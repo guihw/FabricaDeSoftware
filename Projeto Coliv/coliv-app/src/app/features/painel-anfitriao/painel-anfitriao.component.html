@@ -25,33 +25,43 @@
     <h3 class="section-title">Colegas compatíveis com seu imóvel</h3>
   </section>
 
-  <div class="cards-container">
-    <div class="card" *ngFor="let c of candidatos">
-      <div class="photo-placeholder">
-        <span class="img-mock">👤</span>
-      </div>
-
-      <div class="card-content">
-        <h4>🙋‍♂️ {{ c.nome }}, {{ c.idade }} anos</h4>
-        <p class="score">🧬 Score de Match: {{ c.score }}%</p>
-        <p class="budget">🏷️ Orçamento: até R$ {{ c.orcamento | number:'1.2-2' }}</p>
+<div class="cards-container">
+    @for (item of candidatos; track item.nome) {
+      <div class="card">
         
-        <div class="compatibilidades">
-          ✨ Compatibilidades: 
-          <span class="tags">{{ c.tags.join(', ') }}</span>
+        <div class="photo-placeholder">
+          @if (item.foto) {
+            <img [src]="item.foto" [alt]="item.nome" style="width: 100%; height: 100%; object-fit: cover;">
+          } @else {
+            <span>👤</span>
+          }
         </div>
 
-        <p class="rating">⭐ Avaliação (Média): {{ c.nota }} / 5.0</p>
-      </div>
+        <div class="card-content">
+          <h4>{{ item.nome }}, {{ item.idade }} anos</h4>
+          <p class="score">Compatibilidade: {{ item.score }}%</p>
+          <p><strong>Orçamento:</strong> {{ item.orcamento | currency:'BRL' }}</p>
+          
+          <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px;">
+            @for (tag of item.tags; track tag) {
+              <span style="background: #f0f0f0; padding: 2px 8px; border-radius: 10px; font-size: 11px;">
+                {{ tag }}
+              </span>
+            }
+          </div>
+        </div>
 
-      <div class="card-actions">
-        <button class="btn-reject" (click)="rejeitar(c.nome)">❌ Rejeitar</button>
-        <button class="btn-like" (click)="darLike(c.nome)">💜 Dar Like</button>
+        <div class="card-actions">
+          <button class="btn-reject" (click)="rejeitar(item.nome)">Pular</button>
+          <button class="btn-like" (click)="darLike(item.nome)">Dar Like</button>
+        </div>
       </div>
-    </div>
+    } @empty {
+      <p>Nenhum candidato compatível encontrado no momento.</p>
+    }
   </div>
 
   <div class="footer-action">
-    <button class="btn-next">Próximos itens</button>
+    <button class="btn-next">Ver mais candidatos</button>
   </div>
 </div>

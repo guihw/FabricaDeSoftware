@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common'; // <-- IMPORTAÇÃO NECESSÁRIA
+import { CommonModule } from '@angular/common'; 
 
 export interface Candidato {
   nome: string;
@@ -13,8 +13,8 @@ export interface Candidato {
 
 @Component({
   selector: 'app-painel-anfitriao',
-  standalone: true, // Garante que o componente é independente
-  imports: [CommonModule], // <-- ADICIONE O COMMONMODULE AQUI PARA ATIVAR O PIPE 'NUMBER'
+  standalone: true, 
+  imports: [CommonModule], 
   templateUrl: './painel-anfitriao.component.html',
   styleUrls: ['./painel-anfitriao.component.css']
 })
@@ -29,7 +29,7 @@ export class PainelAnfitriaoComponent {
       orcamento: 1550,
       tags: ['Não fumante', 'Trabalha fora', 'Limpo e organizado'],
       nota: 4.8,
-      foto: 'assets/rafael.jpg'
+      foto: 'rafael-costa.jpg'
     },
     {
       nome: 'Juliana Mendes',
@@ -38,7 +38,7 @@ export class PainelAnfitriaoComponent {
       orcamento: 1500,
       tags: ['Não fumante', 'Trabalha fora', 'Gosta de ambiente tranquilo'],
       nota: 4.9,
-      foto: 'assets/juliana.jpg'
+      foto: 'juliana-mendes.jpg'
     },
     {
       nome: 'Pedro Henrique',
@@ -47,7 +47,7 @@ export class PainelAnfitriaoComponent {
       orcamento: 1450,
       tags: ['Não fumante', 'Trabalha fora', 'Organizado'],
       nota: 4.7,
-      foto: 'assets/pedro.jpg'
+      foto: 'pedro-henrique.jpg'
     }
   ];
 
