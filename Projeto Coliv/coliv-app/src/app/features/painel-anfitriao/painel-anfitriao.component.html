@@ -1,0 +1,57 @@
+<div class="painel-wrapper">
+  <header class="main-header">
+    <div class="logo-section">
+      <span class="logo-text">CoLiv</span>
+    </div>
+    <div class="user-info">
+      <h2>Olá, Thiago!</h2>
+      <p>Bem-vindo ao seu painel</p>
+    </div>
+    <div class="header-actions">
+      <div class="badge-plus">⭐ Plus</div>
+      <div class="icon-notificacao">🔔<span class="count">3</span></div>
+      <div class="user-avatar">👤</div>
+    </div>
+  </header>
+
+  <section class="imovel-banner">
+    <div class="imovel-info-card">
+      <p>
+        🏠 Imóvel: <strong>Apartamento Copacabana (Ativo)</strong> 
+        <span class="stats">👁️ 145 visualizações | ❤️ 12 curtidas recebidas</span>
+      </p>
+      <button class="btn-edit">Editar Anúncio</button>
+    </div>
+    <h3 class="section-title">Colegas compatíveis com seu imóvel</h3>
+  </section>
+
+  <div class="cards-container">
+    <div class="card" *ngFor="let c of candidatos">
+      <div class="photo-placeholder">
+        <span class="img-mock">👤</span>
+      </div>
+
+      <div class="card-content">
+        <h4>🙋‍♂️ {{ c.nome }}, {{ c.idade }} anos</h4>
+        <p class="score">🧬 Score de Match: {{ c.score }}%</p>
+        <p class="budget">🏷️ Orçamento: até R$ {{ c.orcamento | number:'1.2-2' }}</p>
+        
+        <div class="compatibilidades">
+          ✨ Compatibilidades: 
+          <span class="tags">{{ c.tags.join(', ') }}</span>
+        </div>
+
+        <p class="rating">⭐ Avaliação (Média): {{ c.nota }} / 5.0</p>
+      </div>
+
+      <div class="card-actions">
+        <button class="btn-reject" (click)="rejeitar(c.nome)">❌ Rejeitar</button>
+        <button class="btn-like" (click)="darLike(c.nome)">💜 Dar Like</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-action">
+    <button class="btn-next">Próximos itens</button>
+  </div>
+</div>
