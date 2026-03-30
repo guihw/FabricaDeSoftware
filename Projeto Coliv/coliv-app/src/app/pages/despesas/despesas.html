@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despesas</title>
+</head>
+<body class="flex w-full h-dvh">
+    <nav class="w-[20%] h-full flex flex-col gap-10 items-center justify-baseline">
+        <ul class="flex flex-col gap-6 text-sm font-bold text-gray-500">
+            <span class="text-3xl mb-4 text-[#6C2BD9] mt-1.5"><h3>Coliv</h3></span>
+            <li>Meus Anúncios</li>
+            <li>Candidatos</li>
+            <li>Matches</li>
+            <li>Despesas</li>
+            <li>Moradia Atual</li>
+
+            <li>Meu Perfil</li>
+            <li>Configurações</li>
+        </ul>
+    </nav>
+
+    <main class="w-full flex flex-col items-center gap-10">
+        <header class="flex w-[90%] justify-between mt-1.5">
+            <div>
+            <h1 class="text-3xl mb-2.5">Gestão de Despesas</h1>
+            <p class="text-sm">Casa Exemplo • 4 moradores</p>
+            </div>
+            <div class="">
+            <button id="btn-novaDespesa" (click)="openDialog()" class="rounded-[10px] pl-4 pr-4 pt-1.5 pb-1.5 text-white font-medium bg-[#6C2BD9] hover:bg-[#4e1aa9]">Nova Despesa</button>
+            </div>
+            <dialog #dialogRef class="flex flex-col justify-center items-start border-amber-400 border-2 w-3xs">
+                <h2>Nova Despesa</h2>
+                <form (ngSubmit)="enviarNovaDespesa()">
+                    <label>Despesa: </label>
+                    <input name="nomeDespesa" type="text" [(ngModel)]="despesa.nome">
+                    <label>Valor:</label>
+                    <input name="valorTotal" type="text" [(ngModel)]="despesa.valor">
+                    <button type="submit" class="bg-[#6C2BD9]">Adicionar</button>
+                </form>
+            </dialog>
+        </header>
+        <section>
+            <fieldset class="flex justify-center items-center gap-10">
+                <legend class="text-center mb-5">Março 2026</legend>
+                <article class="rounded-2xl w-50 p-5 text-black text-left bg-gray-200">
+                    <p class="text-sm text-gray-500">Total</p>
+                    <h2 class="text-3xl">{{ soma }}</h2>
+                </article>
+                <!--<article class="rounded-2xl w-50 p-5 text-black text-left bg-gray-200">
+                    <p class="text-sm text-gray-500">Pago</p>
+                    <h2 class="text-3xl text-green-700">R$ 672,50</h2>
+                </article>
+                <article class="rounded-2xl w-50 p-5 text-black text-left bg-gray-200">
+                    <p class="text-sm text-grey-500">Pendente</p>
+                    <h2 class="text-3xl text-amber-900  ">R$ 882,50</h2>
+                </article> !-->
+            </fieldset>
+            <div *ngFor="let gasto of gastos">
+                <p>{{gasto.nome}}</p>
+                <p>R$ {{gasto.valor}}</p>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
+
+<router-outlet></router-outlet>
