@@ -1,14 +1,15 @@
-import { Component, OnInit, viewChild } from '@angular/core';
+import { Component, inject, OnInit, viewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-
+import { DespesasService } from '../../services/despesas';
 
 interface Despesa {
   nome: string;
   valor: number;
 }
+
 @Component({
   selector: 'app-despesas',
   imports: [CommonModule, RouterOutlet, FormsModule],
@@ -17,41 +18,33 @@ interface Despesa {
 })
 
 export class Despesas implements OnInit {
+  private despesasService = inject(DespesasService);
+
   @ViewChild('dialogRef') dialog!: ElementRef<HTMLDialogElement>;
-  openDialog() {
-    this.dialog.nativeElement.showModal();
-  }
+
+  gastos: Despesa[] = [];
+  soma = 0;
 
   despesa: Despesa = {
     nome: '',
     valor: 0,
   };
-  gastos: Despesa[] = [];
 
-  soma = 0;
+  openDialog() {
+    this.dialog.nativeElement.showModal();
+  }
 
   ngOnInit() {
-    const dados = localStorage.getItem('gastos');
-
-    if (dados) {
-      this.gastos = JSON.parse(dados);
-      this.calcularSoma();
-    }
-
+    this.gastos = this.despesasService.getGastos();
+    this.soma = this.despesasService.calcularSoma();
   }
 
-  calcularSoma() {
-    this.soma = this.gastos.reduce(
-      (acc, gasto) => acc + Number(gasto.valor),
-      0
-    );
+  enviarNovaDespesa(){
+    this.despesasService.adicionarDespesa({...this.despesa});
+    this.gastos = this.despesasService.getGastos();
+    this.soma = this.despesasService.calcularSoma();
+
+    this.despesa = { nome: '', valor: 0 };
   }
 
-
-  enviarNovaDespesa() {
-    this.gastos.push({ ...this.despesa });
-    localStorage.setItem('gastos', JSON.stringify(this.gastos));
-    this.calcularSoma();
-    this.despesa = { nome: '', valor: null as any };
-  }
 }
