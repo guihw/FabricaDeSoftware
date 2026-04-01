@@ -31,11 +31,11 @@
             </div>
             <dialog #dialogRef class="flex flex-col justify-center items-start border-amber-400 border-2 w-3xs">
                 <h2>Nova Despesa</h2>
-                <form (ngSubmit)="enviarNovaDespesa()">
+                <form [formGroup]="form" (ngSubmit)="enviarNovaDespesa()">
                     <label>Despesa: </label>
-                    <input name="nomeDespesa" type="text" [(ngModel)]="despesa.nome">
+                    <input name="nomeDespesa" type="text" formControlName="nome">
                     <label>Valor:</label>
-                    <input name="valorTotal" type="text" [(ngModel)]="despesa.valor">
+                    <input name="valorTotal" type="text" formControlName="valor">
                     <button type="submit" class="bg-[#6C2BD9]">Adicionar</button>
                 </form>
             </dialog>
