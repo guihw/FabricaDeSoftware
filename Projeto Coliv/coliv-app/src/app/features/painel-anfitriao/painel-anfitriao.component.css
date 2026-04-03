@@ -1,0 +1,80 @@
+.painel-wrapper {
+  background-color: #E6E1F9; /* Roxo bem clarinho do fundo */
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* HEADER */
+.main-header {
+  background: white;
+  padding: 10px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.logo-text { font-size: 24px; font-weight: bold; color: #6A1B9A; }
+.user-info h2 { font-size: 18px; margin: 0; }
+.user-info p { font-size: 12px; color: #666; margin: 0; }
+
+.header-actions { display: flex; gap: 20px; align-items: center; }
+.badge-plus { background: #C8E6C9; color: #2E7D32; padding: 5px 15px; border-radius: 20px; font-size: 12px; }
+
+/* BANNER IMÓVEL */
+.imovel-banner { text-align: center; padding: 30px 0; }
+.imovel-info-card {
+  background: white;
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 25px;
+  border-radius: 50px;
+  gap: 15px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+.btn-edit { border: 1px solid #333; background: none; border-radius: 20px; padding: 5px 15px; cursor: pointer; }
+.section-title { margin-top: 25px; font-weight: 500; }
+
+/* GRID DE CARDS */
+.cards-container {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 40px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: white;
+  width: 320px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  padding-bottom: 20px;
+}
+
+.photo-placeholder {
+  height: 200px;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 50px;
+}
+
+.card-content { padding: 20px; font-size: 13px; line-height: 1.6; }
+.card-content h4 { font-size: 16px; margin-bottom: 10px; }
+.score { color: #6A1B9A; font-weight: bold; }
+
+/* BOTÕES DOS CARDS */
+.card-actions {
+  display: flex;
+  justify-content: space-around;
+  padding: 0 15px;
+}
+
+.btn-reject { background: #FFCDD2; color: #C62828; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+.btn-like { background: #CE93D8; color: #4A148C; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; }
+
+.footer-action { text-align: center; padding: 40px; }
+.btn-next { background: #D1C4E9; border: none; padding: 10px 30px; border-radius: 10px; cursor: pointer; }
