@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Despesas</title>
+</head>
+
+<body class="flex w-full h-screen">
+    <nav
+        class="w-[20%] h-full flex flex-col gap-10 items-center justify-baseline ring-1 ring-inset ring-slate-900/[0.08] border-gray-400">
+        <ul class="flex flex-col justify-between h-full  text-sm font-bold text-gray-500">
+            <div class="flex flex-col gap-6">
+            <h3 class="text-3xl mb-4 text-[#6C2BD9] mt-1.5">Coliv</h3>
+            <li>Meus Anúncios</li>
+            <li>Candidatos</li>
+            <li>Matches</li>
+            <li>Despesas</li>
+            <li>Moradia Atual</li>
+            </div>
+
+            <div class="flex flex-col gap-6 mb-2">
+            <li>Meu Perfil</li>
+            <li>Configurações</li>
+            </div>
+        </ul>
+    </nav>
+
+    <main class="flex-1 flex flex-col gap-4 px-6">
+        <header class="flex w-full justify-between mt-1.5 px-6">
+            <div>
+                <h1 class="text-3xl mb-2.5">Gestão de Despesas</h1>
+                <p class="text-sm">Casa Exemplo • 4 moradores</p>
+            </div>
+            <div class="">
+                <button id="btn-novaDespesa" (click)="openDialog()"
+                    class="rounded-[10px] pl-4 pr-4 pt-1.5 pb-1.5 text-white font-medium bg-[#6C2BD9] hover:bg-[#4e1aa9]">Nova
+                    Despesa</button>
+            </div>
+            <dialog #dialogRef class="w-[500px] max-w-full rounded-2xl p-0 
+         fixed top-1/2 left-1/2 
+         -translate-x-1/2 -translate-y-1/2
+         backdrop:bg-black/40 backdrop:backdrop-blur-sm">
+                <div class="p-6 flex flex-col gap-4">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-lg font-semibold">Nova despesa</h2>
+                        <button (click)="closeDialog()" class="text-gray-500 hover:text-black">
+                            ✕
+                        </button>
+                    </div>
+                    <form [formGroup]="form" (ngSubmit)="enviarNovaDespesa()" class="flex flex-col gap-4">
+                        <div>
+                            <label class="text-sm text-gray-600">Nome da despesa</label>
+                            <input type="text" formControlName="nome" placeholder="Ex.: Conta de luz"
+                                class="w-full mt-1 p-2 border rounded-lg">
+                        </div>
+
+                        <div class="flex gap-4">
+                            <div class="w-1/2">
+                                <label class="text-sm text-gray-600">Valor total (R$)</label>
+                                <input type="number" formControlName="valor" class="w-full mt-1 p-2 border rounded-lg">
+                            </div>
+
+                            <div class="w-1/2">
+                                <label class="text-sm text-gray-600">Data de vencimento</label>
+                                <input type="date" formControlName="dataVencimento"
+                                    class="w-full mt-1 p-2 border rounded-lg">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Categoria</label>
+                            <input type="text" formControlName="categoria" placeholder="Selecione uma categoria"
+                                class="w-full mt-1 p-2 border rounded-lg">
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Tipo de despesa</label>
+                            <div class="flex border rounded-lg overflow-hidden">
+                                <button type="button" (click)="form.get('tipodeDespesa')?.setValue('coletiva')"
+                                    [ngClass]="{'bg-[#6C2BD9] text-white': form.get('tipodeDespesa')?.value === 'coletiva',
+                                    'bg-white text-gray-600 hover:bg-gray-100': form.get('tipodeDespesa')?.value !== 'coletiva'}"
+                                    class="w-1/2 py-2 transition-all duration-200">
+                                    Coletiva
+                                </button>
+
+                                <button type="button" (click)="form.get('tipodeDespesa')?.setValue('individual')"
+                                    [ngClass]="{'bg-[#6C2BD9] text-white': form.get('tipodeDespesa')?.value === 'individual',
+                                    'bg-white text-gray-600 hover:bg-gray-100': form.get('tipodeDespesa')?.value !== 'individual'}"
+                                    class="w-1/2 py-2 transition-all duration-200">
+                                    Individual
+                                </button>
+
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center">
+                                <label class="text-sm text-gray-600">Participantes e divisão</label>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm text-gray-500">Divisão igualitária</span>
+                                    <input type="checkbox" class="toggle">
+                                </div>
+                            </div>
+                            <button type="button" class="mt-3 w-full border-2 border-dashed border-gray-300 
+                 rounded-lg p-4 text-gray-500 hover:bg-gray-50">
+                                + Adicionar participantes
+                            </button>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Descrição (opcional)</label>
+                            <textarea formControlName="descricao" class="w-full mt-1 p-2 border rounded-lg"
+                                placeholder="Adicione observações..."></textarea>
+                        </div>
+                        <div>
+                            <label class="text-sm text-gray-600">Comprovante (opcional)</label>
+                            <div class="mt-1 border-2 border-dashed rounded-lg p-6 text-center text-gray-500">
+                                Clique para anexar ou arraste o arquivo
+                            </div>
+                        </div>
+                        <div class="flex gap-4 mt-4">
+                            <button type="button" (click)="closeDialog()" class="w-1/2 py-2 border rounded-lg">
+                                Cancelar
+                            </button>
+
+                            <button type="submit"
+                                class="w-1/2 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+                                Salvar despesa
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+            </dialog>
+        </header>
+        <section class="flex flex-col w-full items-center">
+            <fieldset class="flex justify-center items-center gap-10">
+                <legend class="text-center mb-5">Março 2026</legend>
+                <article class="rounded-2xl w-50 p-5 text-black text-left bg-gray-200">
+                    <p class="text-sm text-gray-500">Total</p>
+                    <h2 class="text-3xl">R$ {{ soma }}</h2>
+                </article>
+                <!--<article class="rounded-2xl w-50 p-5 text-black text-left bg-gray-200">
+                    <p class="text-sm text-gray-500">Pago</p>
+                    <h2 class="text-3xl text-green-700">R$ 672,50</h2>
+                </article>
+                <article class="rounded-2xl w-50 p-5 text-black text-left bg-gray-200">
+                    <p class="text-sm text-grey-500">Pendente</p>
+                    <h2 class="text-3xl text-amber-900  ">R$ 882,50</h2>
+                </article> !-->
+            </fieldset>
+            <div *ngFor="let gasto of gastos" class="flex flex-col gap-4 mt-2 w-full px-6">
+                <button (click)="openPanel(gasto)" class="flex gap-4 w-full items-center justify-between p-5 rounded-[10px] 
+                ring-1 ring-inset ring-slate-900/[0.08]
+                hover:ring-slate-900/[0.30]">
+                    <span class="flex gap-3.5 items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                            <path
+                                d="M8.543 2.232a.75.75 0 0 0-1.085 0l-5.25 5.5A.75.75 0 0 0 2.75 9H4v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V9h1.25a.75.75 0 0 0 .543-1.268l-5.25-5.5Z" />
+                        </svg>
+                        <div class="flex flex-col items-start">
+                            <span>
+                                <h4 class="font-medium">{{gasto.nome}}</h4>
+                            </span>
+                            <span class="flex gap-2">
+                                <p class="text-[0.8rem] font-medium text-gray-400">Vence {{gasto.dataVencimento}}</p>
+                                <p [ngClass]="{'text-[#6C2BD9] bg-purple-200': gasto.tipodeDespesa === 'coletiva', 'text-gray-600 bg-gray-300': gasto.tipodeDespesa === 'individual'}"
+                                    class="text-[0.7rem] font-medium rounded-[5px]  pl-2 pr-2">{{gasto.tipodeDespesa}}
+                                </p>
+                            </span>
+                        </div>
+                    </span>
+
+
+                    <span>
+                        <p>R$ {{gasto.valor}}</p>
+                    </span>
+                </button>
+            </div>
+        </section>
+    </main>
+    <div [class.w-80]="isOpen" [class.w-0]="!isOpen"
+        class="overflow-hidden transition-all duration-300 ring-1 ring-inset ring-slate-900/[0.08]">
+        <div class="w-80 p-8 flex flex-col gap-5">
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="font-medium">{{despesaSelecionada?.nome}}</h1>
+                <button (click)="closePanel()" class="text-gray-500 hover:text-black">
+                    ✕
+                </button>
+            </div>
+            <div class="flex flex-col gap-5 text-gray-500 text-sm">
+                <div class="flex justify-between">
+                    <p>Valor Total:</p>
+                    <p class="text-black font-medium">R$ {{despesaSelecionada?.valor}}</p>
+                </div>
+
+                <div class="flex justify-between">
+                    <p>Categoria:</p>
+                    <p class="text-black font-medium">{{despesaSelecionada?.categoria}}</p>
+                </div>
+
+                <div class="flex justify-between">
+                    <p>Data de Vencimento:</p>
+                    <p class="text-red-400 font-medium">{{despesaSelecionada?.dataVencimento}}</p>
+                </div>
+
+                <div class="flex justify-between">
+                    <p>Tipo:</p>
+                    <p class="text-black font-medium">{{despesaSelecionada?.tipodeDespesa}}</p>
+                </div>
+            </div>
+
+            <div class="w-full flex justify-between gap-2">
+                <button (click)="editarDespesa(despesaSelecionada)"
+                    class="w-full ring-1 ring-slate-900/[0.08] text-black py-2 px-4 rounded-md hover:ring-slate-900/[0.30]">Editar
+                    Despesa</button>
+                <button (click)="abrirConfirmDialog(despesaSelecionada)"
+                    class=" ring-1 ring-red-200 text-red-400 py-2 px-4 rounded-md hover:ring-red-600">Excluir</button>
+            </div>
+            <dialog #confirmDialog class="w-[400px] rounded-2xl p-6 
+            fixed top-1/2 left-1/2 
+            -translate-x-1/2 -translate-y-1/2
+            backdrop:bg-black/40 backdrop:backdrop-blur-sm">
+
+                <div class="flex flex-col gap-4">
+                    <h2 class="text-lg font-semibold">Excluir despesa</h2>
+
+                    <p class="text-gray-600 text-sm">
+                        Tem certeza que deseja excluir <span class="font-medium">{{despesaSelecionada?.nome}}</span>?
+                    </p>
+
+                    <div class="flex justify-end gap-3 mt-4">
+                        <button (click)="fecharConfirmDialog()" class="px-4 py-2 border rounded-lg">
+                            Cancelar
+                        </button>
+
+                        <button (click)="excluirDespesa()"
+                            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                            Excluir
+                        </button>
+                    </div>
+                </div>
+
+            </dialog>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<router-outlet></router-outlet>
