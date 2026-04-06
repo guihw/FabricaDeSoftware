@@ -1,0 +1,159 @@
+@if (display_state === "host") {
+  <form [formGroup]="hostRegistrationForm">
+
+    <div class="grid">
+      <div class="flex flex-col justify-center m-auto min-w-[100%]">
+        <label>Nome</label>
+        <input formControlName="user_name" class="input-style" type="text" placeholder="Seu nome aqui" form="hostRegistrationForm" >
+        <label>CPF</label>
+        <input formControlName="cpf" class="input-style" type="text" name="cpf" placeholder="xxxxxxxxxxx">
+        <label>Email</label>
+        <input formControlName="email" class="input-style" type="email" name="email" placeholder="email@dominio.com">
+        <label>Senha</label>
+        <input formControlName="password" class="input-style" type="password" name="password" placeholder="Senha">
+        <label>Confirmar Senha</label>
+        <input formControlName="pssw_confirm" class="input-style" type="password" name="pssw_confirm" placeholder="Confirmar Senha">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-[50%_50%]">
+
+      <form formGroupName="propertyData">
+      <div class="flex flex-col justify-center m-auto mt-2 min-w-[100%]">
+        <h2 class="text-[20px] m-auto mb-2 font-semibold">Dados Imóvel</h2>
+        <label>Tipo do imóvel</label>
+        <select formControlName="type" class="select-style input-style">
+          <option></option>
+          <option>Casa</option>
+          <option>Apertamento</option>
+          <option>Kitnet</option>
+        </select>
+        <label>Quantidade de Quartos</label>
+        <input formControlName="rooms" class="select-style input-style" type="number" name="qtt_rooms">
+        <label>Descrição do imóvel</label>
+        <input formControlName="descryption" class="select-style input-style" type="text" name="dsc_imvl">
+      </div>
+      </form>
+
+      <div formGroupName="localization" class="flex flex-col justify-center m-auto mt-2 min-w-[100%]">
+        <h2 class="text-[20px] m-auto mb-2 font-semibold">Localização</h2>
+        <label>Estado</label>
+        <select formControlName="estate" class="select-style input-style">
+          <optgroup label="Brasil">
+            <option></option>
+            <option value="AC">AC</option>
+            <option value="AL">AL</option>
+            <option value="AP">AP</option>
+            <option value="AM">AM</option>
+            <option value="BA">BA</option>
+            <option value="CE">CE</option>
+            <option value="DF">DF</option>
+            <option value="ES">ES</option>
+            <option value="GO">GO</option>
+            <option value="MA">MA</option>
+            <option value="MT">MT</option>
+            <option value="MS">MS</option>
+            <option value="MG">MG</option>
+            <option value="PA">PA</option>
+            <option value="PB">PB</option>
+            <option value="PR">PR</option>
+            <option value="PE">PE</option>
+            <option value="PI">PI</option>
+            <option value="RJ">RJ</option>
+            <option value="RN">RN</option>
+            <option value="RS">RS</option>
+            <option value="RO">RO</option>
+            <option value="RR">RR</option>
+            <option value="SC">SC</option>
+            <option value="SP">SP</option>
+            <option value="SE">SE</option>
+            <option value="TO">TO</option>
+          </optgroup>
+        </select>
+        <label>Cidade</label>
+        <input formControlName="city" class="select-style input-style" type="text" name="city">
+
+        <div class="flex justify-around mt-6.5">
+          <div>
+            <input formControlName="terms_confirm" class="mr-2" id="i-rad-1" type="radio" value="true">
+            <label for="i-rad-1">Aceito os Termos de uso</label>
+          </div>
+
+          <button (click)="testForm()" class=" rounded-full pl-4 pr-4 pt-1 pb-1 text-white font-medium bg-[#6C2BD9] hover:bg-[#4e1aa9] duration-[0.65s]">Register</button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+} @else {
+  <form [formGroup]="roommateRegistrationForm">
+
+    <div class="grid">
+      <div class="flex flex-col justify-center m-auto min-w-[100%]">
+        <label>Nome</label>
+        <input formControlName="user_name" class="input-style" type="text" placeholder="Seu nome aqui" form="hostRegistrationForm" >
+        <label>CPF</label>
+        <input formControlName="cpf" class="input-style" type="text" name="cpf" placeholder="xxxxxxxxxxx">
+        <label>Email</label>
+        <input formControlName="email" class="input-style" type="email" name="email" placeholder="email@dominio.com">
+        <label>Senha</label>
+        <input formControlName="password" class="input-style" type="password" name="password" placeholder="Senha">
+        <label>Confirmar Senha</label>
+        <input formControlName="pssw_confirm" class="input-style" type="password" name="pssw_confirm" placeholder="Confirmar Senha">
+      </div>
+    </div>
+
+    <div class="grid grid-cols-[70%] m-auto justify-center">
+      <div formGroupName="localization" class="flex flex-col justify-center m-auto mt-2 min-w-[100%]">
+        <h2 class="text-[20px] m-auto mb-2 font-semibold">Localização</h2>
+        <label>Estado</label>
+        <select formControlName="estate" class="select-style input-style">
+          <optgroup label="Brasil">
+            <option></option>
+            <option value="AC">AC</option>
+            <option value="AL">AL</option>
+            <option value="AP">AP</option>
+            <option value="AM">AM</option>
+            <option value="BA">BA</option>
+            <option value="CE">CE</option>
+            <option value="DF">DF</option>
+            <option value="ES">ES</option>
+            <option value="GO">GO</option>
+            <option value="MA">MA</option>
+            <option value="MT">MT</option>
+            <option value="MS">MS</option>
+            <option value="MG">MG</option>
+            <option value="PA">PA</option>
+            <option value="PB">PB</option>
+            <option value="PR">PR</option>
+            <option value="PE">PE</option>
+            <option value="PI">PI</option>
+            <option value="RJ">RJ</option>
+            <option value="RN">RN</option>
+            <option value="RS">RS</option>
+            <option value="RO">RO</option>
+            <option value="RR">RR</option>
+            <option value="SC">SC</option>
+            <option value="SP">SP</option>
+            <option value="SE">SE</option>
+            <option value="TO">TO</option>
+          </optgroup>
+        </select>
+        <label>Cidade</label>
+        <input formControlName="city" class="select-style input-style" type="text" name="city">
+
+        <div class="flex justify-around mt-6.5">
+          <div>
+            <input formControlName="terms_confirm" class="mr-2" id="i-rad-1" type="radio" value="true">
+            <label for="i-rad-1">Aceito os Termos de uso</label>
+          </div>
+
+          <button (click)="testForm()" class=" rounded-full pl-4 pr-4 pt-1 pb-1 text-white font-medium bg-[#6C2BD9] hover:bg-[#4e1aa9] duration-[0.65s]">Register</button>
+        </div>
+      </div>
+    </div>
+
+  </form>
+}
+
+

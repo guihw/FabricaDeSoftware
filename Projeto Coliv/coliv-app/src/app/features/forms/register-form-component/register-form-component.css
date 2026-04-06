@@ -1,0 +1,8 @@
+.input-style {
+  @apply rounded-[5px] p-[2px] m-auto w-[90%] bg-[#fcf9fc]
+  focus:outline-none duration-[0.60s];
+}
+
+.select-style {
+  @apply w-[80%];
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coliv</title>
+  </head>
+
+  <body>
+      <div class="flex flex-col justify-center max-w-screen gap-10">
+        <nav class="flex items-center justify-between pl-20 pr-20 mt-1 text-black">
+          <div>
+            <a class="text-[#6C2BD9] text-[32px] font-bold">CoLiv</a>
+          </div>
+        </nav>
+
+        <div class="flex flex-col m-auto min-w-[80vw] bg-[#D9D9D9] rounded-[10px] p-2">
+            <div class="flex justify-around">
+              <div class="flex">
+                <button (click)="displayRegistForm1()" class=" rounded-full mb-2 pl-4 pr-4 pt-1 pb-1 text-white font-medium bg-[#6C2BD9] hover:bg-[#4e1aa9] duration-[0.65s]">Anfitrião</button>
+              </div>
+              <div class="flex">
+                <button (click)="displayRegistForm2()" class=" rounded-full mb-2 pl-4 pr-4 pt-1 pb-1 text-white font-medium bg-[#6C2BD9] hover:bg-[#4e1aa9] duration-[0.65s]">Colega</button>
+              </div>
+            </div>
+
+            <div>
+              <app-register-form-component [display_state]="state"></app-register-form-component>
+            </div>
+        </div>
+      </div>
+  </body>
+
+</html>
