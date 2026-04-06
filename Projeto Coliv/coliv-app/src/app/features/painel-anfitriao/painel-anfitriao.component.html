@@ -1,0 +1,85 @@
+<div class="painel-wrapper">
+  <!-- HEADER -->
+  <header class="main-header">
+    <div class="logo-text">StayHub</div>
+
+    <div class="user-info">
+      <h2>Painel do Anfitrião</h2>
+      <p>Gerencie seus candidatos e anúncio</p>
+    </div>
+
+    <div class="header-actions">
+      <span class="badge-plus">Plano Plus</span>
+    </div>
+  </header>
+
+  <!-- BANNER IMÓVEL -->
+  <section class="imovel-banner">
+    <div class="imovel-info-card">
+      <div>
+        <h3>Seu anúncio ativo</h3>
+        <p>Veja e gerencie os candidatos interessados</p>
+      </div>
+
+      <button class="btn-edit" (click)="editarAnuncio()">
+        Editar Anúncio
+      </button>
+    </div>
+
+    <h3 class="section-title">Candidatos interessados</h3>
+  </section>
+
+  <!-- LISTA DE CANDIDATOS -->
+  @if (candidatos$ | async; as candidatos) {
+    @if (candidatos.length > 0) {
+      <section class="cards-container">
+        @for (item of candidatos; track item.id) {
+          <div class="card">
+            <div class="photo-placeholder">
+              <img
+                [src]="item.foto"
+                [alt]="item.nome"
+                style="width: 100%; height: 100%; object-fit: cover;"
+              />
+            </div>
+
+            <div class="card-content">
+              <h4>{{ item.nome }}, {{ item.idade }} anos</h4>
+
+              <p>
+                Perfil em análise para possível match com o seu anúncio.
+              </p>
+
+              <p class="score">
+                Status:
+                @if (item.curtido) {
+                  Curtido
+                } @else {
+                  Pendente
+                }
+              </p>
+            </div>
+
+            <div class="card-actions">
+              <button class="btn-reject" (click)="rejeitar(item)">
+                Rejeitar
+              </button>
+
+              <button class="btn-like" (click)="darLike(item)">
+                Curtir
+              </button>
+            </div>
+          </div>
+        }
+      </section>
+    } @else {
+      <div class="footer-action">
+        <p>Nenhum candidato disponível no momento.</p>
+      </div>
+    }
+  }
+
+  <div class="footer-action">
+    <button class="btn-next">Ver mais candidatos</button>
+  </div>
+</div>
