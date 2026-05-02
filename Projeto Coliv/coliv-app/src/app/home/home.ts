@@ -13,4 +13,8 @@ export class Home {
   toRegistrationPage() {
     this.router.navigate(["/register"])
   }
+
+  toLoginPage() {
+    this.router.navigate(['/login']);
+  }
 }

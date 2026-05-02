@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+/* import { Component } from '@angular/core';
 import { RegisterFormComponent } from '../forms/register-form-component/register-form-component';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 
@@ -17,3 +17,4 @@ export class Register {
 
   displayRegistForm2() {this.state = "roommate"}
 }
+ */

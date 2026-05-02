@@ -1,0 +1,121 @@
+<header class="sticky top-0 w-full z-50 glass-nav flex items-center justify-between px-8 py-6">
+  <div class="text-2xl font-black text-primary tracking-tighter font-headline">
+    Coliv
+  </div>
+  <div class="hidden md:flex gap-8 items-center">
+    <a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Sobre nós</a>
+    <a class="text-on-surface-variant font-medium hover:text-primary transition-colors" href="#">Comunidades</a>
+    <button
+      (click)="toLoginPage()"
+      class="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-xl font-bold text-sm tracking-wide active:scale-95 transition-all">
+      ENTRAR
+    </button>
+  </div>
+</header>
+
+<main class="flex-grow flex flex-col md:flex-row items-center px-6 md:px-20 py-12 gap-12 max-w-7xl mx-auto">
+  <!-- Left: Text & CTAs -->
+  <div class="w-full md:w-1/2 flex flex-col gap-8 order-2 md:order-1">
+    <div class="flex flex-col gap-4">
+      <span class="text-secondary font-bold tracking-[0.2em] text-xs uppercase">Viva o amanhã, hoje</span>
+      <h1 class="font-headline text-5xl md:text-7xl font-extrabold text-primary leading-[1.1] tracking-tight">
+        Sua casa,<br/>sua <span class="text-secondary italic">tribo</span>.
+      </h1>
+      <p class="text-on-surface-variant text-lg md:text-xl leading-relaxed max-w-md mt-4">
+        Descubra uma nova forma de morar. Espaços modernos, curadoria exclusiva e uma comunidade pronta para te receber.
+      </p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row gap-4 mt-4">
+      <button
+        (click)="toRegistrationPage()"
+        class="bg-gradient-to-br from-primary to-primary-container text-white px-8 py-4 rounded-xl font-bold text-base tracking-widest hover:shadow-xl hover:shadow-primary/10 active:scale-95 transition-all">
+        CRIAR CONTA
+      </button>
+      <button
+        (click)="toLoginPage()"
+        class="bg-surface-container-high text-primary px-8 py-4 rounded-xl font-bold text-base tracking-widest border border-outline-variant/15 active:scale-95 transition-all">
+        ENTRAR
+      </button>
+    </div>
+
+    <!-- Social proof -->
+    <div class="flex items-center gap-4 mt-8 py-4 px-6 bg-surface-container-low rounded-2xl w-fit">
+      <div class="flex -space-x-3">
+        <img
+          class="w-10 h-10 rounded-full border-2 border-surface-container-low object-cover"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7aKnFZS-ZNG4jQlSLwY5Aa-UYenIPME1DERAGu5UX7gAwZLWkPFYt3AW0dy8teK9nYmCR20RMrph5llVzgI1ZoCvqIB2zk87YjdfqGAC9pjmzD3_KIl1Pm1zgPO_fyju8FxS6fGdOnXICXcO7mgg8iCtNox_otv2IBE8xQJvgeJrHV2w9LJ3yijMYY6eGEikogOAPDtIyzjsyEZbotPasMuACxLEAOiQiHmws0LOWIUHIwuPtoYtMDfNL4Dg_afHgOhR0bmRndxo"
+          alt="Morador 1" />
+        <img
+          class="w-10 h-10 rounded-full border-2 border-surface-container-low object-cover"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrxWK8tnGY8Jnn40_3W3S0CjW9zmrEs04yLhliNegwjpZvrznhqygUJ33FU4QRTR4ekC2dNvAFkni37s5EHooxMKG9yP5IjZSUvBO83NWjTmTNfDcGRHkpuNi4_Hcnp7_58wc42jN_6JlyfSnSV2FHJQby1P9xy7gYIkHFzalap8QiKJ-IAwXTjMUA9r0c8xzf4-tV5QclzGBt7cNhjJn1_Xv8J-17XmER4TANX_mcGwOWYD2v4qnsDBBo_B8jYTwrnEkh0wlIgEo"
+          alt="Morador 2" />
+        <img
+          class="w-10 h-10 rounded-full border-2 border-surface-container-low object-cover"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_L2LT_rXmE0g8uxfLRkSm0h43lz1P27ttHAuRyUi5Z48chvT2wITdiQMqq-uqDv04Q1gno9GVltPzYn7T2Rod5JzyIqIxAJo_wh2fppUQyqscooUzrIaM2w_JuVqzLUf-xyOi5iP_8Mo6xIm9MLDZxdtd637JubHJaLjJClm1WCtdP-w7vn30zM3YtWEMt2EXZPzvqunyOYbCFKqqQgQDdSelNp48fhATpqrFGWvZIrFbHCDQe9KexrCqCWUlq9NyCXTdUZhgMxk"
+          alt="Morador 3" />
+      </div>
+      <p class="text-sm font-semibold text-on-surface-variant">
+        <span class="text-primary font-bold">+500 pessoas</span> já vivem no Coliv
+      </p>
+    </div>
+  </div>
+
+  <!-- Right: Hero image card -->
+  <div class="w-full md:w-1/2 relative order-1 md:order-2">
+    <div class="aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-2xl relative z-10">
+      <img
+        class="w-full h-full object-cover"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5lzRHgnEG0MywQHKg56H8q49Ut7w6ExaCVIuVRR3eat97tpnZkHgc0r78zQu66xJ4JEHw1jYyBQ23lTvHkfJFwq6FQa2mGa929dh08TcdkzlnNTqGl3zZgiEGxHRfHMPlwVPffVdVPZiSULJ2bjCynAeRSIdea-QKnXk46hrif8niLQqRWRn0ISVJxZw7Nfp7obJhg_-sAMnk0E-ckWgPtDRvIx72h8QSuOvBjjU6RZKFy-L9ov9lEM0EvF0UlP4VVp6TClkaQTE"
+        alt="Moradores em sala de living moderno" />
+      <div class="absolute inset-0 bg-gradient-to-t from-primary/40 to-transparent"></div>
+
+      <!-- Floating info card over image -->
+      <div class="absolute bottom-8 left-8 right-8 glass-nav p-6 rounded-2xl flex items-center justify-between">
+        <div>
+          <p class="text-primary font-bold text-sm uppercase tracking-wider">Unidade Vila Madalena</p>
+          <div class="flex items-center gap-1 mt-1">
+            <span class="material-symbols-outlined text-secondary text-sm star-filled">star</span>
+            <span class="material-symbols-outlined text-secondary text-sm star-filled">star</span>
+            <span class="material-symbols-outlined text-secondary text-sm star-filled">star</span>
+            <span class="material-symbols-outlined text-secondary text-sm star-filled">star</span>
+            <span class="material-symbols-outlined text-secondary text-sm star-filled">star</span>
+            <span class="text-xs text-on-surface-variant font-bold ml-2">4.9 (120 reviews)</span>
+          </div>
+        </div>
+        <div class="h-12 w-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container">
+          <span class="material-symbols-outlined">apartment</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decorative blobs -->
+    <div class="absolute -top-6 -right-6 w-32 h-32 bg-secondary/10 rounded-full blur-3xl z-0"></div>
+    <div class="absolute -bottom-10 -left-10 w-48 h-48 bg-primary/5 rounded-full blur-3xl z-0"></div>
+
+    <!-- Floating feature badge -->
+    <div class="absolute -right-8 top-1/4 hidden lg:block z-20">
+      <div class="bg-surface-container-lowest p-4 rounded-2xl shadow-lg flex items-center gap-4 border border-outline-variant/10">
+        <div class="w-12 h-12 rounded-xl bg-secondary-container/30 flex items-center justify-center">
+          <span class="material-symbols-outlined text-secondary">wifi</span>
+        </div>
+        <div>
+          <p class="text-xs font-bold text-on-surface-variant uppercase">Alta Velocidade</p>
+          <p class="text-sm font-bold text-primary tracking-tight">Internet 1Gbps inclusa</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="mt-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-8 border-t border-outline-variant/10 bg-surface-container-lowest/50">
+  <div class="flex flex-col items-center md:items-start gap-2">
+    <div class="text-xl font-black text-primary tracking-tighter font-headline">Coliv</div>
+    <p class="text-xs text-on-surface-variant font-medium tracking-wide">© 2025 COLIV EXPERIENCE. TODOS OS DIREITOS RESERVADOS.</p>
+  </div>
+  <div class="flex gap-8">
+    <a class="material-symbols-outlined text-on-surface-variant hover:text-secondary transition-colors" href="#">language</a>
+    <a class="material-symbols-outlined text-on-surface-variant hover:text-secondary transition-colors" href="#">share</a>
+    <a class="material-symbols-outlined text-on-surface-variant hover:text-secondary transition-colors" href="#">contact_support</a>
+  </div>
+</footer>
