@@ -2,6 +2,8 @@ import { Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core'
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { DespesasService } from './services/despesas';
+import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
+import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 
 interface Despesa {
   id: number,
@@ -15,7 +17,7 @@ interface Despesa {
 
 @Component({
   selector: 'app-despesas',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BottomNavbarComponent, TopNavbarComponent],
   templateUrl: './despesas.html',
   styleUrl: './despesas.css',
 })
