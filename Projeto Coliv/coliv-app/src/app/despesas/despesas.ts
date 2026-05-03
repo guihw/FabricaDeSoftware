@@ -1,8 +1,9 @@
 import { Component, inject, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { DespesasService } from '../../services/despesas';
+import { DespesasService } from './services/despesas';
+import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
+import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 
 interface Despesa {
   id: number,
@@ -16,7 +17,7 @@ interface Despesa {
 
 @Component({
   selector: 'app-despesas',
-  imports: [CommonModule, RouterOutlet, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, BottomNavbarComponent, TopNavbarComponent],
   templateUrl: './despesas.html',
   styleUrl: './despesas.css',
 })
@@ -33,6 +34,7 @@ export class Despesas implements OnInit {
   })
   isOpen = false;
   despesaSelecionada!: Despesa;
+  modoEdicao = false;
 
   openPanel(despesa: Despesa) {
     if (this.isOpen == false) this.isOpen = true;
@@ -47,9 +49,25 @@ export class Despesas implements OnInit {
   private despesasService = inject(DespesasService);
 
   @ViewChild('dialogRef', { static: false }) dialog!: ElementRef<HTMLDialogElement>;
+  @ViewChild('confirmDialog', { static: false }) confirmDialog!: ElementRef<HTMLDialogElement>;
 
   gastos: Despesa[] = [];
   soma = 0;
+
+  ngOnInit() {
+    this.gastos = this.despesasService.getGastos();
+    this.soma = this.despesasService.calcularSoma();
+  }
+
+  openDialog() {
+    this.dialog.nativeElement.showModal();
+  }
+
+  closeDialog() {
+    this.dialog.nativeElement.close();
+    this.form.reset({ tipodeDespesa: 'coletiva' });
+    this.modoEdicao = false;
+  }
 
   despesa: Despesa = {
     id: 0,
@@ -61,19 +79,7 @@ export class Despesas implements OnInit {
     descricao: '',
   };
 
-  openDialog() {
-    this.dialog.nativeElement.showModal();
-  }
 
-  closeDialog() {
-    this.dialog.nativeElement.close();
-  }
-
-  ngOnInit() {
-    this.gastos = this.despesasService.getGastos();
-    this.soma = this.despesasService.calcularSoma();
-  }
-  modoEdicao = false;
   enviarNovaDespesa() {
     if (this.form.invalid) return;
     else if (this.modoEdicao == true) {
@@ -88,6 +94,8 @@ export class Despesas implements OnInit {
     this.form.reset();
   }
 
+
+
   editarDespesa(despesa: Despesa) {
     this.modoEdicao = true;
     this.openDialog();
@@ -97,7 +105,6 @@ export class Despesas implements OnInit {
     this.soma = this.despesasService.calcularSoma();
   }
 
-  @ViewChild('confirmDialog', { static: false }) confirmDialog!: ElementRef<HTMLDialogElement>;
   abrirConfirmDialog(despesa: Despesa) {
     this.despesaSelecionada = despesa;
     this.confirmDialog.nativeElement.showModal();

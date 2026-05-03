@@ -1,0 +1,237 @@
+<!-- Modal: Nova Despesa / Editar -->
+<dialog #dialogRef class="w-full max-w-full m-0 mt-auto rounded-t-[2.5rem] p-0 
+  backdrop:bg-primary/40 backdrop:backdrop-blur-sm
+  max-h-[90vh] overflow-y-auto">
+  <div class="p-8 flex flex-col gap-6">
+    <div class="flex justify-between items-center">
+      <h2 class="text-2xl font-extrabold text-primary tracking-tight">
+        {{ modoEdicao ? 'Editar Despesa' : 'Nova Despesa' }}
+      </h2>
+      <button (click)="closeDialog()" class="p-2 hover:bg-surface-container rounded-full transition-colors">
+        <span class="material-symbols-outlined text-primary">close</span>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="enviarNovaDespesa()" class="flex flex-col gap-5">
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">Nome da despesa</label>
+        <input formControlName="nome" type="text" placeholder="Ex.: Conta de Luz"
+          class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/20 placeholder:text-outline/50 font-medium" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">Valor (R$)</label>
+          <input formControlName="valor" type="number" placeholder="0,00"
+            class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/20 placeholder:text-outline/50 font-medium" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">Vencimento</label>
+          <input formControlName="dataVencimento" type="date"
+            class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/20 font-medium" />
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">Categoria</label>
+        <input formControlName="categoria" type="text" placeholder="Ex.: Energia, Limpeza..."
+          class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/20 placeholder:text-outline/50 font-medium" />
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">Tipo de Despesa</label>
+        <div class="flex rounded-xl overflow-hidden bg-surface-container-low">
+          <button type="button" (click)="form.get('tipodeDespesa')?.setValue('coletiva')"
+            [ngClass]="{
+              'bg-primary text-on-primary': form.get('tipodeDespesa')?.value === 'coletiva',
+              'text-on-surface-variant hover:bg-surface-container': form.get('tipodeDespesa')?.value !== 'coletiva'
+            }"
+            class="w-1/2 py-3 font-bold text-sm transition-all duration-200">
+            Coletiva
+          </button>
+          <button type="button" (click)="form.get('tipodeDespesa')?.setValue('individual')"
+            [ngClass]="{
+              'bg-primary text-on-primary': form.get('tipodeDespesa')?.value === 'individual',
+              'text-on-surface-variant hover:bg-surface-container': form.get('tipodeDespesa')?.value !== 'individual'
+            }"
+            class="w-1/2 py-3 font-bold text-sm transition-all duration-200">
+            Individual
+          </button>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">Descrição (opcional)</label>
+        <textarea formControlName="descricao" rows="3" placeholder="Detalhes adicionais..."
+          class="w-full bg-surface-container-low border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-secondary/20 placeholder:text-outline/50 font-medium resize-none"></textarea>
+      </div>
+
+      <div class="flex gap-3 mt-2">
+        <button type="button" (click)="closeDialog()"
+          class="w-1/2 py-4 border-2 border-outline/20 text-primary font-bold rounded-2xl active:scale-[0.98] transition-transform">
+          CANCELAR
+        </button>
+        <button type="submit"
+          class="w-1/2 py-4 bg-primary text-on-primary font-black rounded-2xl shadow-lg active:scale-[0.98] transition-transform tracking-widest">
+          SALVAR
+        </button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<!-- MODAL DE EXCLUIR DESPESA -->
+<dialog #confirmDialog class="w-full max-w-full m-0 mt-auto rounded-t-[2.5rem] p-0
+  backdrop:bg-primary/40 backdrop:backdrop-blur-sm">
+  <div class="p-8 flex flex-col gap-6">
+    <h2 class="text-2xl font-extrabold text-primary tracking-tight">Excluir despesa</h2>
+    <p class="text-on-surface-variant font-medium">
+      Tem certeza que deseja excluir
+      <span class="font-bold text-primary">{{ despesaSelecionada?.nome }}</span>?
+    </p>
+    <div class="flex gap-3">
+      <button (click)="fecharConfirmDialog()"
+        class="w-1/2 py-4 border-2 border-outline/20 text-primary font-bold rounded-2xl active:scale-[0.98] transition-transform">
+        CANCELAR
+      </button>
+      <button (click)="excluirDespesa()"
+        class="w-1/2 py-4 bg-error text-on-error font-black rounded-2xl shadow-lg active:scale-[0.98] transition-transform tracking-widest">
+        EXCLUIR
+      </button>
+    </div>
+  </div>
+</dialog>
+
+<!-- NAVBAR SUPERIOR -->
+<app-top-navbar-component></app-top-navbar-component>
+
+
+<main class="px-6 pt-6 pb-32 space-y-8">
+
+  <!-- Hero Section -->
+  <section class="flex flex-col gap-2">
+    <span class="text-secondary font-bold tracking-[0.2em] text-[10px] uppercase">Seu Santuário</span>
+    <h2 class="text-3xl font-extrabold tracking-tight text-primary leading-tight">Gestão de<br/>Despesas</h2>
+    <p class="text-on-surface-variant text-sm font-medium">Casa Exemplo • 4 moradores</p>
+  </section>
+
+  <!-- SUMMARY CARDS -->
+  <section class="grid grid-cols-2 gap-4">
+    <div class="col-span-2 bg-surface-container-lowest p-6 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex justify-between items-center">
+      <div class="space-y-1">
+        <p class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant">Total do Mês</p>
+        <p class="text-3xl font-black text-primary">R$ {{ soma }}</p>
+      </div>
+      <span class="material-symbols-outlined text-secondary text-4xl">account_balance_wallet</span>
+    </div>
+
+    <div class="bg-primary text-on-primary p-5 rounded-2xl space-y-2">
+      <span class="material-symbols-outlined text-secondary-fixed opacity-80">check_circle</span>
+      <p class="text-[10px] uppercase tracking-widest font-bold opacity-60">Pago</p>
+      <p class="text-xl font-black">R$ 672,50</p> <!-- MUDAR QUANDO FOR INTEGRAR COM O BACKEND -->
+    </div>
+
+    <div class="bg-surface-container-low p-5 rounded-2xl space-y-2">
+      <span class="material-symbols-outlined text-primary">pending</span>
+      <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Pendente</p>
+      <p class="text-xl font-black text-primary">R$ 882,50</p> <!-- MUDAR QUANDO FOR INTEGRAR COM O BACKEND -->
+    </div>
+  </section>
+
+  <!-- EXPENSE LIST -->
+  <section class="space-y-4">
+    <div class="flex justify-between items-center">
+      <h3 class="text-xl font-bold text-primary">Despesas</h3>
+      <button (click)="openDialog()"
+        class="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 active:scale-95 transition-transform">
+        <span class="material-symbols-outlined text-sm">add_circle</span>
+        ADICIONAR
+      </button>
+    </div>
+
+    <div class="space-y-2">
+      <div *ngFor="let gasto of gastos"
+        (click)="openPanel(gasto)"
+        class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between cursor-pointer active:bg-surface-container transition-colors">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined">receipt_long</span>
+          </div>
+          <div>
+            <p class="font-bold text-primary">{{ gasto.nome }}</p>
+            <div class="flex items-center gap-2 mt-0.5">
+              <p class="text-xs text-on-surface-variant">Vence {{ gasto.dataVencimento }}</p>
+              <span [ngClass]="{
+                'text-secondary bg-secondary-container/40': gasto.tipodeDespesa === 'coletiva',
+                'text-on-surface-variant bg-surface-container': gasto.tipodeDespesa === 'individual'
+              }"
+                class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide">
+                {{ gasto.tipodeDespesa }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <p class="font-black text-primary">R$ {{ gasto.valor }}</p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- SIDE PANEL -->
+<div class="fixed inset-0 z-40 pointer-events-none">
+  <div (click)="closePanel()"
+    [class.opacity-100]="isOpen" [class.opacity-0]="!isOpen" [class.pointer-events-auto]="isOpen"
+    class="absolute inset-0 bg-primary/30 backdrop-blur-sm transition-opacity duration-300"></div>
+
+  <div [class.translate-x-0]="isOpen" [class.translate-x-full]="!isOpen"
+    class="absolute right-0 top-0 h-full w-80 bg-surface shadow-2xl transition-transform duration-300 ease-in-out pointer-events-auto flex flex-col">
+    <div class="p-8 flex flex-col gap-6 h-full overflow-y-auto">
+
+      <div class="flex justify-between items-center">
+        <h2 class="font-black text-primary text-lg">{{ despesaSelecionada?.nome }}</h2>
+        <button (click)="closePanel()" class="p-2 hover:bg-surface-container rounded-full transition-colors">
+          <span class="material-symbols-outlined text-primary">close</span>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-sm">
+        <div class="flex justify-between py-3 border-b border-outline-variant/20">
+          <p class="text-on-surface-variant font-medium">Valor Total</p>
+          <p class="font-black text-primary">R$ {{ despesaSelecionada?.valor }}</p>
+        </div>
+        <div class="flex justify-between py-3 border-b border-outline-variant/20">
+          <p class="text-on-surface-variant font-medium">Categoria</p>
+          <p class="font-bold text-primary">{{ despesaSelecionada?.categoria }}</p>
+        </div>
+        <div class="flex justify-between py-3 border-b border-outline-variant/20">
+          <p class="text-on-surface-variant font-medium">Vencimento</p>
+          <p class="font-bold text-error">{{ despesaSelecionada?.dataVencimento }}</p>
+        </div>
+        <div class="flex justify-between py-3">
+          <p class="text-on-surface-variant font-medium">Tipo</p>
+          <span [ngClass]="{
+            'text-secondary bg-secondary-container/40': despesaSelecionada?.tipodeDespesa === 'coletiva',
+            'text-on-surface-variant bg-surface-container': despesaSelecionada?.tipodeDespesa === 'individual'
+          }"
+            class="text-[10px] font-bold rounded-md px-2 py-1 uppercase tracking-wide">
+            {{ despesaSelecionada?.tipodeDespesa }}
+          </span>
+        </div>
+      </div>
+
+      <div class="flex gap-3 mt-auto">
+        <button (click)="editarDespesa(despesaSelecionada)"
+          class="w-full py-3 border-2 border-outline/20 text-primary font-bold rounded-2xl active:scale-[0.98] transition-transform text-sm">
+          EDITAR
+        </button>
+        <button (click)="abrirConfirmDialog(despesaSelecionada)"
+          class="py-3 px-4 border-2 border-error/30 text-error font-bold rounded-2xl active:scale-[0.98] transition-transform">
+          <span class="material-symbols-outlined text-sm">delete</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<app-navbar-bottom></app-navbar-bottom>

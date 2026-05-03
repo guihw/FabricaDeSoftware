@@ -1,4 +1,4 @@
-import { AsyncPipe } from '@angular/common';
+/* import { AsyncPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import {
   Candidato,
@@ -34,4 +34,4 @@ export class PainelAnfitriaoComponent {
       console.log(resposta.mensagem);
     });
   }
-}
+} */
