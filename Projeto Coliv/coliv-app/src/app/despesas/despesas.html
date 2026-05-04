@@ -87,7 +87,7 @@
     <h2 class="text-2xl font-extrabold text-primary tracking-tight">Excluir despesa</h2>
     <p class="text-on-surface-variant font-medium">
       Tem certeza que deseja excluir
-      <span class="font-bold text-primary">{{ despesaSelecionada?.nome }}</span>?
+      <span class="font-bold text-primary">{{ despesaSelecionada.nome }}</span>?
     </p>
     <div class="flex gap-3">
       <button (click)="fecharConfirmDialog()"
@@ -188,7 +188,7 @@
     <div class="p-8 flex flex-col gap-6 h-full overflow-y-auto">
 
       <div class="flex justify-between items-center">
-        <h2 class="font-black text-primary text-lg">{{ despesaSelecionada?.nome }}</h2>
+        <h2 class="font-black text-primary text-lg">{{ despesaSelecionada.nome }}</h2>
         <button (click)="closePanel()" class="p-2 hover:bg-surface-container rounded-full transition-colors">
           <span class="material-symbols-outlined text-primary">close</span>
         </button>
@@ -197,24 +197,24 @@
       <div class="space-y-4 text-sm">
         <div class="flex justify-between py-3 border-b border-outline-variant/20">
           <p class="text-on-surface-variant font-medium">Valor Total</p>
-          <p class="font-black text-primary">R$ {{ despesaSelecionada?.valor }}</p>
+          <p class="font-black text-primary">R$ {{ despesaSelecionada.valor }}</p>
         </div>
         <div class="flex justify-between py-3 border-b border-outline-variant/20">
           <p class="text-on-surface-variant font-medium">Categoria</p>
-          <p class="font-bold text-primary">{{ despesaSelecionada?.categoria }}</p>
+          <p class="font-bold text-primary">{{ despesaSelecionada.categoria }}</p>
         </div>
         <div class="flex justify-between py-3 border-b border-outline-variant/20">
           <p class="text-on-surface-variant font-medium">Vencimento</p>
-          <p class="font-bold text-error">{{ despesaSelecionada?.dataVencimento }}</p>
+          <p class="font-bold text-error">{{ despesaSelecionada.dataVencimento }}</p>
         </div>
         <div class="flex justify-between py-3">
           <p class="text-on-surface-variant font-medium">Tipo</p>
           <span [ngClass]="{
-            'text-secondary bg-secondary-container/40': despesaSelecionada?.tipodeDespesa === 'coletiva',
-            'text-on-surface-variant bg-surface-container': despesaSelecionada?.tipodeDespesa === 'individual'
+            'text-secondary bg-secondary-container/40': despesaSelecionada.tipodeDespesa === 'coletiva',
+            'text-on-surface-variant bg-surface-container': despesaSelecionada.tipodeDespesa === 'individual'
           }"
             class="text-[10px] font-bold rounded-md px-2 py-1 uppercase tracking-wide">
-            {{ despesaSelecionada?.tipodeDespesa }}
+            {{ despesaSelecionada.tipodeDespesa }}
           </span>
         </div>
       </div>
