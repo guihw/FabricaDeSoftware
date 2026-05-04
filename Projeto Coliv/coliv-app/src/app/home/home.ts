@@ -11,7 +11,7 @@ export class Home {
   private router = inject(Router);
 
   toRegistrationPage() {
-    this.router.navigate(["/register"])
+    this.router.navigate(["/cadastro"])
   }
 
   toLoginPage() {
