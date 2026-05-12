@@ -18,8 +18,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()).
         headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)).
-        authorizeHttpRequests(auth ->
-                auth.requestMatchers("/usuarios/anfitriao/**").permitAll().anyRequest().authenticated()).
+        authorizeHttpRequests(auth -> auth.
+                requestMatchers("/usuarios/anfitriao/**").permitAll().anyRequest().authenticated()).
         httpBasic(Customizer.withDefaults());
 
         return http.build();

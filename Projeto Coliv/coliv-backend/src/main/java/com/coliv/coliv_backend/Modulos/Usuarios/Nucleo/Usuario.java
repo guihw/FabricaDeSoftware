@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Usuarios.Core;
+package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo;
 
 import jakarta.persistence.*;
 
@@ -7,8 +7,9 @@ public abstract class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String cpf;
     @Column(nullable = false)
     private String nome;
@@ -23,11 +24,22 @@ public abstract class Usuario {
 
     public Usuario(){}
 
-    public Usuario(String cpf, String nome, String email, String senha) {
+    public Usuario(String nome, String cpf, String email, String senha, Long fotoPerfil) {
         this.cpf = cpf;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
+        this.fotoPerfil = fotoPerfil;
+    }
+
+    public Usuario(Long id, String nome, String cpf, String email, String senha, boolean possuiPlano, Long fotoPerfil) {
+        this.email = email;
+        this.id = id;
+        this.cpf = cpf;
+        this.nome = nome;
+        this.senha = senha;
+        this.possuiPlano = possuiPlano;
+        this.fotoPerfil = fotoPerfil;
     }
 
     public Long getId() {

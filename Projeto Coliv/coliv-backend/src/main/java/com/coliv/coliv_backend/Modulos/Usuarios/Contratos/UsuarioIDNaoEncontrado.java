@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Usuarios.Contracts;
+package com.coliv.coliv_backend.Modulos.Usuarios.Contratos;
 
 public class UsuarioIDNaoEncontrado extends RuntimeException {
     public UsuarioIDNaoEncontrado(Long id) {

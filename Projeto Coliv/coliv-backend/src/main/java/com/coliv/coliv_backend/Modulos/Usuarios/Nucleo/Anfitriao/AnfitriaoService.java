@@ -1,16 +1,13 @@
-package com.coliv.coliv_backend.Modulos.Usuarios.Core.Anfitriao;
+package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 
-import com.coliv.coliv_backend.Modulos.Usuarios.Contracts.*;
-import com.coliv.coliv_backend.Modulos.Usuarios.Contracts.Anfitriao.AnfitriaoDTO;
-import com.coliv.coliv_backend.Modulos.Usuarios.Contracts.IUsuario;
-import com.coliv.coliv_backend.Modulos.Usuarios.Contracts.Anfitriao.UsuarioAnfitriaoCriado;
-import com.coliv.coliv_backend.Modulos.Usuarios.Contracts.UsuarioDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.*;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.IUsuario;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.event.TransactionPhase;
-import org.springframework.transaction.event.TransactionalEventListener;
 
 import java.util.List;
 
@@ -31,8 +28,9 @@ class AnfitriaoService implements IUsuario {
     }
 
     public Anfitriao criarAnfitriao(AnfitriaoDTO anfitriaoDTO) {
-        Anfitriao usuario = new Anfitriao(anfitriaoDTO.getCpf(), anfitriaoDTO.getNome(),
-                                          anfitriaoDTO.getEmail(), anfitriaoDTO.getSenha());
+        Anfitriao usuario = new Anfitriao(anfitriaoDTO.nome(), anfitriaoDTO.cpf(),
+                                          anfitriaoDTO.email(), anfitriaoDTO.senha(),
+                                          anfitriaoDTO.fotoPerfil());
 
         usuario = anfitriaoRepository.save(usuario);
         publisher.publishEvent(new UsuarioAnfitriaoCriado(usuario.getId()));
@@ -59,10 +57,10 @@ class AnfitriaoService implements IUsuario {
         anfitriaoRepository.deleteById(id);
     }
 
-    @EventListener
-    public void testeDeEvento(UsuarioAnfitriaoCriado event) {
-        System.out.println("Usuário de ID : " + event.anfitriaoId() + " criado . . .");
-    }
+//    @EventListener
+//    public void testeDeEvento(UsuarioAnfitriaoCriado event) {
+//        System.out.println("Usuário de ID : " + event.anfitriaoId() + " criado . . .");
+//    }
 
     @Override
     public UsuarioDTO getuser(Long id) {
