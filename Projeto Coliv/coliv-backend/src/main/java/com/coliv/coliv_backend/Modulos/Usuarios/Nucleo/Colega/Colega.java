@@ -1,9 +1,10 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega;
 
+import com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Usuario;
 import jakarta.persistence.Entity;
 
 @Entity
-public class Colega {
+public class Colega extends Usuario {
     String descricao;
     Float classificacao;
     Long preferenciaColegaId;

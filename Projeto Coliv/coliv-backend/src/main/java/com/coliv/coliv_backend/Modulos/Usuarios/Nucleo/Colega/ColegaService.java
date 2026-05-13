@@ -1,14 +1,20 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega;
 
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
-import org.apache.catalina.User;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 public class ColegaService {
-    ColegaRepository colegaRepository;
+    @Autowired
+    private ColegaRepository colegaRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     public List<Colega> getAllColegas(){
         return colegaRepository.findAll();
@@ -26,31 +32,28 @@ public class ColegaService {
         }
 
         if (request.getPassword() == null || request.getPassword().length() < 6) {
-            throw new RuntimeException("Password must contain at least 6 characters");
+            throw new RuntimeException("Password precisa ter 6 caracteres");
         }
-
-        boolean userAlreadyExists =
+        boolean colegaAlreadyExists =
                 colegaRepository.existsByEmail(request.getEmail());
 
-        if (userAlreadyExists) {
-            throw new RuntimeException("Email already registered");
+        if (colegaAlreadyExists) {
+            throw new RuntimeException("Email já registrado");
         }
 
-        String encryptedPassword =
-                passwordEncoder.encode(request.getPassword());
+        String encryptedPassword = passwordEncoder.encode(request.getPassword());
+        Colega colega = new Colega();
 
-        User user = new User();
+        colega.setNome(request.getNome());
+        colega.setEmail(request.getEmail().toLowerCase());
+        colega.setSenha(encryptedPassword);
 
-        user.setName(request.getName());
-        user.setEmail(request.getEmail().toLowerCase());
-        user.setPassword(encryptedPassword);
+        Colega savedColega = colegaRepository.save(colega);
 
-        User savedUser = userRepository.save(user);
-
-        return new UserResponse(
-                savedUser.getId(),
-                savedUser.getName(),
-                savedUser.getEmail()
+        return new ColegaResponse(
+                savedColega.getId(),
+                savedColega.getNome(),
+                savedColega.getEmail()
         );
 
     }
