@@ -82,7 +82,7 @@ public abstract class Usuario {
         this.senha = senha;
     }
 
-    public boolean isPossuiPlano() {
+    public boolean getPossuiPlano() {
         return possuiPlano;
     }
 
