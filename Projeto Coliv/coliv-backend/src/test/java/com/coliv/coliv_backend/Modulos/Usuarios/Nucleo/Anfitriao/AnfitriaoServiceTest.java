@@ -36,8 +36,8 @@ class AnfitriaoServiceTest {
     ArgumentCaptor<Anfitriao> anfitriaoCaptor;
 
     @Test
-    @DisplayName("Buscar Anfitriao Teste")
-    public void buscarAnfitriaoTeste() {
+    @DisplayName("Buscar Anfitriao Teste Retorno Positivo")
+    public void buscarAnfitriaoTesteRetornoPositivo() {
         Anfitriao anfitriaoTeste = new Anfitriao(1L, "Teste", "511.995.364-25", "testeemail.com",
                                             "senhateste", false, 0L, 0L, 0L);
 
@@ -46,6 +46,19 @@ class AnfitriaoServiceTest {
         Anfitriao resultado = anfitriaoService.buscarPorId(1L);
 
         assertThat(resultado.getNome()).isEqualTo("Teste");
+    }
+
+    @Test
+    @DisplayName("Buscar Anfitriao Teste Retorno Negativo")
+    public void buscarAnfitriaoTesteRetornoNegativo() {
+        Anfitriao anfitriaoTeste = new Anfitriao(-1L, "Teste", "511.995.364-25", "testeemail.com",
+                "senhateste", false, 0L, 0L, 0L);
+
+        when(anfitriaoRepository.findById(-1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> anfitriaoService.buscarPorId(-1L)).isInstanceOf(UsuarioIDNaoEncontrado.class);
+
+        verify(anfitriaoRepository, times(1)).findById(-1L);
     }
 
     @Test
@@ -113,20 +126,30 @@ class AnfitriaoServiceTest {
     @DisplayName("Remover Anfitriao Teste com Retorno Positivo")
     public void removerAnfitriaoTesteRetornoPositivo () {
         Long id = 1L;
+        Anfitriao anfitriao = new Anfitriao();
+        anfitriao.setId(id);
+
+        when(anfitriaoRepository.findById(id)).thenReturn(Optional.of(anfitriao));
 
         anfitriaoService.excluir(id);
 
+        verify(anfitriaoRepository, times(1)).findById(id);
         verify(anfitriaoRepository, times(1)).deleteById(id);
     }
 
     @Test
     @DisplayName("Remover Anfitriao Teste com Retorno Negativo")
-    @Disabled
     public void removerAnfitriaoTesteRetornoNegativo () {
         Long id = -1L;
+        Anfitriao anfitriao = new Anfitriao();
+        anfitriao.setId(id);
 
-        anfitriaoService.excluir(id);
+        when(anfitriaoRepository.findById(id)).thenReturn(Optional.empty());
 
-        verify(anfitriaoRepository, times(1)).deleteById(id);
+
+        assertThatThrownBy(() -> anfitriaoService.excluir(id)).isInstanceOf(UsuarioIDNaoEncontrado.class);
+
+        verify(anfitriaoRepository, times(1)).findById(id);
+        verify(anfitriaoRepository, never()).deleteById(id);
     }
 }

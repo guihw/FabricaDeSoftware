@@ -70,6 +70,7 @@ class AnfitriaoService implements IUsuario {
     }
 
     public void excluir(Long id) {
+        anfitriaoRepository.findById(id).orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
         anfitriaoRepository.deleteById(id);
     }
 
@@ -78,5 +79,14 @@ class AnfitriaoService implements IUsuario {
         return anfitriaoRepository.findById(id).
                 map(usuario -> new UsuarioDTO(usuario.getNome(), usuario.getEmail())).
                 orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
+    }
+
+    @Override
+    public void adicionarPreferenciaAnfitriao(Long userId, Long id) {
+        Anfitriao anfitriao = anfitriaoRepository.findById(userId).orElseThrow(() ->
+                new UsuarioIDNaoEncontrado(userId));
+
+        anfitriao.setPreferenciasId(id);
+        anfitriaoRepository.save(anfitriao);
     }
 }
