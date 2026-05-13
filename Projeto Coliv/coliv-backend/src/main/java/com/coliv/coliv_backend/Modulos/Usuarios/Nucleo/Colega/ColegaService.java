@@ -1,6 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega;
 
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
+import org.apache.catalina.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
