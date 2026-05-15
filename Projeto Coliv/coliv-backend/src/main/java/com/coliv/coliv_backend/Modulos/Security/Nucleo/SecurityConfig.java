@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Security.Core;
+package com.coliv.coliv_backend.Modulos.Security.Nucleo;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +19,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable()).
         headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable)).
         authorizeHttpRequests(auth -> auth.
-                requestMatchers("/usuarios/anfitriao/**").permitAll().anyRequest().authenticated()).
+                requestMatchers("/usuarios/anfitriao/**", "/formularios/preferencias-anfitriao/**").permitAll().anyRequest().authenticated()).
         httpBasic(Customizer.withDefaults());
 
         return http.build();
