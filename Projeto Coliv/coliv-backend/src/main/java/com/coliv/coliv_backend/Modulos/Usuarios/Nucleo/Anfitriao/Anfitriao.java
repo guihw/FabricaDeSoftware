@@ -1,7 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 
 import com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Usuario;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
@@ -15,8 +14,7 @@ class Anfitriao extends Usuario {
         super(nome, cpf, email, senha, fotoPerfil);
     }
 
-    public Anfitriao(Long id, String nome, String cpf, String email, String senha, boolean possuiPlano, Long fotoPerfil, Long dadosImoveId, Long preferenciasId) {
+    public Anfitriao(Long id, String nome, String cpf, String email, String senha, boolean possuiPlano, Long fotoPerfil) {
         super(id, nome, cpf, email, senha, possuiPlano, fotoPerfil);
-
     }
 }

@@ -52,8 +52,6 @@ class DadosImovelServiceTest {
     @DisplayName("Buscar Dado do Imovel Retorno Negativo")
     public void buscarDadoImovelRetornoNegativo() {
         Long id = -1L;
-        DadosImovel buscado = new DadosImovel("Imóvel no centro da cidade", "Rua xyz", 4);
-        buscado.setId(id);
 
         when(dir.findById(id)).thenReturn(Optional.empty());
 
@@ -119,7 +117,6 @@ class DadosImovelServiceTest {
         assertThatThrownBy(() -> dis.editarDadosImovel(aid, dto)).isInstanceOf(DadosImovelNaoEncontradoUsandoReferencia.class);
         verify(dir, times(1)).findByAnfitriaoId(aid);
         verify(dir, never()).save(any());
-
     }
 
     @Test

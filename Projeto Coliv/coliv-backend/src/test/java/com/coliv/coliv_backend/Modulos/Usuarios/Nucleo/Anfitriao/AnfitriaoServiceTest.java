@@ -1,6 +1,5 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.IPreferenciasAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
@@ -40,7 +39,7 @@ class AnfitriaoServiceTest {
     @DisplayName("Buscar Anfitriao Teste Retorno Positivo")
     public void buscarAnfitriaoTesteRetornoPositivo() {
         Anfitriao anfitriaoTeste = new Anfitriao(1L, "Teste", "511.995.364-25", "testeemail.com",
-                                            "senhateste", false, 0L, 0L, 0L);
+                                            "senhateste", false, 0L);
 
         when(anfitriaoRepository.findById(1L)).thenReturn(Optional.of(anfitriaoTeste));
 
@@ -53,7 +52,7 @@ class AnfitriaoServiceTest {
     @DisplayName("Buscar Anfitriao Teste Retorno Negativo")
     public void buscarAnfitriaoTesteRetornoNegativo() {
         Anfitriao anfitriaoTeste = new Anfitriao(-1L, "Teste", "511.995.364-25", "testeemail.com",
-                "senhateste", false, 0L, 0L, 0L);
+                "senhateste", false, 0L);
 
         when(anfitriaoRepository.findById(-1L)).thenReturn(Optional.empty());
 
@@ -66,7 +65,7 @@ class AnfitriaoServiceTest {
     @DisplayName("Criar Anfitriao Teste")
     public void criarAnfitriaoTeste() {
         Anfitriao anfitriaoSalvo = new Anfitriao(1L, "Teste", "511.995.364-25", "testeemail.com",
-                "senhateste", false, 0L, 0L, 0L);
+                "senhateste", false, 0L);
         AnfitriaoDTO dto = new AnfitriaoDTO("Teste", "511.995.364-25", "testeemail.com",
                 "senhateste", 0L);
 
@@ -89,7 +88,7 @@ class AnfitriaoServiceTest {
     public void editarAnfitriaoTesteRetornoPositivo () {
         Long id = 1L;
         Anfitriao anfitriao = new Anfitriao(id, "Teste", "511.995.364-25", "testeemail.com",
-                "senhateste", false, 0L, 0L, 0L);
+                "senhateste", false, 0L);
         Anfitriao anfitriaoUpdate = new Anfitriao("Teste1", "511.995.364-25", "teste1email@email.com",
                 "senhateste1", 0L);
 
@@ -156,7 +155,7 @@ class AnfitriaoServiceTest {
     @DisplayName("Get Anfitriao Interno Retorno Positivo")
     public void getAnfitriaoInternoRetornoPositivo() {
         Anfitriao anfitriaoTeste = new Anfitriao(1L, "Teste", "511.995.364-25", "testeemail.com",
-                "senhateste", false, 0L, 0L, 0L);
+                "senhateste", false, 0L);
 
         when(anfitriaoRepository.findById(1L)).thenReturn(Optional.of(anfitriaoTeste));
 
