@@ -52,7 +52,6 @@ class CardAnfitriaoService {
     @EventListener
     public void eventoAnfitriaoCriado(UsuarioAnfitriaoCriado evento) {
         CardAnfitriao cardAnfitriao = new CardAnfitriao();
-        cardAnfitriao.setPrecoMensal(9.99);
         cardAnfitriao.setAnfitriaoId(evento.anfitriaoId());
 
         car.save(cardAnfitriao);

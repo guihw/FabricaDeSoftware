@@ -13,7 +13,7 @@ class CardAnfitriao {
     private Long id;
     private Double classificacao;
     @Column(name = "preco_mensal", nullable = false)
-    private Double precoMensal;
+    private Double precoMensal = 0.00;
     private List<Long> arquivos;
     @Column(name = "anfitriao_id")
     private Long anfitriaoId;

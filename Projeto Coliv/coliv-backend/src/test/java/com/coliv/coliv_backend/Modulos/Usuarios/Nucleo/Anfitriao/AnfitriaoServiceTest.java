@@ -3,6 +3,8 @@ package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.CPFDeUsuarioExistente;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.EmailDeUsuarioExistente;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
 import org.junit.jupiter.api.*;
@@ -13,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -51,9 +54,6 @@ class AnfitriaoServiceTest {
     @Test
     @DisplayName("Buscar Anfitriao Teste Retorno Negativo")
     public void buscarAnfitriaoTesteRetornoNegativo() {
-        Anfitriao anfitriaoTeste = new Anfitriao(-1L, "Teste", "511.995.364-25", "testeemail.com",
-                "senhateste", false, 0L);
-
         when(anfitriaoRepository.findById(-1L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> anfitriaoService.buscarPorId(-1L)).isInstanceOf(UsuarioIDNaoEncontrado.class);
@@ -62,16 +62,20 @@ class AnfitriaoServiceTest {
     }
 
     @Test
-    @DisplayName("Criar Anfitriao Teste")
-    public void criarAnfitriaoTeste() {
+    @DisplayName("Criar Anfitriao Teste Retorno Positivo")
+    public void criarAnfitriaoTesteRetornoPositivo() {
         Anfitriao anfitriaoSalvo = new Anfitriao(1L, "Teste", "511.995.364-25", "testeemail.com",
                 "senhateste", false, 0L);
         AnfitriaoDTO dto = new AnfitriaoDTO("Teste", "511.995.364-25", "testeemail.com",
                 "senhateste", 0L);
 
         when(anfitriaoRepository.save(any())).thenReturn(anfitriaoSalvo);
+        when(anfitriaoRepository.existsByEmail(dto.email())).thenReturn(false);
+        when(anfitriaoRepository.existsByCpf(dto.cpf())).thenReturn(false);
 
         Anfitriao anfitriao = anfitriaoService.criarAnfitriao(dto);
+        verify(anfitriaoRepository, times(1)).existsByEmail(dto.email());
+        verify(anfitriaoRepository, times(1)).existsByCpf(dto.cpf());
         verify(anfitriaoRepository, times(1)).save(anfitriaoCaptor.capture());
         verify(publisher, times(1)).publishEvent(any(UsuarioAnfitriaoCriado.class));
         Anfitriao anfitriaoCapturado = anfitriaoCaptor.getValue();
@@ -81,6 +85,34 @@ class AnfitriaoServiceTest {
         assertThat(anfitriaoCapturado.getNome()).isEqualTo("Teste");
         assertThat(anfitriao.getId()).isEqualTo(1L);
         assertThat(anfitriao.getNome()).isEqualTo("Teste");
+    }
+
+    @Test
+    @DisplayName("Criar Anfitriao Teste Retorno Negativo 1")
+    public void criarAnfitriaoTesteRetornoNegativo1() {
+        AnfitriaoDTO dto = new AnfitriaoDTO("Teste", "511.995.364-25", "testeemail.com",
+                "senhateste", 0L);
+
+        when(anfitriaoRepository.existsByEmail(dto.email())).thenReturn(true);
+
+        assertThatThrownBy(() -> anfitriaoService.criarAnfitriao(dto)).isInstanceOf(EmailDeUsuarioExistente.class);
+        verify(anfitriaoRepository, never()).save(any());
+        verify(anfitriaoRepository, times(1)).existsByEmail(dto.email());
+        verify(publisher, never()).publishEvent(any(UsuarioAnfitriaoCriado.class));
+    }
+
+    @Test
+    @DisplayName("Criar Anfitriao Teste Retorno Negativo 2")
+    public void criarAnfitriaoTesteRetornoNegativo2() {
+        AnfitriaoDTO dto = new AnfitriaoDTO("Teste", "511.995.364-25", "testeemail.com",
+                "senhateste", 0L);
+
+        when(anfitriaoRepository.existsByCpf(dto.cpf())).thenReturn(true);
+
+        assertThatThrownBy(() -> anfitriaoService.criarAnfitriao(dto)).isInstanceOf(CPFDeUsuarioExistente.class);
+        verify(anfitriaoRepository, never()).save(any());
+        verify(anfitriaoRepository, times(1)).existsByCpf(dto.cpf());
+        verify(publisher, never()).publishEvent(any(UsuarioAnfitriaoCriado.class));
     }
 
     @Test

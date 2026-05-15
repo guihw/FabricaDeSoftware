@@ -1,14 +1,15 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.IPreferenciasAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.*;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +21,8 @@ class AnfitriaoService implements IAnfitriao {
     private AnfitriaoRepository anfitriaoRepository;
     @Autowired
     private ApplicationEventPublisher publisher;
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
     public List<Anfitriao> listar() {
         return anfitriaoRepository.findAll();
@@ -29,11 +32,20 @@ class AnfitriaoService implements IAnfitriao {
         return anfitriaoRepository.findById(id).orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
     }
 
+    @Transactional
     public Anfitriao criarAnfitriao(AnfitriaoDTO anfitriaoDTO) {
         Anfitriao usuario = new Anfitriao(anfitriaoDTO.nome(), anfitriaoDTO.cpf(),
                                           anfitriaoDTO.email(), anfitriaoDTO.senha(),
                                           anfitriaoDTO.fotoPerfil());
 
+        if (anfitriaoRepository.existsByEmail(anfitriaoDTO.email())) {
+            throw new EmailDeUsuarioExistente(anfitriaoDTO.email());
+        }
+
+        if (anfitriaoRepository.existsByCpf(anfitriaoDTO.cpf())) {
+            throw new CPFDeUsuarioExistente();
+        }
+//        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         usuario = anfitriaoRepository.save(usuario);
         publisher.publishEvent(new UsuarioAnfitriaoCriado(usuario.getId()));
 
