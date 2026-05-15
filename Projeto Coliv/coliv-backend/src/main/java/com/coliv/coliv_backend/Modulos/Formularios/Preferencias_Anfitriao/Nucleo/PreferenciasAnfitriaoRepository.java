@@ -3,4 +3,6 @@ package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Nucle
 import org.springframework.data.jpa.repository.JpaRepository;
 
 interface PreferenciasAnfitriaoRepository extends JpaRepository<PreferenciasAnfitriao, Long> {
+
+    PreferenciasAnfitriao findByAnfitriaoId(Long id);
 }

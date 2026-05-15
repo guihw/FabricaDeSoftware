@@ -1,6 +1,8 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 
+import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.IPreferenciasAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
 import org.junit.jupiter.api.*;
@@ -11,13 +13,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -98,7 +98,6 @@ class AnfitriaoServiceTest {
         Anfitriao anfitriaoEdit = anfitriaoService.editarAnfitriao(id, anfitriaoUpdate);
         verify(anfitriaoRepository, times(1)).findById(id);
         verify(anfitriaoRepository, times(1)).save(anfitriaoCaptor.capture());
-
         Anfitriao capturado = anfitriaoCaptor.getValue();
 
         assertThat(anfitriaoEdit).isNotNull();
@@ -135,21 +134,20 @@ class AnfitriaoServiceTest {
 
         verify(anfitriaoRepository, times(1)).findById(id);
         verify(anfitriaoRepository, times(1)).deleteById(id);
+        verify(publisher, times(1)).publishEvent(any(AnfitriaoExcluido.class));
     }
 
     @Test
     @DisplayName("Remover Anfitriao Teste com Retorno Negativo")
     public void removerAnfitriaoTesteRetornoNegativo () {
         Long id = -1L;
-        Anfitriao anfitriao = new Anfitriao();
-        anfitriao.setId(id);
 
         when(anfitriaoRepository.findById(id)).thenReturn(Optional.empty());
-
 
         assertThatThrownBy(() -> anfitriaoService.excluir(id)).isInstanceOf(UsuarioIDNaoEncontrado.class);
 
         verify(anfitriaoRepository, times(1)).findById(id);
         verify(anfitriaoRepository, never()).deleteById(id);
+        verify(publisher, never()).publishEvent(any(AnfitriaoExcluido.class));
     }
 }

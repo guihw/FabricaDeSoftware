@@ -7,7 +7,6 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "preferencias_anfitriao")
 class PreferenciasAnfitriao {
-    //Using PA for abbreviation.
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,15 +22,28 @@ class PreferenciasAnfitriao {
     private String regrasDaCasa;
     @Column(name = "perfil_colega_desejado")
     private String perfilColegaDesejado;
+    @Column(name = "anfitriao_id")
+    private Long anfitriaoId;
 
     PreferenciasAnfitriao() {}
 
-    public PreferenciasAnfitriao(boolean presencaAnimais, String horariosParaVisita, String politicaDeLimpeza, String regrasDaCasa, String perfilColegaDesejado) {
+    public PreferenciasAnfitriao(boolean presencaAnimais, String horariosParaVisita, String politicaDeLimpeza,
+                                 String regrasDaCasa, String perfilColegaDesejado) {
         this.presencaAnimais = presencaAnimais;
         this.horariosParaVisita = horariosParaVisita;
         this.politicaDeLimpeza = politicaDeLimpeza;
         this.regrasDaCasa = regrasDaCasa;
         this.perfilColegaDesejado = perfilColegaDesejado;
+    }
+
+    public PreferenciasAnfitriao(boolean presencaAnimais, String horariosParaVisita, String politicaDeLimpeza,
+                                 String regrasDaCasa, String perfilColegaDesejado, Long anfitriaoId) {
+        this.presencaAnimais = presencaAnimais;
+        this.horariosParaVisita = horariosParaVisita;
+        this.politicaDeLimpeza = politicaDeLimpeza;
+        this.regrasDaCasa = regrasDaCasa;
+        this.perfilColegaDesejado = perfilColegaDesejado;
+        this.anfitriaoId = anfitriaoId;
     }
 
     public Long getId() {
@@ -80,5 +92,13 @@ class PreferenciasAnfitriao {
 
     public void setPerfilColegaDesejado(String perfilColegaDesejado) {
         this.perfilColegaDesejado = perfilColegaDesejado;
+    }
+
+    public Long getAnfitriaoId() {
+        return anfitriaoId;
+    }
+
+    public void setAnfitriaoId(Long anfitriaoId) {
+        this.anfitriaoId = anfitriaoId;
     }
 }

@@ -2,5 +2,5 @@ package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contr
 
 public interface IPreferenciasAnfitriao {
 
-    public PrefereciasAnfitriaoDTO getPreferenciasAnfitriao(Long id);
+    public PreferenciasAnfitriaoDTO getPreferenciasAnfitriao(Long anfitriaoId);
 }

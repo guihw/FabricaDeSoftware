@@ -1,6 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Nucleo;
 
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PrefereciasAnfitriaoDTO;
+import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciasAnfitriaoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,13 +25,13 @@ class PreferenciasAnfitriaoController {
     }
 
     @PostMapping("{userId}/nova-preferencia")
-    public PreferenciasAnfitriao criarPreferencia(@PathVariable Long userId, @RequestBody PrefereciasAnfitriaoDTO prefereciasAnfitriaoDTO) {
-        return pas.criarPreferencia(userId, prefereciasAnfitriaoDTO);
+    public PreferenciasAnfitriao criarPreferencia(@PathVariable Long userId, @RequestBody PreferenciasAnfitriaoDTO preferenciasAnfitriaoDTO) {
+        return pas.criarPreferencia(userId, preferenciasAnfitriaoDTO);
     }
 
-    @PutMapping("/editar/{id}")
-    public PreferenciasAnfitriao editarPreferencias(@PathVariable Long id, @RequestBody PrefereciasAnfitriaoDTO preferenciasDTO) {
-        return pas.editarPreferencias(id, preferenciasDTO);
+    @PutMapping("/editar/{anfitriaoId}")
+    public PreferenciasAnfitriao editarPreferencias(@PathVariable Long anfitriaoId, @RequestBody PreferenciasAnfitriaoDTO preferenciasDTO) {
+        return pas.editarPreferencias(anfitriaoId, preferenciasDTO);
     }
 
     @DeleteMapping("/excluir/{id}")

@@ -1,8 +1,10 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 
+import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.IPreferenciasAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.*;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
-import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.IUsuario;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-class AnfitriaoService implements IUsuario {
+class AnfitriaoService implements IAnfitriao {
 
     @Autowired
     private AnfitriaoRepository anfitriaoRepository;
@@ -53,12 +55,6 @@ class AnfitriaoService implements IUsuario {
         if (anfitriao.getSenha() != null && !anfitriao.getSenha().isBlank()) {
             original.setSenha(anfitriao.getSenha());
         }
-        if (anfitriao.getPreferenciasId() != null) {
-            original.setPreferenciasId(anfitriao.getPreferenciasId());
-        }
-        if (anfitriao.getDadosImoveId() != null) {
-            original.setDadosImoveId(anfitriao.getDadosImoveId());
-        }
 
         original.setPossuiPlano(anfitriao.getPossuiPlano());
 
@@ -71,6 +67,9 @@ class AnfitriaoService implements IUsuario {
 
     public void excluir(Long id) {
         anfitriaoRepository.findById(id).orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
+
+        publisher.publishEvent(new AnfitriaoExcluido(id));
+
         anfitriaoRepository.deleteById(id);
     }
 
@@ -79,14 +78,5 @@ class AnfitriaoService implements IUsuario {
         return anfitriaoRepository.findById(id).
                 map(usuario -> new UsuarioDTO(usuario.getNome(), usuario.getEmail())).
                 orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
-    }
-
-    @Override
-    public void adicionarPreferenciaAnfitriao(Long userId, Long id) {
-        Anfitriao anfitriao = anfitriaoRepository.findById(userId).orElseThrow(() ->
-                new UsuarioIDNaoEncontrado(userId));
-
-        anfitriao.setPreferenciasId(id);
-        anfitriaoRepository.save(anfitriao);
     }
 }
