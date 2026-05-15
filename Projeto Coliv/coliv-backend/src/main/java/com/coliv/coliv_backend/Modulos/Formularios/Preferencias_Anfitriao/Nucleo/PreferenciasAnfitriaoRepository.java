@@ -2,7 +2,9 @@ package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Nucle
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 interface PreferenciasAnfitriaoRepository extends JpaRepository<PreferenciasAnfitriao, Long> {
 
-    PreferenciasAnfitriao findByAnfitriaoId(Long id);
+    Optional<PreferenciasAnfitriao> findByAnfitriaoId(Long id);
 }
