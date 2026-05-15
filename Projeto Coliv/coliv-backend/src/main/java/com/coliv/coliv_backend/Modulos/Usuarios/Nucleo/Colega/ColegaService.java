@@ -19,6 +19,7 @@ public class ColegaService {
     public List<Colega> getAllColegas(){
         return colegaRepository.findAll();
     }
+
     public Colega getColega(Long id){
         return colegaRepository.findById(id).orElseThrow(()-> new UsuarioIDNaoEncontrado(id));
     }
@@ -57,4 +58,9 @@ public class ColegaService {
         );
 
     }
+
+    public Colega editarColega(Long id, Colega colega) {
+
+    }
+
 }
