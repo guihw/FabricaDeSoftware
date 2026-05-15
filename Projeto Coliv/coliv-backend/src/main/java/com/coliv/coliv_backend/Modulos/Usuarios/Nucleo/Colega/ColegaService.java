@@ -1,5 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega;
 
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.ColegaResponse;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.CreateColegaRequest;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +62,30 @@ public class ColegaService {
     }
 
     public Colega editarColega(Long id, Colega colega) {
+        Colega original = colegaRepository.findById(id).orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
+        if (colega.getNome() != null && !colega.getNome().isBlank()) {
+            original.setNome(colega.getNome());
+        }
+        if (colega.getCpf() != null && !colega.getCpf().isBlank()) {
+            original.setCpf(colega.getCpf());
+        }
+        if (colega.getEmail() != null && !colega.getEmail().isBlank()) {
+            original.setEmail(colega.getEmail());
+        }
+        if (colega.getSenha() != null && !colega.getSenha().isBlank()) {
+            String encryptedPassword = passwordEncoder.encode(colega.getSenha());
+            original.setSenha(encryptedPassword);
+        }
 
+        Colega updatedColega = colegaRepository.save(original);
+        return updatedColega;
     }
 
+    public void excluir(Long id) {
+
+        Colega colega = colegaRepository.findById(id)
+                .orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
+
+        colegaRepository.delete(colega);
+    }
 }

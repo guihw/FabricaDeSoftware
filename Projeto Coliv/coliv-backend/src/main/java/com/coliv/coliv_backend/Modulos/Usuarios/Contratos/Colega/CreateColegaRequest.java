@@ -1,15 +1,9 @@
-package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega;
+package com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega;
 
-public class ColegaResponse {//DADOS QUE SAEM DA API
-    private Long id;
+public class CreateColegaRequest {//DADOS QUE ENTRAM NA API
     private String nome;
     private String email;
-
-    public ColegaResponse(Long id, String nome, String email) {
-        this.id = id;
-        this.nome = nome;
-        this.email = email;
-    }
+    private String password;
 
     public String getNome() {
         return nome;
@@ -27,5 +21,11 @@ public class ColegaResponse {//DADOS QUE SAEM DA API
         this.email = email;
     }
 
+    public String getPassword() {
+        return password;
+    }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

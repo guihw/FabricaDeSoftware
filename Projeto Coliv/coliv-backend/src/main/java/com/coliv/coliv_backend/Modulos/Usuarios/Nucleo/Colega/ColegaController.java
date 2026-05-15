@@ -1,6 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega;
 
-import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.ColegaResponse;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.CreateColegaRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
