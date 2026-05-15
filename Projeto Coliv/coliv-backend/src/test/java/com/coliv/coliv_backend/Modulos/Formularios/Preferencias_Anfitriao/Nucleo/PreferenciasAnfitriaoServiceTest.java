@@ -1,8 +1,11 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciaNaoEncontradaUsandoReferencia;
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciasAnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciaAnfitriaoIDNaoEncontrado;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -117,12 +120,8 @@ class PreferenciasAnfitriaoServiceTest {
     @DisplayName("Editar Preferencia Anfitriao Teste com Retorno Negativo")
     public void editarPreferenciaAnfitriaoTesteRetornoNegativo () {
         Long id = -1L;
-        PreferenciasAnfitriao preferencia = new PreferenciasAnfitriao(false, "20:30",
-                "Limpeza", "Agendar visitas com antecedencia", "Silencioso");
-        preferencia.setId(id);
         PreferenciasAnfitriaoDTO dto = new PreferenciasAnfitriaoDTO(false, "20:30",
                 "Limpeza", "Agendar visitas com antecedencia", "Silencioso");
-        preferencia.setId(id);
 
         when(par.findById(id)).thenReturn(Optional.empty());
 
@@ -155,5 +154,83 @@ class PreferenciasAnfitriaoServiceTest {
 
         verify(par, times(1)).findById(id);
         verify(par, never()).deleteById(id);
+    }
+
+    @Test
+    @DisplayName("Get Preferencia Anfitriao Interno Retorno Positivo")
+    public void getPreferenciaAnfitriaoInternoRetornoPositivo() {
+        Long id = 1L, aid = 2L;
+        PreferenciasAnfitriao preferencias = new PreferenciasAnfitriao(false, "20:30",
+                "Limpeza", "Agendar visitas com antecedência", "Silencioso");
+        preferencias.setId(id);
+        preferencias.setAnfitriaoId(aid);
+
+        when(par.findByAnfitriaoId(aid)).thenReturn(Optional.of(preferencias));
+
+        PreferenciasAnfitriaoDTO retornando = pas.getPreferenciasAnfitriao(aid);
+        verify(par, times(1)).findByAnfitriaoId(aid);
+
+        assertThat(retornando.presencaAnimais()).isEqualTo(false);
+        assertThat(retornando.perfilColegaDesejado()).isEqualTo("Silencioso");
+        assertThat(retornando.regrasDaCasa()).isEqualTo("Agendar visitas com antecedência");
+    }
+
+    @Test
+    @DisplayName("Get Preferencia Anfitriao Interno Retorno Negativo")
+    public void getPreferenciaAnfitriaoInternoRetornoNegativo() {
+        Long aid = -2L;
+
+        when(par.findByAnfitriaoId(aid)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> pas.getPreferenciasAnfitriao(aid)).isInstanceOf(PreferenciaNaoEncontradaUsandoReferencia.class);
+        verify(par, times(1)).findByAnfitriaoId(aid);
+    }
+
+    @Test
+    @DisplayName("Anfitriao Criado Evento")
+    public void anfitriaoCriadoEvento() {
+        Long aid = 1L;
+        PreferenciasAnfitriao preferencias = new PreferenciasAnfitriao();
+        UsuarioAnfitriaoCriado evento = new UsuarioAnfitriaoCriado(aid);
+        preferencias.setId(aid);
+        preferencias.setAnfitriaoId(aid);
+
+        when(par.save(any(PreferenciasAnfitriao.class))).thenReturn(preferencias);
+
+        pas.eventoAnfitriaoCriado(evento);
+        verify(par, times(1)).save(paCaptor.capture());
+        PreferenciasAnfitriao captura = paCaptor.getValue();
+
+        assertThat(captura.getId()).isNull();
+        assertThat(captura.getAnfitriaoId()).isEqualTo(preferencias.getAnfitriaoId());
+    }
+
+    @Test
+    @DisplayName("Anfitriao Excluido Evento Retorno Positivo")
+    public void anfitriaoExcluidoEventoRetornoPositivo() {
+        Long aid = 1L;
+        PreferenciasAnfitriao preferencias = new PreferenciasAnfitriao();
+        AnfitriaoExcluido evento = new AnfitriaoExcluido(aid);
+        preferencias.setId(aid);
+        preferencias.setAnfitriaoId(aid);
+
+        when(par.findByAnfitriaoId(aid)).thenReturn(Optional.of(preferencias));
+
+        pas.eventoAnfitriaoExcluido(evento);
+        verify(par, times(1)).findByAnfitriaoId(aid);
+        verify(par, times(1)).deleteById(aid);
+    }
+
+    @Test
+    @DisplayName("Anfitriao Excluido Evento Retorno Negativo")
+    public void anfitriaoExcluidoEventoRetornoNegativo() {
+        Long aid = -1L;
+        AnfitriaoExcluido evento = new AnfitriaoExcluido(aid);
+
+        when(par.findByAnfitriaoId(aid)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> pas.eventoAnfitriaoExcluido(evento)).isInstanceOf(PreferenciaNaoEncontradaUsandoReferencia.class);
+        verify(par, times(1)).findByAnfitriaoId(aid);
+        verify(par, never()).deleteById(aid);
     }
 }

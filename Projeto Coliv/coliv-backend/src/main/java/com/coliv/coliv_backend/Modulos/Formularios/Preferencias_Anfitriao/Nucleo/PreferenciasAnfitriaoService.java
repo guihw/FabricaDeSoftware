@@ -1,6 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Nucleo;
 
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.IPreferenciasAnfitriao;
+import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciaNaoEncontradaUsandoReferencia;
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciasAnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciaAnfitriaoIDNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
@@ -66,7 +67,8 @@ class PreferenciasAnfitriaoService implements IPreferenciasAnfitriao {
 
     @Override
     public PreferenciasAnfitriaoDTO getPreferenciasAnfitriao(Long anfitriaoId) {
-        PreferenciasAnfitriao pa = par.findByAnfitriaoId(anfitriaoId);
+        PreferenciasAnfitriao pa = par.findByAnfitriaoId(anfitriaoId).orElseThrow(() -> new
+                PreferenciaNaoEncontradaUsandoReferencia(anfitriaoId));
 
         return new PreferenciasAnfitriaoDTO(pa.getPresencaAnimais(),
                 pa.getHorariosParaVisita(), pa.getPoliticaDeLimpeza(), pa.getRegrasDaCasa(), pa.getPerfilColegaDesejado());
@@ -82,7 +84,8 @@ class PreferenciasAnfitriaoService implements IPreferenciasAnfitriao {
 
     @EventListener
     public void eventoAnfitriaoExcluido(AnfitriaoExcluido evento) {
-         PreferenciasAnfitriao preferencia =  par.findByAnfitriaoId(evento.anfitriaoId());
+         PreferenciasAnfitriao preferencia =  par.findByAnfitriaoId(evento.anfitriaoId()).orElseThrow(() ->  new
+                 PreferenciaNaoEncontradaUsandoReferencia(evento.anfitriaoId()));
 
          par.deleteById(preferencia.getId());
     }

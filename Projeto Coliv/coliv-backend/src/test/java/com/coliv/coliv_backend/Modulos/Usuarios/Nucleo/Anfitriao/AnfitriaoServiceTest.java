@@ -4,6 +4,7 @@ import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contra
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -149,5 +150,28 @@ class AnfitriaoServiceTest {
         verify(anfitriaoRepository, times(1)).findById(id);
         verify(anfitriaoRepository, never()).deleteById(id);
         verify(publisher, never()).publishEvent(any(AnfitriaoExcluido.class));
+    }
+
+    @Test
+    @DisplayName("Get Anfitriao Interno Retorno Positivo")
+    public void getAnfitriaoInternoRetornoPositivo() {
+        Anfitriao anfitriaoTeste = new Anfitriao(1L, "Teste", "511.995.364-25", "testeemail.com",
+                "senhateste", false, 0L, 0L, 0L);
+
+        when(anfitriaoRepository.findById(1L)).thenReturn(Optional.of(anfitriaoTeste));
+
+        UsuarioDTO resultado = anfitriaoService.getuser(1L);
+
+        assertThat(resultado.nome()).isEqualTo("Teste");
+        assertThat(resultado.email()).isEqualTo("testeemail.com");
+    }
+
+    @Test
+    @DisplayName("Get Anfitriao Interno Retorno Negativo")
+    public void getAnfitriaoInternoRetornoNegativo() {
+        when(anfitriaoRepository.findById(-1L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> anfitriaoService.getuser(-1L)).isInstanceOf(UsuarioIDNaoEncontrado.class);
+        verify(anfitriaoRepository, times(1)).findById(-1L);
     }
 }
