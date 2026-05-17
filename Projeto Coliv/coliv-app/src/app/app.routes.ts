@@ -5,6 +5,7 @@ import { Cadastro } from './cadastro/cadastro';
 import { FormPreferencias } from './form-preferencias/form-preferencias';
 import { FeedAnfitriao } from './feed-anfitriao/feed-anfitriao';
 import { FeedColega } from './feed-colega/feed-colega';
+import { CriarAnuncio } from './criar-anuncio/criar-anuncio';
 
 
 export const routes: Routes = [
@@ -13,5 +14,6 @@ export const routes: Routes = [
   {path: 'cadastro', component: Cadastro},
   {path: 'preferencias', component: FormPreferencias},
   {path: 'feedanfitriao', component: FeedAnfitriao},
-  {path: 'feedcolega', component: FeedColega}
+  {path: 'feedcolega', component: FeedColega},
+  {path: 'criaranuncio', component: CriarAnuncio}
 ];
