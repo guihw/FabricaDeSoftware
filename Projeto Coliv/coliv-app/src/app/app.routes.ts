@@ -6,6 +6,7 @@ import { FormPreferencias } from './form-preferencias/form-preferencias';
 import { FeedAnfitriao } from './feed-anfitriao/feed-anfitriao';
 import { FeedColega } from './feed-colega/feed-colega';
 import { CriarAnuncio } from './criar-anuncio/criar-anuncio';
+import { Chat } from './chat/chat';
 
 
 export const routes: Routes = [
@@ -15,5 +16,6 @@ export const routes: Routes = [
   {path: 'preferencias', component: FormPreferencias},
   {path: 'feedanfitriao', component: FeedAnfitriao},
   {path: 'feedcolega', component: FeedColega},
-  {path: 'criaranuncio', component: CriarAnuncio}
+  {path: 'criaranuncio', component: CriarAnuncio},
+  {path: 'chat', component: Chat}
 ];
