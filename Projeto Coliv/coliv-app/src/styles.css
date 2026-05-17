@@ -30,6 +30,7 @@
   --color-tertiary-fixed-dim: #b9c8de;
   --color-on-tertiary-fixed: #0d1c2d;
   --color-on-tertiary-fixed-variant: #39485a;
+  --background-image-gradient-primary: linear-gradient(135deg, var(--color-primary), var(--color-primary-container));
 
   --color-surface: #f7f9fb;
   --color-surface-dim: #d8dadc;
