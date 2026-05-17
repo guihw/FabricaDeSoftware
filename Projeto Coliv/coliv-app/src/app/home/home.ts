@@ -1,9 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 
 @Component({
   selector: 'app-home',
-  imports: [],
+  imports: [TopNavbarComponent],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })
