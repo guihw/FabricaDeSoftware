@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterOutlet } from '@angular/router';
+import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 
 @Component({
   selector: 'app-cadastro',
-  imports: [RouterOutlet, ReactiveFormsModule],
+  imports: [RouterOutlet, ReactiveFormsModule, TopNavbarComponent],
   templateUrl: './cadastro.html',
   styleUrl: './cadastro.css',
 })

@@ -1,0 +1,159 @@
+
+<!-- TopAppBar (deixar Preferencias dinamico) -->
+<header class="sticky top-0 w-full z-50 bg-slate-50/70 dark:bg-slate-950/70 backdrop-blur-xl">
+<div class="flex items-center justify-between px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button routerLink="/cadastro" class="active:scale-95 transition-all duration-200 hover:opacity-80 transition-opacity">
+<span class="material-symbols-outlined text-[#1A2B4C] dark:text-slate-50">arrow_back</span>
+</button>
+<span class="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#1A2B4C] dark:text-slate-50">Preferências</span>
+</div>
+<div class="text-2xl font-black text-[#1A2B4C] dark:text-slate-50 tracking-tighter">Coliv</div>
+</div>
+</header>
+<main class="max-w-screen-xl mx-auto px-6 py-10 pb-32">
+<!-- Hero  -->
+<section class="mb-12">
+<h1 class="font-headline text-5xl md:text-7xl font-extrabold text-primary tracking-tight leading-[0.9] mb-4">
+    Encontre seu <br/> <span class="text-secondary-container [text-shadow:_2px_2px_0_#031636]">match ideal.</span>
+</h1>
+<p class="text-on-surface-variant text-lg max-w-md">O co-living é sobre pessoas. Defina seus hábitos para que possamos sugerir o lar perfeito.</p>
+</section>
+<!-- Bento Grid Form Layout -->
+<form class="grid grid-cols-1 md:grid-cols-12 gap-6">
+<!-- Preço -->
+<div class="md:col-span-8 bg-surface-container-lowest p-8 rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.03)] flex flex-col justify-between">
+<div>
+<h2 class="font-headline text-2xl font-bold mb-2">Faixa de Investimento</h2>
+<p class="text-on-surface-variant text-sm mb-8">Qual o valor mensal planejado para sua estadia?</p>
+</div>
+<div class="relative w-full py-10 px-2">
+<input class="custom-slider w-full h-1 bg-surface-variant rounded-full appearance-none outline-none" max="8000" min="800" step="100" type="range"/>
+<div class="flex justify-between mt-6 font-bold text-primary">
+<span>R$ 800</span>
+<div class="bg-primary-container text-white px-4 py-2 rounded-lg text-lg">R$ 2.400 - R$ 4.500</div>
+<span>R$ 8.000</span>
+</div>
+</div>
+</div>
+<!-- Localização -->
+<div class="md:col-span-4 bg-primary-container p-8 rounded-xl text-white relative overflow-hidden group">
+<div class="relative z-10">
+<h2 class="font-headline text-2xl font-bold mb-2">Localização</h2>
+<p class="text-on-primary-container text-sm mb-6">Onde a mágica acontece?</p>
+<div class="relative">
+<input class="w-full bg-white/10 border-none rounded-xl py-4 px-12 placeholder:text-white/40 focus:ring-2 focus:ring-secondary-container text-white" placeholder="Ex: Pinheiros, SP" type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-secondary-container">location_on</span>
+</div>
+</div>
+
+<div class="absolute -bottom-10 -right-10 w-40 h-40 bg-secondary-container/20 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-700"></div>
+</div>
+<!-- hábitos de sono-->
+<div class="md:col-span-4 bg-surface-container-low p-8 rounded-xl">
+<h2 class="font-headline text-2xl font-bold mb-6">Ritmo de Sono</h2>
+<div class="flex flex-wrap gap-3">
+<button class="px-6 py-3 rounded-full bg-white text-primary font-bold text-sm shadow-sm hover:bg-secondary-container transition-colors" type="button">Madrugador</button>
+<button class="px-6 py-3 rounded-full bg-secondary-container text-on-secondary-container font-bold text-sm" type="button">Noturno</button>
+<button class="px-6 py-3 rounded-full bg-white text-primary font-bold text-sm shadow-sm hover:bg-secondary-container transition-colors" type="button">Equilibrado</button>
+</div>
+<div class="mt-8 flex items-center gap-4 p-4 bg-white/50 rounded-xl">
+<span class="material-symbols-outlined text-primary">bedtime</span>
+<p class="text-xs text-on-surface-variant">Preferência por ambientes silenciosos após as 22h.</p>
+</div>
+</div>
+
+<div class="md:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+<!-- Sociabilidade -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-headline font-bold">Sociabilidade</h3>
+<span class="material-symbols-outlined text-secondary">groups</span>
+</div>
+<div class="space-y-4">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-6 h-6 rounded-md border-2 border-surface-variant flex items-center justify-center group-hover:border-secondary transition-colors">
+<div class="w-3 h-3 bg-secondary rounded-sm opacity-0 group-hover:opacity-20"></div>
+</div>
+<span class="text-sm font-medium">Amo jantares coletivos</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-6 h-6 rounded-md border-2 border-secondary bg-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xs">check</span>
+</div>
+<span class="text-sm font-medium">Equilíbrio é tudo</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-6 h-6 rounded-md border-2 border-surface-variant flex items-center justify-center group-hover:border-secondary transition-colors"></div>
+<span class="text-sm font-medium">Prefiro meu espaço</span>
+</label>
+</div>
+</div>
+<!-- manias de limpeza -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<h3 class="font-headline font-bold">Limpeza</h3>
+<span class="material-symbols-outlined text-secondary">cleaning_services</span>
+</div>
+<div class="space-y-4">
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-6 h-6 rounded-md border-2 border-surface-variant flex items-center justify-center group-hover:border-secondary transition-colors"></div>
+<span class="text-sm font-medium">Minimalista &amp; Impecável</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-6 h-6 rounded-md border-2 border-secondary bg-secondary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-xs">check</span>
+</div>
+<span class="text-sm font-medium">Organizado na medida</span>
+</label>
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="w-6 h-6 rounded-md border-2 border-surface-variant flex items-center justify-center group-hover:border-secondary transition-colors"></div>
+<span class="text-sm font-medium">Caos criativo (limpo)</span>
+</label>
+</div>
+</div>
+</div>
+<!-- Pets & trabalho -->
+<div class="md:col-span-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Pets -->
+<div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-secondary-container">
+<h3 class="font-headline font-bold flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-secondary">pets</span> Animais
+</h3>
+<div class="flex items-center justify-between p-3 bg-surface-container-low rounded-lg">
+<span class="text-sm font-medium">Tenho ou aceito pets</span>
+<div class="w-12 h-6 bg-secondary-container rounded-full relative cursor-pointer">
+<div class="absolute right-1 top-1 w-4 h-4 bg-secondary rounded-full"></div>
+</div>
+</div>
+</div>
+<!-- Hpabitos do Trabalho -->
+<div class="md:col-span-2 bg-white p-6 rounded-xl shadow-sm flex flex-col md:flex-row items-center gap-6">
+<div class="flex-shrink-0">
+<img alt="Work focus" class="w-20 h-20 rounded-full object-cover" data-alt="close-up of clean modern wooden desk with laptop and coffee cup in a brightly lit co-working space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuApw0gTwfRzDDzC_-ahm1CY5gjRI6x_5QeZomcpJPaq5iddPFsAgPMWDor1cyR8DKE6s2Dd3Lsb9savYL3indrP44a03MjuoghrcCLalniDmN4bYzeCGqTShHtkx2bpNJ0Z6yWZr1tNNLtp0csRbnqClQ7EbvH0I2VRh2HfgXvM7XUsKs1Ze0NNmtcoAk28vXOxvRfW6cj59Q2vrYor3DnHzKHYUgsDbiHm3rA_ScsfUlTFXbRQk-UQABTkMvf1fHknzgv8ZUVK36k"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-headline font-bold mb-2">Hábitos de Trabalho</h3>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-2 bg-surface-container-high rounded-full text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container transition-all" type="button">Home Office</button>
+<button class="px-4 py-2 bg-primary text-white rounded-full text-xs font-bold uppercase tracking-wider" type="button">Híbrido</button>
+<button class="px-4 py-2 bg-surface-container-high rounded-full text-xs font-bold uppercase tracking-wider text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container transition-all" type="button">Trabalho Externo</button>
+</div>
+</div>
+</div>
+</div>
+</form>
+
+<div class="fixed bottom-10 left-1/2 -translate-x-1/2 w-full max-w-md px-6 z-40">
+<button class="w-full bg-gradient-to-r from-primary to-primary-container text-white py-5 rounded-xl font-headline font-extrabold text-lg uppercase tracking-widest shadow-[0_12px_40px_rgba(3,22,54,0.3)] active:scale-95 transition-transform">
+    Salvar Preferências
+</button>
+</div>
+</main>
+
+
+<div class="fixed top-0 right-0 p-8 opacity-10 pointer-events-none hidden lg:block">
+<span class="material-symbols-outlined text-[200px] leading-none text-primary">diversity_3</span>
+</div>
+
+<router-outlet></router-outlet>

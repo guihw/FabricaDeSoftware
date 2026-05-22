@@ -7,7 +7,6 @@ public abstract class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(nullable = false, unique = true)
     private Long id;
     @Column(nullable = false)
     private String nome;
@@ -78,7 +77,7 @@ public abstract class Usuario {
         this.senha = senha;
     }
 
-    public boolean getPossuiPlano() {
+    public boolean isPossuiPlano() {
         return possuiPlano;
     }
 

@@ -1,0 +1,143 @@
+
+<!-- TopAppBar -->
+<app-top-navbar-component>
+<div class="flex items-center gap-6">
+<nav class="hidden md:flex items-center gap-8">
+<a class="text-slate-400 dark:text-slate-600 font-bold hover:opacity-80 transition-opacity" href="#">Início</a>
+<a class="text-slate-400 dark:text-slate-600 font-bold hover:opacity-80 transition-opacity" href="#">Chat</a>
+<a class="text-[#1A2B4C] dark:text-white font-bold hover:opacity-80 transition-opacity" href="#">Feed</a>
+<a class="text-slate-400 dark:text-slate-600 font-bold hover:opacity-80 transition-opacity" href="#">Perfil</a>
+</nav>
+<div class="w-10 h-10 rounded-full bg-surface-container-high overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional male host headshot in a bright modern office setting with warm natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCP1lB4Z70f2Sr1BRiSUbefp9SK8iCZv-v4mdcv9ij5E3T6UwbSbvKzOhx2v8-nIGejh9_4tG6gZ0YM7e-R3MOZgwN2kX8OcC196Ra5GugsvWYmULbfgABVVBMC5UBi90Wx1S3ZnKE7UApS8q7p6mGYyQs_MYq4e0OVTFSWTT6_9VlzM_XGrWSXrh1s5xqjs6KVXv_KIp7_VUZ8QZAahdSvwQt5uy6SrWdEdZQB6lbEKLGk089lW-z4BiKz14gry6em-XV8Xr1PF20"/>
+</div>
+</div>
+</app-top-navbar-component>
+
+<main class="max-w-7xl mx-auto px-6 pt-8">
+<!-- Hero Listing Overview -->
+<section class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
+<div class="md:col-span-8 bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.02)] flex flex-col md:flex-row">
+<div class="w-full md:w-2/5 relative">
+<img class="w-full h-full object-cover min-h-[250px]" data-alt="luxurious sunlit modern living room with scandinavian furniture and large windows overlooking city" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYvhibhWAZV14XBqxIOzUUk6dyEAgEJufY4l_eem_RoHeXIrtVq_X6V2OggRSPRBMWo6yXtCv4zGAC-YSpTZ9SwK8ujEAU7TwXnOQPaoTDpeNSRAOjU19el_9Gick7U-X7wxuIfQPLAaiE3n0mhbyQqNb55DsGFrcrouLqMnBMwNrWDTGqm7NVsZ7PwXOZ_lsavmyUiJnPBzjiIclDvTbDkeA5eaD_XLwQjP9qsDyBzsKD3qiil_GFSDUuBcof4-H-HGeNv6ibbxg"/>
+<div class="absolute top-4 left-4 bg-primary text-on-primary px-3 py-1 rounded-full text-xs font-bold tracking-widest uppercase">Ativo</div>
+</div>
+<div class="p-8 flex-1 flex flex-col justify-center">
+<h2 class="text-3xl font-extrabold text-primary mb-2 leading-tight tracking-tight">Vila Madalena Premium Sanctuary</h2>
+<p class="text-on-surface-variant mb-6 text-sm">Rua Harmonia, 1250 • Suíte Leste disponível</p>
+<div class="flex gap-4 items-center">
+<div class="bg-surface-container-low px-4 py-2 rounded-xl">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Interessados</p>
+<p class="text-xl font-black text-primary">24</p>
+</div>
+<div class="bg-surface-container-low px-4 py-2 rounded-xl">
+<p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Visitas</p>
+<p class="text-xl font-black text-primary">08</p>
+</div>
+<div class="bg-secondary-container px-4 py-2 rounded-xl">
+<p class="text-[10px] uppercase tracking-widest text-on-secondary-container font-bold">Matches</p>
+<p class="text-xl font-black text-on-secondary-container">05</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Mini Stats/Management CTA -->
+<div class="md:col-span-4 bg-primary-container rounded-xl p-8 flex flex-col justify-between relative overflow-hidden">
+<div class="relative z-10">
+<h3 class="text-white text-xl font-bold mb-2">Próxima Visita</h3>
+<p class="text-on-primary-container text-sm mb-6">Amanhã, às 14:00 com Bruno Silva</p>
+<button class="bg-secondary-container text-on-secondary-container w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">Ver Agenda Completa</button>
+</div>
+<!-- Abstract visual element for high-end feel -->
+<div class="absolute -right-10 -bottom-10 w-40 h-40 bg-secondary opacity-20 rounded-full blur-3xl"></div>
+</div>
+</section>
+<!-- Roommate Matches Section -->
+<section>
+<div class="flex items-end justify-between mb-8">
+<div>
+<span class="text-secondary font-bold text-xs uppercase tracking-[0.2em] mb-2 block">Algoritmo Coliv</span>
+<h2 class="text-4xl font-extrabold tracking-tighter text-primary">Colegas Compatíveis</h2>
+</div>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors font-semibold text-sm">
+                    Filtros Avançados <span class="material-symbols-outlined text-sm">tune</span>
+</button>
+</div>
+<!-- Matches Bento Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+<app-colegas-card-component></app-colegas-card-component>
+
+<!-- Profile Card 2 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-[0_10px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] transition-all duration-500">
+<div class="relative rounded-xl overflow-hidden mb-5 aspect-[4/5]">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="young professional man in high-end casual attire smiling in a modern architectural space with clean lines" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDB-06o2w6IHO8YAbyNkt6FVU7eFqo3cFPJ_eV7wtZdZyuyiHiYv6rZwc9pp0FySoY0hWdebJu1d143kazLPjbXMQj99icQ8GUtsGYLhvN_0no_Bx2M3BIYlBZK_0N2Jy0ztXRW7al2-Doyb_A2jRnJf5KKHhLejBl2dZg495f7FbPpDCF_p-rX66EMiHGnxqKZMdAvvAw8oxQNHcDUwJ1UxlPjeTKAStWk8i8FMpQCa6h4xPUv6MXSbgzzbOaq2DRufZkyJstJUCs"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1">
+<span class="text-primary font-black text-sm">82%</span>
+<span class="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Match</span>
+</div>
+</div>
+<div class="px-2">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-primary">Lucas Rocha, 29</h3>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Dev</span>
+</div>
+<p class="text-on-surface-variant text-sm line-clamp-2 mb-6 font-medium">"Trabalho em tech, gosto de cozinhar nos fins de semana e sou bem organizado com as áreas comuns."</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-surface-container-high py-3 rounded-xl flex items-center justify-center active:scale-95 transition-all">
+<span class="material-symbols-outlined text-outline">close</span>
+</button>
+<button class="flex-[3] bg-gradient-to-br from-primary to-primary-container text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                Aceitar <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Profile Card 3 -->
+<div class="group bg-surface-container-lowest rounded-xl p-4 shadow-[0_10px_30px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] transition-all duration-500">
+<div class="relative rounded-xl overflow-hidden mb-5 aspect-[4/5]">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="stylish young woman in a minimal loft apartment with large plants and industrial aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNFlt28egcXdZCf8_xOeK4-ezFWGdeImx1IYEHJAbC5aUZeDT14RtDzHG9r_s8q6otfXNbEh6i6_6Fj0BpRyxvBbSSxs1ZsxwDy6CPpwGqgO6kWC7QQ2hHT2ffYSo2FQSEIingw6Zt6FIomKXU0eQRmPu7ssivmnqcl98UNhU2sutZYxC7lm1AdGdbItnUtl881QrkwbLHlX4ckH30fLMxlrQDBSh4r-_HdNH2CfMvJpi4SW8DFg7Uf4pF0TgO-X2jKLgDR14J8AE"/>
+<div class="absolute top-4 right-4 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-1">
+<span class="text-primary font-black text-sm">75%</span>
+<span class="text-[8px] font-bold text-on-surface-variant uppercase tracking-tighter">Match</span>
+</div>
+</div>
+<div class="px-2">
+<div class="flex justify-between items-start mb-2">
+<h3 class="text-xl font-bold text-primary">Ana Clara, 24</h3>
+<span class="bg-secondary-fixed text-on-secondary-fixed text-[10px] px-2 py-0.5 rounded-full font-bold uppercase">Arquiteta</span>
+</div>
+<p class="text-on-surface-variant text-sm line-clamp-2 mb-6 font-medium">"Recém-chegada na cidade. Amo design de interiores e procuro um lugar que valorize a estética."</p>
+<div class="flex gap-3">
+<button class="flex-1 bg-surface-container-high py-3 rounded-xl flex items-center justify-center active:scale-95 transition-all">
+<span class="material-symbols-outlined text-outline">close</span>
+</button>
+<button class="flex-[3] bg-gradient-to-br from-primary to-primary-container text-white py-3 rounded-xl font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 active:scale-95 transition-all">
+                                Aceitar <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-8 pt-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl z-50 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.04)] border-t border-slate-100/10">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 active:scale-90 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Início</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 active:scale-90 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#79F7EA] text-[#007169] rounded-2xl px-5 py-2 active:scale-90 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_balance_wallet</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Gestão</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 active:scale-90 transition-transform duration-300 ease-out" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Perfil</span>
+</a>
+</nav>
+<router-outlet></router-outlet>
