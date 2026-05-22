@@ -12,6 +12,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -30,22 +31,22 @@ class PreferenciasAnfitriaoService implements IPreferenciasAnfitriao {
         return par.findById(id).orElseThrow(() -> new PreferenciaAnfitriaoIDNaoEncontrado(id));
     }
 
-    public PreferenciasAnfitriao criarPreferencia(Long userId, PreferenciasAnfitriaoDTO preferenciasDTO) {
+    public PreferenciasAnfitriaoDTO criarPreferencia(Long userId, PreferenciasAnfitriaoDTO preferenciasDTO) {
         PreferenciasAnfitriao preferencias = new PreferenciasAnfitriao(preferenciasDTO.presencaAnimais(),
-                preferenciasDTO.horariosParaVisita(), preferenciasDTO.politicaDeLimpeza(),
+                LocalTime.parse(preferenciasDTO.horariosParaVisita()), preferenciasDTO.politicaDeLimpeza(),
                 preferenciasDTO.regrasDaCasa(), preferenciasDTO.perfilColegaDesejado(), userId);
 
-        preferencias = par.save(preferencias);
+        par.save(preferencias);
 
-        return preferencias;
+        return preferenciasDTO;
     }
 
-    public PreferenciasAnfitriao editarPreferencias(Long id, PreferenciasAnfitriaoDTO preferenciasDTO) {
+    public PreferenciasAnfitriaoDTO editarPreferencias(Long id, PreferenciasAnfitriaoDTO preferenciasDTO) {
         PreferenciasAnfitriao original = par.findById(id).orElseThrow(() -> new PreferenciaAnfitriaoIDNaoEncontrado(id));
 
         original.setPresencaAnimais(preferenciasDTO.presencaAnimais());
         if (preferenciasDTO.horariosParaVisita() != null) {
-            original.setHorariosParaVisita(preferenciasDTO.horariosParaVisita());
+            original.setHorariosParaVisita(LocalTime.parse(preferenciasDTO.horariosParaVisita()));
         }
         if (preferenciasDTO.politicaDeLimpeza() != null && !preferenciasDTO.politicaDeLimpeza().isBlank()) {
             original.setPoliticaDeLimpeza(preferenciasDTO.politicaDeLimpeza());
@@ -57,7 +58,9 @@ class PreferenciasAnfitriaoService implements IPreferenciasAnfitriao {
             original.setPerfilColegaDesejado(preferenciasDTO.perfilColegaDesejado());
         }
 
-        return par.save(original);
+        par.save(original);
+
+        return preferenciasDTO;
     }
 
     public void excluir(Long id) {
@@ -70,8 +73,8 @@ class PreferenciasAnfitriaoService implements IPreferenciasAnfitriao {
         PreferenciasAnfitriao pa = par.findByAnfitriaoId(anfitriaoId).orElseThrow(() -> new
                 PreferenciaNaoEncontradaUsandoReferencia(anfitriaoId));
 
-        return new PreferenciasAnfitriaoDTO(pa.getPresencaAnimais(),
-                pa.getHorariosParaVisita(), pa.getPoliticaDeLimpeza(), pa.getRegrasDaCasa(), pa.getPerfilColegaDesejado());
+        return new PreferenciasAnfitriaoDTO(pa.getPresencaAnimais(), pa.getHorariosParaVisita().toString(),
+                pa.getPoliticaDeLimpeza(), pa.getRegrasDaCasa(), pa.getPerfilColegaDesejado());
     }
 
     @EventListener

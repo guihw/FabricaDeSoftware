@@ -15,7 +15,7 @@ class PreferenciasAnfitriao {
     @Column(name = "presenca_animais")
     private boolean presencaAnimais;
     @Column(name = "horarios_visita")
-    private String horariosParaVisita;
+    private LocalTime horariosParaVisita;
     @Column(name = "politica_limpeza")
     private String politicaDeLimpeza;
     @Column(name = "regras_casa")
@@ -27,7 +27,7 @@ class PreferenciasAnfitriao {
 
     PreferenciasAnfitriao() {}
 
-    public PreferenciasAnfitriao(boolean presencaAnimais, String horariosParaVisita, String politicaDeLimpeza,
+    public PreferenciasAnfitriao(boolean presencaAnimais, LocalTime horariosParaVisita, String politicaDeLimpeza,
                                  String regrasDaCasa, String perfilColegaDesejado) {
         this.presencaAnimais = presencaAnimais;
         this.horariosParaVisita = horariosParaVisita;
@@ -36,7 +36,7 @@ class PreferenciasAnfitriao {
         this.perfilColegaDesejado = perfilColegaDesejado;
     }
 
-    public PreferenciasAnfitriao(boolean presencaAnimais, String horariosParaVisita, String politicaDeLimpeza,
+    public PreferenciasAnfitriao(boolean presencaAnimais, LocalTime horariosParaVisita, String politicaDeLimpeza,
                                  String regrasDaCasa, String perfilColegaDesejado, Long anfitriaoId) {
         this.presencaAnimais = presencaAnimais;
         this.horariosParaVisita = horariosParaVisita;
@@ -62,11 +62,11 @@ class PreferenciasAnfitriao {
         this.presencaAnimais = presencaAnimais;
     }
 
-    public String getHorariosParaVisita() {
+    public LocalTime getHorariosParaVisita() {
         return horariosParaVisita;
     }
 
-    public void setHorariosParaVisita(String horariosParaVisita) {
+    public void setHorariosParaVisita(LocalTime horariosParaVisita) {
         this.horariosParaVisita = horariosParaVisita;
     }
 

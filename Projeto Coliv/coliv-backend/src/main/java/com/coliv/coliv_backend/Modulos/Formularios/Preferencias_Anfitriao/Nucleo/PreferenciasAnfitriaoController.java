@@ -25,12 +25,12 @@ class PreferenciasAnfitriaoController {
     }
 
     @PostMapping("{userId}/nova-preferencia")
-    public PreferenciasAnfitriao criarPreferencia(@PathVariable Long userId, @RequestBody PreferenciasAnfitriaoDTO preferenciasAnfitriaoDTO) {
+    public PreferenciasAnfitriaoDTO criarPreferencia(@PathVariable Long userId, @RequestBody PreferenciasAnfitriaoDTO preferenciasAnfitriaoDTO) {
         return pas.criarPreferencia(userId, preferenciasAnfitriaoDTO);
     }
 
     @PutMapping("/editar/{anfitriaoId}")
-    public PreferenciasAnfitriao editarPreferencias(@PathVariable Long anfitriaoId, @RequestBody PreferenciasAnfitriaoDTO preferenciasDTO) {
+    public PreferenciasAnfitriaoDTO editarPreferencias(@PathVariable Long anfitriaoId, @RequestBody PreferenciasAnfitriaoDTO preferenciasDTO) {
         return pas.editarPreferencias(anfitriaoId, preferenciasDTO);
     }
 

@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -37,7 +38,7 @@ class PreferenciasAnfitriaoServiceTest {
     @DisplayName("Buscar Preferencia Anfitriao Retorno Positivo")
     public void buscarPreferenciaAnfitriaoRetornoPositivo() {
         Long id = 1L;
-        PreferenciasAnfitriao pa = new PreferenciasAnfitriao(true, "10:00",
+        PreferenciasAnfitriao pa = new PreferenciasAnfitriao(true, LocalTime.of(10, 0),
                 "Não sujo", "Livre", "Comunicativo");
         pa.setId(id);
 
@@ -45,7 +46,7 @@ class PreferenciasAnfitriaoServiceTest {
 
         PreferenciasAnfitriao preferencia = pas.buscarPorId(id);
 
-        assertThat(preferencia.getHorariosParaVisita()).isEqualTo("10:00");
+        assertThat(preferencia.getHorariosParaVisita().toString()).isEqualTo("10:00");
         assertThat(preferencia.getPerfilColegaDesejado()).isEqualTo("Comunicativo");
     }
 
@@ -53,8 +54,7 @@ class PreferenciasAnfitriaoServiceTest {
     @DisplayName("Buscar Preferencia Anfitriao Retorno Negativo")
     public void buscarPreferenciaAnfitriaoRetornoNegativo() {
         Long id = -1L;
-        PreferenciasAnfitriao pa = new PreferenciasAnfitriao(true, "10:00",
-                "Não sujo", "Livre", "Comunicativo");
+        PreferenciasAnfitriao pa = new PreferenciasAnfitriao();
         pa.setId(id);
 
         when(par.findById(id)).thenReturn(Optional.empty());
@@ -72,18 +72,17 @@ class PreferenciasAnfitriaoServiceTest {
         PreferenciasAnfitriaoDTO dto = new PreferenciasAnfitriaoDTO(false, "20:30",
                 "Limpeza", "Agendar visitas com antecedencia", "Silencioso");
 
-        PreferenciasAnfitriao salvo = new PreferenciasAnfitriao(false, "20:30",
+        PreferenciasAnfitriao salvo = new PreferenciasAnfitriao(false, LocalTime.of(20, 30),
                 "Limpeza", "Agendar visitas com antecedencia", "Silencioso");
         salvo.setId(id);
 
         when(par.save(any())).thenReturn(salvo);
 
-        PreferenciasAnfitriao preferencias = pas.criarPreferencia(userId, dto);
+        PreferenciasAnfitriaoDTO preferencias = pas.criarPreferencia(userId, dto);
         verify(par, times(1)).save(paCaptor.capture());
         PreferenciasAnfitriao capturado = paCaptor.getValue();
 
         assertThat(capturado).isNotNull();
-        assertThat(preferencias.getId()).isEqualTo(id);
         assertThat(capturado.getId()).isNull();
     }
 
@@ -91,10 +90,10 @@ class PreferenciasAnfitriaoServiceTest {
     @DisplayName("Editar Preferencia Anfitriao Teste com Retorno Positivo")
     public void editarPreferenciaAnfitriaoTesteRetornoPositivo () {
         Long id = 1L;
-        PreferenciasAnfitriao preferencia = new PreferenciasAnfitriao(false, "20:30",
+        PreferenciasAnfitriao preferencia = new PreferenciasAnfitriao(false, LocalTime.of(20, 30),
                 "Limpeza", "Agendar visitas com antecedencia", "Silencioso");
         PreferenciasAnfitriao preferenciaEditada = new PreferenciasAnfitriao(false,
-                "20:30", "Limpeza", "Agendar visitas é opcional",
+                LocalTime.of(20, 30), "Limpeza", "Agendar visitas é opcional",
                 "Trabalhador");
         PreferenciasAnfitriaoDTO dto = new PreferenciasAnfitriaoDTO(false,
                 "20:30", "Limpeza", "Agendar visitas é opcional",
@@ -105,15 +104,14 @@ class PreferenciasAnfitriaoServiceTest {
         when(par.findById(id)).thenReturn(Optional.of(preferencia));
         when(par.save(any())).thenReturn(preferenciaEditada);
 
-        PreferenciasAnfitriao update = pas.editarPreferencias(id, dto);
+        PreferenciasAnfitriaoDTO update = pas.editarPreferencias(id, dto);
         verify(par, times(1)).findById(id);
         verify(par, times(1)).save(paCaptor.capture());
         PreferenciasAnfitriao capturado = paCaptor.getValue();
 
         assertThat(update).isNotNull();
-        assertThat(update.getId()).isEqualTo(preferencia.getId());
-        assertThat(capturado.getRegrasDaCasa()).isEqualTo(update.getRegrasDaCasa());
-        assertThat(update.getPerfilColegaDesejado()).isEqualTo("Trabalhador");
+        assertThat(capturado.getRegrasDaCasa()).isEqualTo(update.regrasDaCasa());
+        assertThat(update.perfilColegaDesejado()).isEqualTo("Trabalhador");
     }
 
     @Test
@@ -160,7 +158,7 @@ class PreferenciasAnfitriaoServiceTest {
     @DisplayName("Get Preferencia Anfitriao Interno Retorno Positivo")
     public void getPreferenciaAnfitriaoInternoRetornoPositivo() {
         Long id = 1L, aid = 2L;
-        PreferenciasAnfitriao preferencias = new PreferenciasAnfitriao(false, "20:30",
+        PreferenciasAnfitriao preferencias = new PreferenciasAnfitriao(false, LocalTime.of(20, 30),
                 "Limpeza", "Agendar visitas com antecedência", "Silencioso");
         preferencias.setId(id);
         preferencias.setAnfitriaoId(aid);
