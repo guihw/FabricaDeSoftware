@@ -1,21 +1,33 @@
 package com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Nucleo;
 
-import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoDTO;
+import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoRequestDTO;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoIDNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoNaoEncontradoUsandoReferencia;
+import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoResponseDTO;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelDTO;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.IDadosImovel;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 class CardAnfitriaoService {
 
     @Autowired
     private CardAnfitriaoRepository car;
+    @Autowired
+    private IAnfitriao iAnfitriao;
+    @Autowired
+    private IDadosImovel iDadosImovel;
 
     public List<CardAnfitriao> listar() {
         return car.findAll();
@@ -25,23 +37,55 @@ class CardAnfitriaoService {
         return car.findById(id).orElseThrow(() -> new CardAnfitriaoIDNaoEncontrado(id));
     }
 
-    public CardAnfitriao criarCardAnfitriao(Long anfitriaoId, CardAnfitriaoDTO dto) {
-        CardAnfitriao cardAnfitriao = new CardAnfitriao(dto.classificacao(), dto.precoMensal());
-        cardAnfitriao.setAnfitriaoId(anfitriaoId);
+    public CardAnfitriaoResponseDTO getCardCompleteInfo(Long id) {
+        UsuarioDTO usuarioDTO = iAnfitriao.obterUsuario(id);
+        DadosImovelDTO imovelDTO = iDadosImovel.getDadosImovel(id);
+        CardAnfitriao card = car.findByAnfitriaoId(id).
+                orElseThrow(() -> new CardAnfitriaoNaoEncontradoUsandoReferencia(id));
 
-        cardAnfitriao = car.save(cardAnfitriao);
-
-        return cardAnfitriao;
+        return new CardAnfitriaoResponseDTO(usuarioDTO.nome(), usuarioDTO.email(), imovelDTO.descricao(),
+                imovelDTO.localizacao(), imovelDTO.quartos(), card.getClassificacao(),
+                card.getPrecoMensal(), card.getArquivos());
     }
 
-    public CardAnfitriao editarCardAnfitriao(Long anfitriaoId, CardAnfitriaoDTO dto) {
+    public List<CardAnfitriaoResponseDTO> getCardCompleteInfoList() {
+        List<UsuarioDTO> usuario = iAnfitriao.obterListaDeUsuarios();
+        List<DadosImovelDTO> imovel = iDadosImovel.obterListaDeDados();
+        List<CardAnfitriao> cards = car.findAll();
+
+        Map<Long, UsuarioDTO> usuarioMap = usuario.stream().collect(
+                Collectors.toMap(UsuarioDTO::id, user -> user));
+        Map<Long, DadosImovelDTO> imovelMap = imovel.stream().collect(
+                Collectors.toMap(DadosImovelDTO::anfitriaoId, dados -> dados));
+
+        return cards.stream().map(card -> {
+            UsuarioDTO usuarioDTO = usuarioMap.get(card.getAnfitriaoId());
+            DadosImovelDTO imovelDTO = imovelMap.get(card.getAnfitriaoId());
+
+            return new CardAnfitriaoResponseDTO(usuarioDTO.nome(), usuarioDTO.email(), imovelDTO.descricao(),
+                    imovelDTO.localizacao(), imovelDTO.quartos(), card.getClassificacao(),
+                    card.getPrecoMensal(), card.getArquivos());
+        }).toList();
+    }
+
+    public CardAnfitriaoRequestDTO criarCardAnfitriao(Long anfitriaoId, CardAnfitriaoRequestDTO dto) {
+        CardAnfitriao cardAnfitriao = new CardAnfitriao(new BigDecimal(dto.precoMensal()));
+        cardAnfitriao.setAnfitriaoId(anfitriaoId);
+
+        car.save(cardAnfitriao);
+
+        return dto;
+    }
+
+    public CardAnfitriaoRequestDTO editarCardAnfitriao(Long anfitriaoId, CardAnfitriaoRequestDTO dto) {
         CardAnfitriao cardAnfitriao = car.findByAnfitriaoId(anfitriaoId).orElseThrow(() -> new
                 CardAnfitriaoNaoEncontradoUsandoReferencia(anfitriaoId));
 
-        cardAnfitriao.setClassificacao(dto.classificacao());
-        cardAnfitriao.setPrecoMensal(dto.precoMensal());
+        cardAnfitriao.setPrecoMensal(new BigDecimal(dto.precoMensal()));
 
-        return car.save(cardAnfitriao);
+        car.save(cardAnfitriao);
+
+        return dto;
     }
 
     public void excluir(Long id) {

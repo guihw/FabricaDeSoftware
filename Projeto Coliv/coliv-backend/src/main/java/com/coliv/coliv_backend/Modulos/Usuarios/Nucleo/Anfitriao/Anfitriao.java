@@ -10,11 +10,11 @@ class Anfitriao extends Usuario {
 
     public Anfitriao () {}
 
-    public Anfitriao(String nome, String cpf, String email, String senha, Long fotoPerfil) {
-        super(nome, cpf, email, senha, fotoPerfil);
+    public Anfitriao(String nome, String cpf, String email, String senha) {
+        super(nome, cpf, email, senha);
     }
 
-    public Anfitriao(Long id, String nome, String cpf, String email, String senha, boolean possuiPlano, Long fotoPerfil) {
-        super(id, nome, cpf, email, senha, possuiPlano, fotoPerfil);
+    public Anfitriao(Long id, String nome, String cpf, String email, String senha, boolean possuiPlano) {
+        super(id, nome, cpf, email, senha, possuiPlano);
     }
 }

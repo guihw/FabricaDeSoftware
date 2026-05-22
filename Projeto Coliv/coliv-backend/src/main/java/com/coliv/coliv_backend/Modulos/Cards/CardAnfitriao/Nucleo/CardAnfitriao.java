@@ -2,6 +2,7 @@ package com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Nucleo;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -13,15 +14,15 @@ class CardAnfitriao {
     private Long id;
     private Double classificacao;
     @Column(name = "preco_mensal", nullable = false)
-    private Double precoMensal = 0.00;
+    private BigDecimal precoMensal = BigDecimal.ZERO;
+    @Column(name = "lista_arquivos_id")
     private List<Long> arquivos;
     @Column(name = "anfitriao_id")
     private Long anfitriaoId;
 
     CardAnfitriao () {}
 
-    public CardAnfitriao(Double classificacao, Double precoMensal) {
-        this.classificacao = classificacao;
+    public CardAnfitriao(BigDecimal precoMensal) {
         this.precoMensal = precoMensal;
     }
 
@@ -41,11 +42,11 @@ class CardAnfitriao {
         this.classificacao = classificacao;
     }
 
-    public Double getPrecoMensal() {
+    public BigDecimal getPrecoMensal() {
         return precoMensal;
     }
 
-    public void setPrecoMensal(Double precoMensal) {
+    public void setPrecoMensal(BigDecimal precoMensal) {
         this.precoMensal = precoMensal;
     }
 

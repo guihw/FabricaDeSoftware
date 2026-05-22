@@ -1,10 +1,17 @@
 package com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Nucleo;
 
-import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoDTO;
+import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoRequestDTO;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoIDNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoNaoEncontradoUsandoReferencia;
+import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoResponseDTO;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelDTO;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelNaoEncontradoUsandoReferencia;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.IDadosImovel;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,11 +21,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,6 +33,10 @@ class CardAnfitriaoServiceTest {
 
     @Mock
     private CardAnfitriaoRepository car;
+    @Mock
+    private IAnfitriao iAnfitriao;
+    @Mock
+    private IDadosImovel iDadosImovel;
 
     @InjectMocks
     private CardAnfitriaoService cas;
@@ -37,7 +48,7 @@ class CardAnfitriaoServiceTest {
     @DisplayName("Buscar Card de Anfitriao Retorno Positivo")
     public void buscarCardAnfitriaoRetornoPositivo() {
         Long id = 1L;
-        CardAnfitriao card = new CardAnfitriao(5D, 512D);
+        CardAnfitriao card = new CardAnfitriao(new BigDecimal("512.00"));
         card.setId(id);
 
         when(car.findById(id)).thenReturn(Optional.of(card));
@@ -61,33 +72,101 @@ class CardAnfitriaoServiceTest {
     }
 
     @Test
+    @DisplayName("Obter Informacao Card Anfitriao Retorno Positivo")
+    public void obterInformacaoCardAnfitriaoRetornoPositivo () {
+        Long id = 1L;
+        UsuarioDTO usuario = new UsuarioDTO(id, "Teste", "teste1email@email.com");
+        DadosImovelDTO dados = new DadosImovelDTO(id, "Descricao", "Localizacao", 3);
+        CardAnfitriao card = new CardAnfitriao(new BigDecimal("64.00"));
+
+        when(iAnfitriao.obterUsuario(id)).thenReturn(usuario);
+        when(iDadosImovel.getDadosImovel(id)).thenReturn(dados);
+        when(car.findByAnfitriaoId(id)).thenReturn(Optional.of(card));
+
+        CardAnfitriaoResponseDTO dto = cas.getCardCompleteInfo(id);
+        verify(iAnfitriao, times(1)).obterUsuario(id);
+        verify(iDadosImovel, times(1)).getDadosImovel(id);
+        verify(car, times(1)).findByAnfitriaoId(id);
+
+        assertThat(dto).isNotNull();
+        assertThat(dto.descricao()).isEqualTo(dados.descricao());
+        assertThat(dto.nome()).isEqualTo(usuario.nome());
+        assertThat(dto.precoMensal()).isEqualTo(card.getPrecoMensal());
+    }
+
+    @Test
+    @DisplayName("Obter Informacao Card Anfitriao Retorno Negativo 1")
+    public void obterInformacaoCardAnfitriaoRetornoNegativo1 () {
+        Long id = -1L;
+
+        when(iAnfitriao.obterUsuario(id)).thenThrow(new UsuarioIDNaoEncontrado(id));
+
+        assertThatThrownBy(() -> cas.getCardCompleteInfo(id)).isInstanceOf(UsuarioIDNaoEncontrado.class);
+        verify(iAnfitriao, times(1)).obterUsuario(id);
+        verify(iDadosImovel, never()).getDadosImovel(id);
+        verify(car, never()).findByAnfitriaoId(id);
+    }
+
+    @Test
+    @DisplayName("Obter Informacao Card Anfitriao Retorno Negativo 2")
+    public void obterInformacaoCardAnfitriaoRetornoNegativo2 () {
+        Long id = -1L;
+        UsuarioDTO usuario = new UsuarioDTO(id, "Teste", "teste1email@email.com");
+
+        when(iAnfitriao.obterUsuario(id)).thenReturn(usuario);
+        when(iDadosImovel.getDadosImovel(id)).thenThrow(new DadosImovelNaoEncontradoUsandoReferencia(id));
+
+        assertThatThrownBy(() -> cas.getCardCompleteInfo(id)).isInstanceOf(
+                DadosImovelNaoEncontradoUsandoReferencia.class);
+        verify(iAnfitriao, times(1)).obterUsuario(id);
+        verify(iDadosImovel, times(1)).getDadosImovel(id);
+        verify(car, never()).findByAnfitriaoId(id);
+    }
+
+    @Test
+    @DisplayName("Obter Informacao Card Anfitriao Retorno Negativo 3")
+    public void obterInformacaoCardAnfitriaoRetornoNegativo3 () {
+        Long id = -1L;
+        UsuarioDTO usuario = new UsuarioDTO(id, "Teste", "teste1email@email.com");
+        DadosImovelDTO dados = new DadosImovelDTO(id, "Descricao", "Localizacao", 3);
+
+        when(iAnfitriao.obterUsuario(id)).thenReturn(usuario);
+        when(iDadosImovel.getDadosImovel(id)).thenReturn(dados);
+        when(car.findByAnfitriaoId(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> cas.getCardCompleteInfo(id)).isInstanceOf(
+                CardAnfitriaoNaoEncontradoUsandoReferencia.class);
+        verify(iAnfitriao, times(1)).obterUsuario(id);
+        verify(iDadosImovel, times(1)).getDadosImovel(id);
+        verify(car, times(1)).findByAnfitriaoId(id);
+    }
+
+    @Test
     @DisplayName("Criar Card de Anfitriao")
     public void criarCardAnfitriao() {
         Long id = 1L;
-        CardAnfitriaoDTO dto = new CardAnfitriaoDTO(5D, 512D);
-        CardAnfitriao salvo = new CardAnfitriao(5D, 512D);
+        CardAnfitriaoRequestDTO dto = new CardAnfitriaoRequestDTO("512.00");
+        CardAnfitriao salvo = new CardAnfitriao(new BigDecimal("512.00"));
         salvo.setId(id);
         salvo.setAnfitriaoId(id + 1L);
 
         when(car.save(any())).thenReturn(salvo);
 
-        CardAnfitriao retorno = cas.criarCardAnfitriao(id + 1L, dto);
+        CardAnfitriaoRequestDTO retorno = cas.criarCardAnfitriao(id + 1L, dto);
         verify(car, times(1)).save(caCaptor.capture());
         CardAnfitriao captura = caCaptor.getValue();
 
         assertThat(retorno).isNotNull();
         assertThat(captura.getId()).isNull();
-        assertThat(retorno.getId()).isEqualTo(salvo.getId());
-        assertThat(retorno.getAnfitriaoId()).isEqualTo(id + 1L);
     }
 
     @Test
     @DisplayName("Editar Card de Anfitriao Teste com Retorno Positivo")
     public void editarCardAnfitriaoTesteRetornoPositivo() {
         Long id = 1L, aid = 2L;
-        CardAnfitriaoDTO dto = new CardAnfitriaoDTO(5D, 512D);
-        CardAnfitriao card = new CardAnfitriao(2.5D, 256D);
-        CardAnfitriao salvo = new CardAnfitriao(5D, 512D);
+        CardAnfitriaoRequestDTO dto = new CardAnfitriaoRequestDTO("512.00");
+        CardAnfitriao card = new CardAnfitriao(new BigDecimal("256.00"));
+        CardAnfitriao salvo = new CardAnfitriao(new BigDecimal("512.00"));
         card.setId(id);
         card.setAnfitriaoId(aid);
         salvo.setId(id);
@@ -96,22 +175,21 @@ class CardAnfitriaoServiceTest {
         when(car.findByAnfitriaoId(aid)).thenReturn(Optional.of(card));
         when(car.save(any())).thenReturn(salvo);
 
-        CardAnfitriao retorno = cas.editarCardAnfitriao(aid, dto);
+        CardAnfitriaoRequestDTO retorno = cas.editarCardAnfitriao(aid, dto);
         verify(car, times(1)).findByAnfitriaoId(aid);
         verify(car, times(1)).save(caCaptor.capture());
         CardAnfitriao captura = caCaptor.getValue();
 
         assertThat(retorno).isNotNull();
-        assertThat(retorno.getId()).isEqualTo(card.getId());
-        assertThat(retorno.getAnfitriaoId()).isEqualTo(aid);
-        assertThat(retorno.getPrecoMensal()).isEqualTo(512D);
+        assertThat(captura).isNotNull();
+        assertThat(retorno.precoMensal()).isEqualTo("512.00");
     }
 
     @Test
     @DisplayName("Editar Card de Anfitriao Teste com Retorno Negativo")
     public void editarCardAnfitriaoTesteRetornoNegativo() {
         Long aid = -2L;
-        CardAnfitriaoDTO dto = new CardAnfitriaoDTO(5D, 512D);
+        CardAnfitriaoRequestDTO dto = new CardAnfitriaoRequestDTO("512.00");
 
         when(car.findByAnfitriaoId(aid)).thenReturn(Optional.empty());
 
@@ -155,7 +233,7 @@ class CardAnfitriaoServiceTest {
         UsuarioAnfitriaoCriado evento = new UsuarioAnfitriaoCriado(aid);
         card.setId(aid);
         card.setAnfitriaoId(aid);
-        card.setPrecoMensal(128D);
+        card.setPrecoMensal(new BigDecimal("128.00"));
 
         when(car.save(any(CardAnfitriao.class))).thenReturn(card);
 
@@ -175,7 +253,7 @@ class CardAnfitriaoServiceTest {
         AnfitriaoExcluido evento = new AnfitriaoExcluido(aid);
         card.setId(aid);
         card.setAnfitriaoId(aid);
-        card.setPrecoMensal(128D);
+        card.setPrecoMensal(new BigDecimal("128.00"));
 
         when(car.findByAnfitriaoId(aid)).thenReturn(Optional.of(card));
 

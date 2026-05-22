@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Nucleo;
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelDTO;
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelIDNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelNaoEncontradoUsandoReferencia;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelRequestDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
 import org.junit.jupiter.api.DisplayName;
@@ -63,26 +64,28 @@ class DadosImovelServiceTest {
     @DisplayName("Criar Dados do Imovel")
     public void criarDadosImovel() {
         Long id = 1L;
-        DadosImovelDTO dto = new DadosImovelDTO("Imóvel no centro da cidade", "Rua xyz", 3);
+        DadosImovelRequestDTO dto = new DadosImovelRequestDTO( "Imóvel no centro da cidade",
+                "Rua xyz", 3);
         DadosImovel salvo = new DadosImovel("Imóvel no centro da cidade", "Rua xyz", 3);
         salvo.setId(id);
 
         when(dir.save(any())).thenReturn(salvo);
 
-        DadosImovel dadosImovel = dis.criarDadosImovel(id + 1, dto);
+        DadosImovelRequestDTO dadosImovel = dis.criarDadosImovel(id + 1, dto);
         verify(dir, times(1)).save(diCaptor.capture());
         DadosImovel captura = diCaptor.getValue();
 
         assertThat(captura.getId()).isNull();
         assertThat(dadosImovel).isNotNull();
-        assertThat(dadosImovel.getId()).isEqualTo(id);
+
     }
 
     @Test
     @DisplayName("Editar Dados do Imovel Teste com Retorno Positivo")
     public void editarDadosImovelTesteRetornoPositivo() {
         Long id = 1L, aid = 2L;
-        DadosImovelDTO dto = new DadosImovelDTO("Imóvel no centro da cidade", "Rua poc", 5);
+        DadosImovelRequestDTO dto = new DadosImovelRequestDTO("Imóvel no centro da cidade",
+                "Rua poc", 5);
         DadosImovel dadosImovel = new DadosImovel("Imóvel no centro da cidade", "Rua xyz", 3);
         DadosImovel dadosEditados = new DadosImovel("Imóvel no centro da cidade", "Rua poc", 5);
         dadosImovel.setId(id);
@@ -93,23 +96,22 @@ class DadosImovelServiceTest {
         when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.of(dadosImovel));
         when(dir.save(any())).thenReturn(dadosEditados);
 
-        DadosImovel edicao = dis.editarDadosImovel(aid, dto);
+        DadosImovelRequestDTO edicao = dis.editarDadosImovel(aid, dto);
         verify(dir, times(1)).findByAnfitriaoId(aid);
         verify(dir, times(1)).save(diCaptor.capture());
         DadosImovel captura = diCaptor.getValue();
 
         assertThat(edicao).isNotNull();
-        assertThat(edicao.getAnfitriaoId()).isEqualTo(aid);
-        assertThat(edicao.getId()).isEqualTo(dadosImovel.getId());
-        assertThat(captura.getQuartos()).isEqualTo(edicao.getQuartos());
+        assertThat(captura.getQuartos()).isEqualTo(edicao.quartos());
     }
 
     @Test
     @DisplayName("Editar Dados do Imovel Teste com Retorno Negativo")
     public void editarDadosImovelTesteRetornoNegativo() {
         Long id = -1L, aid = -2L;
-        DadosImovelDTO dto = new DadosImovelDTO("Imóvel no centro da cidade", "Rua poc", 5);
-        DadosImovel dadosImovel = new DadosImovel("Imóvel no centro da cidade", "Rua xyz", 3);
+        DadosImovelRequestDTO dto = new DadosImovelRequestDTO("Imóvel no centro da cidade",
+                "Rua poc", 5);
+        DadosImovel dadosImovel = new DadosImovel();
         dadosImovel.setId(id);
 
         when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.empty());
