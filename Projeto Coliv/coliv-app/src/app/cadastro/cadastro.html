@@ -43,62 +43,86 @@
 
 <!-- TIPO DE PERFIL -->
 <div class="space-y-3">
-<label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Quem é você?</label>
-<div class="grid grid-cols-2 gap-3">
-<label class="relative cursor-pointer group">
-<input checked="" class="peer sr-only" name="profile" type="radio"/>
-<div class="p-4 rounded-xl bg-surface-container-low border-2 border-transparent peer-checked:border-secondary transition-all flex flex-col items-center text-center gap-2 group-hover:bg-surface-container-high">
-<span class="material-symbols-outlined text-primary group-peer-checked:text-secondary" data-icon="search">search</span>
-<span class="text-sm font-bold text-primary">Colega</span>
-<p class="text-[10px] text-on-surface-variant leading-tight">Estou buscando um lugar</p>
-</div>
-</label>
-<label class="relative cursor-pointer group">
-<input class="peer sr-only" name="profile" type="radio"/>
-<div class="p-4 rounded-xl bg-surface-container-low border-2 border-transparent peer-checked:border-secondary transition-all flex flex-col items-center text-center gap-2 group-hover:bg-surface-container-high">
-<span class="material-symbols-outlined text-primary group-peer-checked:text-secondary" data-icon="key">key</span>
-<span class="text-sm font-bold text-primary">Anfitrião</span>
-<p class="text-[10px] text-on-surface-variant leading-tight">Tenho um lugar disponível</p>
-</div>
-</label>
-</div>
-</div>
-<!-- Input Fields -->
-<div class="space-y-4">
-<div class="group">
-<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">Nome Completo</label>
-<input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="Como devemos te chamar?" type="text"/>
-</div>
-<div class="group relative">
-<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">CPF</label>
-<div class="relative">
-<input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="000.000.000-00" type="text"/>
-<div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
-<span class="material-symbols-outlined text-secondary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
-</div>
-</div>
-<p class="text-[11px] text-secondary mt-1 ml-1 font-medium">Documento validado com sucesso</p>
-</div>
-<div class="group">
-<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">E-mail</label>
-<input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="exemplo@email.com" type="email"/>
-</div>
-<div class="group">
-<label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">Senha</label>
-<div class="relative">
-<input class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="Mínimo 8 caracteres" type="password"/>
-<button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant" type="button">
-<span class="material-symbols-outlined" data-icon="visibility">visibility</span>
-</button>
-</div>
-</div>
+  <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Quem é você?</label>
+  <div class="grid grid-cols-2 gap-3">
+
+    <label class="relative cursor-pointer group" (click)="selecionarPerfil('colega')">
+      <input class="peer sr-only" name="profile" type="radio" [checked]="perfil() === 'colega'"/>
+      <div class="p-4 rounded-xl bg-surface-container-low border-2 transition-all flex flex-col items-center text-center gap-2 group-hover:bg-surface-container-high"
+           [class.border-secondary]="perfil() === 'colega'"
+           [class.border-transparent]="perfil() !== 'colega'">
+        <span class="material-symbols-outlined text-primary">search</span>
+        <span class="text-sm font-bold text-primary">Colega</span>
+        <p class="text-[10px] text-on-surface-variant leading-tight">Estou buscando um lugar</p>
+      </div>
+    </label>
+
+    <label class="relative cursor-pointer group" (click)="selecionarPerfil('anfitriao')">
+      <input class="peer sr-only" name="profile" type="radio" [checked]="perfil() === 'anfitriao'"/>
+      <div class="p-4 rounded-xl bg-surface-container-low border-2 transition-all flex flex-col items-center text-center gap-2 group-hover:bg-surface-container-high"
+           [class.border-secondary]="perfil() === 'anfitriao'"
+           [class.border-transparent]="perfil() !== 'anfitriao'">
+        <span class="material-symbols-outlined text-primary">key</span>
+        <span class="text-sm font-bold text-primary">Anfitrião</span>
+        <p class="text-[10px] text-on-surface-variant leading-tight">Tenho um lugar disponível</p>
+      </div>
+    </label>
+
+  </div>
 </div>
 
-<!--obs: retirar o routerlink e deixar o forms lidar com a navegação-->
-<button routerLink="/preferencias" class="w-full py-5 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold uppercase tracking-widest text-sm editorial-shadow active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="submit">
-    Continuar
-<span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
-</button>
+<!-- Input Fields -->
+<div class="space-y-4">
+
+  <div class="group">
+    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">Nome Completo</label>
+    <input formControlName="nome" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="Como devemos te chamar?" type="text"/>
+    <p *ngIf="campoInvalido('nome')" class="text-xs text-error mt-1 ml-1">
+      Nome deve ter pelo menos 3 caracteres.
+    </p>
+  </div>
+
+  <div class="group relative">
+    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">CPF</label>
+    <div class="relative">
+      <input formControlName="cpf" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="000.000.000-00" type="text"/>
+      <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
+        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="group">
+    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">E-mail</label>
+    <input formControlName="email" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="exemplo@email.com" type="email"/>
+  </div>
+
+  <div class="group">
+    <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">Senha</label>
+    <div class="relative">
+      <input formControlName="senha" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="Mínimo 8 caracteres" type="password"/>
+      <button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant" type="button" (click)="toggleSenha()">
+        <span class="material-symbols-outlined">visibility</span>
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<div *ngIf="erro()" class="p-4 bg-error-container text-on-error-container rounded-xl text-sm font-medium">
+      {{ erro() }}
+    </div>
+
+<button class="w-full py-5 bg-gradient-to-br from-primary to-primary-container text-white rounded-xl font-bold uppercase tracking-widest text-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2" type="submit" [disabled]="carregando()">
+      <span *ngIf="!carregando()" class="flex items-center gap-2 justify-center">
+        Continuar
+        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+      </span>
+      <span *ngIf="carregando()" class="flex items-center gap-2 justify-center">
+        <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+        Aguarde...
+      </span>
+    </button>
 
 <!-- NEGOCIO DE TERMOS E LOGIN -->
 <footer class="pt-6 border-t border-slate-100/10">
