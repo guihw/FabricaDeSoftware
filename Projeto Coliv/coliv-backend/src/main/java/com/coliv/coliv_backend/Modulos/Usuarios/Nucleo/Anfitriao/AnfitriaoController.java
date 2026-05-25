@@ -1,6 +1,8 @@
 package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Anfitriao;
 
-import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoPostDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoPutDTO;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,22 +17,22 @@ class AnfitriaoController {
     private AnfitriaoService anfitriaoService;
 
     @GetMapping("/listar")
-    public List<Anfitriao> listar() {
+    public List<UsuarioDTO> listar() {
         return anfitriaoService.listar();
     }
 
     @GetMapping("/buscar/{id}")
-    public Anfitriao buscarPorId (@PathVariable Long id) {
+    public UsuarioDTO buscarPorId (@PathVariable Long id) {
         return anfitriaoService.buscarPorId(id);
     }
 
     @PostMapping("/novo")
-    public Anfitriao criarAnfitriao(@RequestBody AnfitriaoDTO anfitriaoDTO) {
-        return anfitriaoService.criarAnfitriao(anfitriaoDTO);
+    public AnfitriaoPostDTO criarAnfitriao(@RequestBody AnfitriaoPostDTO anfitriaoPostDTO) {
+        return anfitriaoService.criarAnfitriao(anfitriaoPostDTO);
     }
 
     @PutMapping("/editar/{id}")
-    public Anfitriao editarAnfitriao(@PathVariable Long id, @RequestBody Anfitriao anfitriao) {
+    public AnfitriaoPutDTO editarAnfitriao(@PathVariable Long id, @RequestBody AnfitriaoPostDTO anfitriao) {
         return anfitriaoService.editarAnfitriao(id, anfitriao);
     }
 

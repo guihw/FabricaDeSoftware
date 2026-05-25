@@ -1,6 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Nucleo;
 
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelDTO;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,12 +26,12 @@ class DadosImovelController {
     }
 
     @PostMapping("/{anfitriaoId}/novo-dados-imovel")
-    public DadosImovel criarDadosImovel (@PathVariable Long anfitriaoId, @RequestBody DadosImovelDTO dto) {
+    public DadosImovelRequestDTO criarDadosImovel (@PathVariable Long anfitriaoId, @RequestBody DadosImovelRequestDTO dto) {
         return dis.criarDadosImovel(anfitriaoId, dto);
     }
 
     @PutMapping("/editar/{anfitriaoId}")
-    public DadosImovel editarDadosImovel (@PathVariable Long anfitriaoId, @RequestBody DadosImovelDTO dto) {
+    public DadosImovelRequestDTO editarDadosImovel (@PathVariable Long anfitriaoId, @RequestBody DadosImovelRequestDTO dto) {
         return dis.editarDadosImovel(anfitriaoId, dto);
     }
 

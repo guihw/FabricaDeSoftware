@@ -1,9 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Nucleo;
 
-import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelDTO;
-import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelIDNaoEncontrado;
-import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelNaoEncontradoUsandoReferencia;
-import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.IDadosImovel;
+import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.*;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +23,17 @@ class DadosImovelService implements IDadosImovel {
         return dir.findById(id).orElseThrow(() -> new DadosImovelIDNaoEncontrado(id));
     }
 
-    public DadosImovel criarDadosImovel(Long anfitriaoId, DadosImovelDTO dto) {
+    public DadosImovelRequestDTO criarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
         DadosImovel dadosImovel = new DadosImovel(dto.descricao(), dto.localizacao(), dto.quartos());
         dadosImovel.setAnfitriaoId(anfitriaoId);
 
-        dadosImovel = dir.save(dadosImovel);
+        dir.save(dadosImovel);
 
-        return dadosImovel;
+        return dto;
     }
 
 
-    public DadosImovel editarDadosImovel(Long anfitriaoId, DadosImovelDTO dto) {
+    public DadosImovelRequestDTO editarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
         DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId).orElseThrow(() -> new
                 DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
 
@@ -48,7 +45,9 @@ class DadosImovelService implements IDadosImovel {
         }
         dadosImovel.setQuartos(dto.quartos());
 
-        return dir.save(dadosImovel);
+        dir.save(dadosImovel);
+
+        return dto;
     }
 
     public void excluir(Long id) {
@@ -77,6 +76,15 @@ class DadosImovelService implements IDadosImovel {
         DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId).orElseThrow(() -> new
                 DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
 
-        return new DadosImovelDTO(dadosImovel.getDescricao(), dadosImovel.getLocalizacao(), dadosImovel.getQuartos());
+        return new DadosImovelDTO(dadosImovel.getAnfitriaoId(), dadosImovel.getDescricao(),
+                dadosImovel.getLocalizacao(), dadosImovel.getQuartos());
+    }
+
+    @Override
+    public List<DadosImovelDTO> obterListaDeDados() {
+        List<DadosImovel> dados = dir.findAll();
+        return dados.stream().map(dado ->
+                new DadosImovelDTO(dado.getAnfitriaoId(), dado.getDescricao(),
+                        dado.getLocalizacao(), dado.getQuartos())).toList();
     }
 }

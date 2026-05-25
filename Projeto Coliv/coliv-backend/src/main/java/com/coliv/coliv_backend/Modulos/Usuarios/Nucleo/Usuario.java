@@ -8,26 +8,33 @@ public abstract class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false, unique = true)
-    private String cpf;
     @Column(nullable = false)
     private String nome;
+    @Column(nullable = false, unique = true)
+    private String cpf;
     @Column(nullable = false, unique = true)
     private String email;
     @Column(nullable = false)
     private String senha;
     @Column(name = "possui_plano_id")
     private boolean possuiPlano = false;
-    @Column(name = "foto_perfil_id")
-    private Long fotoPerfil;
 
     public Usuario(){}
 
-    public Usuario(String cpf, String nome, String email, String senha) {
+    public Usuario(String nome, String cpf, String email, String senha) {
         this.cpf = cpf;
         this.nome = nome;
         this.email = email;
         this.senha = senha;
+    }
+
+    public Usuario(Long id, String nome, String cpf, String email, String senha, boolean possuiPlano) {
+        this.email = email;
+        this.id = id;
+        this.cpf = cpf;
+        this.nome = nome;
+        this.senha = senha;
+        this.possuiPlano = possuiPlano;
     }
 
     public Long getId() {
@@ -76,13 +83,5 @@ public abstract class Usuario {
 
     public void setPossuiPlano(boolean possuiPlano) {
         this.possuiPlano = possuiPlano;
-    }
-
-    public Long getFotoPerfil() {
-        return fotoPerfil;
-    }
-
-    public void setFotoPerfil(Long fotoPerfil) {
-        this.fotoPerfil = fotoPerfil;
     }
 }
