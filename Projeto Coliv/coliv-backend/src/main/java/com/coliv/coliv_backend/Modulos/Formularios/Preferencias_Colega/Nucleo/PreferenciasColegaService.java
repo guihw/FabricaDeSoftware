@@ -1,29 +1,63 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Nucleo;
 
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.PreferenciaColegaIDNaoEncontrado;
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.PreferenciaColegaNaoEncontradaUsandoReferencia;
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.PreferenciasColegaDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.*;
+import jakarta.transaction.Transactional;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-public class PreferenciasColegaService {
+public class PreferenciasColegaService implements IPreferenciasColega {
 
-    @Autowired
-    private PreferenciasColegaRepository repository;
+    private final PreferenciasColegaRepository repository;
 
-    public List<PreferenciasColega> listar() {
-        return repository.findAll();
+    public PreferenciasColegaService(PreferenciasColegaRepository repository) {
+        this.repository = repository;
     }
 
-    public PreferenciasColega buscarPorId(Long id) {
-        return repository.findById(id)
+    public List<PreferenciasColegaResponse> listar() {
+
+        return repository.findAll()
+                .stream()
+                .map(preferencias -> new PreferenciasColegaResponse(
+                        preferencias.getId(),
+                        preferencias.getPrecoMinimo(),
+                        preferencias.getPrecoMaximo(),
+                        preferencias.getLocalizacao(),
+                        preferencias.getHorarioDeSono(),
+                        preferencias.getNivelDeSociabilidade(),
+                        preferencias.getNivelDeLimpeza(),
+                        preferencias.getHabitoDeTrabalho(),
+                        preferencias.isAceitaAnimais()
+                ))
+                .toList();
+    }
+
+    public PreferenciasColegaResponse buscarPorId(Long id) {
+
+        PreferenciasColega preferencias = repository.findById(id)
                 .orElseThrow(() -> new PreferenciaColegaIDNaoEncontrado(id));
+
+        return new PreferenciasColegaResponse(
+                preferencias.getId(),
+                preferencias.getPrecoMinimo(),
+                preferencias.getPrecoMaximo(),
+                preferencias.getLocalizacao(),
+                preferencias.getHorarioDeSono(),
+                preferencias.getNivelDeSociabilidade(),
+                preferencias.getNivelDeLimpeza(),
+                preferencias.getHabitoDeTrabalho(),
+                preferencias.isAceitaAnimais()
+        );
     }
 
-    public PreferenciasColega criarPreferencia(Long colegaId, PreferenciasColegaDTO dto) {
+    @Transactional
+    public PreferenciasColegaResponse criarPreferencia(Long colegaId, PreferenciasColegaDTO dto) {
+
+        if (dto.precoMinimo().compareTo(dto.precoMaximo()) > 0) {
+            throw new RuntimeException("Preço mínimo não pode ser maior que o máximo");
+        }
 
         PreferenciasColega preferencias = new PreferenciasColega.Builder()
                 .precoMinimo(dto.precoMinimo())
@@ -37,10 +71,23 @@ public class PreferenciasColegaService {
                 .colegaId(colegaId)
                 .build();
 
-        return repository.save(preferencias);
+        PreferenciasColega saved = repository.save(preferencias);
+
+        return new PreferenciasColegaResponse(
+                saved.getId(),
+                saved.getPrecoMinimo(),
+                saved.getPrecoMaximo(),
+                saved.getLocalizacao(),
+                saved.getHorarioDeSono(),
+                saved.getNivelDeSociabilidade(),
+                saved.getNivelDeLimpeza(),
+                saved.getHabitoDeTrabalho(),
+                saved.isAceitaAnimais()
+        );
     }
 
-    public PreferenciasColega editarPreferencias(Long id, PreferenciasColegaDTO dto) {
+    @Transactional
+    public PreferenciasColegaResponse editarPreferencias(Long id, PreferenciasColegaDTO dto) {
 
         PreferenciasColega original = repository.findById(id)
                 .orElseThrow(() -> new PreferenciaColegaIDNaoEncontrado(id));
@@ -75,9 +122,22 @@ public class PreferenciasColegaService {
 
         original.setAceitaAnimais(dto.aceitaAnimais());
 
-        return repository.save(original);
+        PreferenciasColega updated = repository.save(original);
+
+        return new PreferenciasColegaResponse(
+                updated.getId(),
+                updated.getPrecoMinimo(),
+                updated.getPrecoMaximo(),
+                updated.getLocalizacao(),
+                updated.getHorarioDeSono(),
+                updated.getNivelDeSociabilidade(),
+                updated.getNivelDeLimpeza(),
+                updated.getHabitoDeTrabalho(),
+                updated.isAceitaAnimais()
+        );
     }
 
+    @Transactional
     public void excluir(Long id) {
 
         repository.findById(id)
@@ -86,13 +146,15 @@ public class PreferenciasColegaService {
         repository.deleteById(id);
     }
 
-    public PreferenciasColegaDTO getPreferenciasColega(Long colegaId) {
+    @Override
+    public PreferenciasColegaResponse getPreferenciasColega(Long colegaId) {
 
         PreferenciasColega preferencias = repository.findByColegaId(colegaId)
                 .orElseThrow(() ->
                         new PreferenciaColegaNaoEncontradaUsandoReferencia(colegaId));
 
-        return new PreferenciasColegaDTO(
+        return new PreferenciasColegaResponse(
+                preferencias.getId(),
                 preferencias.getPrecoMinimo(),
                 preferencias.getPrecoMaximo(),
                 preferencias.getLocalizacao(),
@@ -102,5 +164,25 @@ public class PreferenciasColegaService {
                 preferencias.getHabitoDeTrabalho(),
                 preferencias.isAceitaAnimais()
         );
+    }
+
+    @EventListener
+    public void eventoColegaCriado(UsuarioColegaCriado evento) {
+
+        PreferenciasColega preferencias = new PreferenciasColega.Builder()
+                .colegaId(evento.colegaId())
+                .build();
+
+        repository.save(preferencias);
+    }
+
+    @EventListener
+    public void eventoColegaExcluido(ColegaExcluido evento) {
+
+        PreferenciasColega preferencias = repository.findByColegaId(evento.colegaId())
+                .orElseThrow(() ->
+                        new PreferenciaColegaNaoEncontradaUsandoReferencia(evento.colegaId()));
+
+        repository.deleteById(preferencias.getId());
     }
 }

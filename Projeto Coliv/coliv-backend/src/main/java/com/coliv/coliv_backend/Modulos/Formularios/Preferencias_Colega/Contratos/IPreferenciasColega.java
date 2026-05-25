@@ -2,5 +2,5 @@ package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contrato
 
 public interface IPreferenciasColega {
 
-    PreferenciasColegaDTO getPreferenciasColega(Long colegaId);
+    PreferenciasColegaResponse getPreferenciasColega(Long colegaId);
 }

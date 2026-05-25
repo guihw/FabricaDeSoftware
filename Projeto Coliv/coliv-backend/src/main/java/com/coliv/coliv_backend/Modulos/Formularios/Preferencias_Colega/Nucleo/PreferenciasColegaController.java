@@ -1,7 +1,8 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Nucleo;
 
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.PreferenciasColegaDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.PreferenciasColegaResponse;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,32 +12,35 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class PreferenciasColegaController {
 
-    @Autowired
-    private PreferenciasColegaService service;
+    private final PreferenciasColegaService service;
+
+    public PreferenciasColegaController(PreferenciasColegaService service) {
+        this.service = service;
+    }
 
     @GetMapping("/listar")
-    public List<PreferenciasColega> listar() {
+    public List<PreferenciasColegaResponse> listar() {
         return service.listar();
     }
 
     @GetMapping("/buscar/{id}")
-    public PreferenciasColega buscarPorId(@PathVariable Long id) {
+    public PreferenciasColegaResponse buscarPorId(@PathVariable Long id) {
         return service.buscarPorId(id);
     }
 
     @PostMapping("/{colegaId}/nova-preferencia")
-    public PreferenciasColega criarPreferencia(
+    public PreferenciasColegaResponse criarPreferencia(
             @PathVariable Long colegaId,
-            @RequestBody PreferenciasColegaDTO dto
+            @Valid @RequestBody PreferenciasColegaDTO dto
     ) {
 
         return service.criarPreferencia(colegaId, dto);
     }
 
     @PutMapping("/editar/{id}")
-    public PreferenciasColega editarPreferencias(
+    public PreferenciasColegaResponse editarPreferencias(
             @PathVariable Long id,
-            @RequestBody PreferenciasColegaDTO dto
+            @Valid @RequestBody PreferenciasColegaDTO dto
     ) {
 
         return service.editarPreferencias(id, dto);
