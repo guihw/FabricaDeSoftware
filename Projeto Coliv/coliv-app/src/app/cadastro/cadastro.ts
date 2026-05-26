@@ -12,6 +12,8 @@ import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
 import { AnfitriaoDTO, CreateColegaRequest } from '../core/models/usuario.model';
 import { ApiError } from '../core/services/api.service';
+import { HttpClient } from '@angular/common/http';
+import { debounceTime } from 'rxjs/operators';
 
 type PerfilTipo = 'colega' | 'anfitriao';
 
@@ -27,12 +29,15 @@ export class Cadastro implements OnInit {
   carregando = signal(false);
   erro = signal<string | null>(null);
   mostrarSenha = signal(false);
+  cpfValido = false;
+  cpfErro = '';
 
   constructor(
     private fb: FormBuilder,
     private router: Router,
     private anfitriaoService: AnfitriaoService,
-    private colegaService: ColegaService
+    private colegaService: ColegaService,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
@@ -42,7 +47,29 @@ export class Cadastro implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       senha: ['', [Validators.required, Validators.minLength(8)]],
     });
+
+    this.cadastroForm.get('cpf')?.valueChanges
+      .pipe(debounceTime(600))
+      .subscribe(valor => {
+        if (valor) this.validarCpf(valor);
+      });
   }
+
+  validarCpf(cpf: string): void {
+    this.cpfValido = false;
+    this.cpfErro = '';
+
+    this.http.post<any>('http://localhost:8080/validacao/cpf/validar', { cpf })
+      .subscribe({
+        next: (res) => {
+          this.cpfValido = res.valido;
+          if (!res.valido) this.cpfErro = res.mensagem;
+        },
+        error: (err) => {
+          this.cpfErro = err.error?.erro ?? 'Formato inválido';
+        }
+      });
+    }
 
   selecionarPerfil(tipo: PerfilTipo): void {
     this.perfil.set(tipo);
