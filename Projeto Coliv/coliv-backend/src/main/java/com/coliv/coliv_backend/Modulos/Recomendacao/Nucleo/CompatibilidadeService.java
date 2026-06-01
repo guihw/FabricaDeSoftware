@@ -4,9 +4,6 @@ import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitri
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.IPreferenciasAnfitriao;
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Anfitriao.Contratos.PreferenciasAnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.PreferenciasColegaResponse;
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Nucleo.HabitoDeTrabalho;
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Nucleo.NivelDeLimpeza;
-import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Nucleo.NivelDeSociabilidade;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,8 +22,7 @@ public class CompatibilidadeService {
             CardAnfitriaoResponseDTO card,
             Long anfitriaoId) {
 
-        PreferenciasAnfitriaoDTO prefAnf =
-                iPreferenciasAnfitriao.getPreferenciasAnfitriao(anfitriaoId);
+        PreferenciasAnfitriaoDTO prefAnf = iPreferenciasAnfitriao.getPreferenciasAnfitriao(anfitriaoId);
 
         int score = 0;
 
