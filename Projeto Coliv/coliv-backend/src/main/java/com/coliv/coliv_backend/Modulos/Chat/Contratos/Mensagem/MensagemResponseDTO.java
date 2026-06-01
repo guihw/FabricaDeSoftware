@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Chat.Contratos;
+package com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem;
 
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 

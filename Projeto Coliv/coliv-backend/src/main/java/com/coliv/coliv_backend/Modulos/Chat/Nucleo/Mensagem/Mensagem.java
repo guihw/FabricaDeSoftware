@@ -1,12 +1,13 @@
-package com.coliv.coliv_backend.Modulos.Chat.Nucleo;
+package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem;
 
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat.Chat;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
 @Entity
-class Mensagem {
+public class Mensagem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,10 +16,12 @@ class Mensagem {
     private Long sequencialId;
     private String texto;
     @Column(name = "tipo_usuario", nullable = false)
+    @Enumerated(EnumType.STRING)
     private TipoUsuario tipoUsuario;
-    @ManyToOne
-    @JoinColumn(name = "chat_id", nullable = false)
-    private Chat chat;
+    @Column(name = "chat_id")
+    private Long chatId;
+    @Column(name = "grupo_id")
+    private Long grupoId;
     @Column(name = "criado_em", updatable = false)
     private LocalDateTime criadoEm;
     @Column(name = "atualizado_em")
@@ -28,7 +31,7 @@ class Mensagem {
     @Column(name = "usuario_id", nullable = false)
     private Long usuarioId;
 
-    Mensagem () {
+    public Mensagem() {
         this.criadoEm = LocalDateTime.now();
     }
 
@@ -36,7 +39,8 @@ class Mensagem {
         this.sequencialId = builder.sequencialId;
         this.texto = builder.texto;
         this.tipoUsuario = builder.tipoUsuario;
-        this.chat = builder.chat;
+        this.chatId = builder.chatId;
+        this.grupoId = builder.grupoId;
         this.criadoEm = builder.criadoEm;
         this.atualizadoEm = builder.atualizadoEm;
         this.arquivoId = builder.arquivoId;
@@ -75,12 +79,20 @@ class Mensagem {
         this.tipoUsuario = tipoUsuario;
     }
 
-    public Chat getChat() {
-        return chat;
+    public Long getChatId() {
+        return chatId;
     }
 
-    public void setChat(Chat chat) {
-        this.chat = chat;
+    public void setChatId(Long chatId) {
+        this.chatId = chatId;
+    }
+
+    public Long getGrupoId() {
+        return grupoId;
+    }
+
+    public void setGrupoId(Long grupoId) {
+        this.grupoId = grupoId;
     }
 
     public LocalDateTime getAtualizadoEm() {
@@ -115,11 +127,12 @@ class Mensagem {
         this.criadoEm = criadoEm;
     }
 
-    static class Builder {
+    public static class Builder {
         private Long sequencialId;
         private String texto;
         private TipoUsuario tipoUsuario;
-        private Chat chat;
+        private Long chatId;
+        private Long grupoId;
         private LocalDateTime criadoEm;
         private LocalDateTime atualizadoEm;
         private Long arquivoId;
@@ -140,8 +153,13 @@ class Mensagem {
             return this;
         }
 
-        public Builder chat(Chat chat) {
-            this.chat = chat;
+        public Builder chatId(Long chatId) {
+            this.chatId = chatId;
+            return this;
+        }
+
+        public Builder grupoId(Long grupoId) {
+            this.grupoId = grupoId;
             return this;
         }
 

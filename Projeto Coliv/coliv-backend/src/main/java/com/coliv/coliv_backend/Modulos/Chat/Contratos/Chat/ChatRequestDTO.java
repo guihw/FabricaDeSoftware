@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Chat.Contratos;
+package com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat;
 
 import java.util.List;
 

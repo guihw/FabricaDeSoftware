@@ -7,6 +7,8 @@ import java.util.List;
 public interface IAnfitriao {
 
     public UsuarioDTO obterUsuario(Long id);
+
+    public boolean verificarExistencia(Long id);
     
     public List<UsuarioDTO> obterListaDeUsuarios();
 }
