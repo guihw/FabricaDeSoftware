@@ -1,7 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Grupo;
 
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Membro.Membro;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.Mensagem;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemGrupo.MensagemGrupo;
 import jakarta.persistence.*;
 
 import java.util.List;
@@ -19,17 +19,9 @@ public class Grupo {
     @OneToMany(cascade = CascadeType.ALL)
     private List<Membro> membros;
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Mensagem> mensagens;
+    private List<MensagemGrupo> mensagens;
 
     public Grupo () {}
-
-    private Grupo (Builder builder) {
-        this.id = builder.id;
-        this.anfitriaoId = builder.anfitriaoId;
-        this.nomeGrupo = builder.nomeGrupo;
-        this.membros = builder.membros;
-        this.mensagens = builder.mensagens;
-    }
 
     public Long getId() {
         return id;
@@ -67,48 +59,13 @@ public class Grupo {
         this.membros.add(membro);
     }
 
-    public List<Mensagem> getMensagens() {
+    public List<MensagemGrupo> getMensagens() {
         return mensagens;
     }
 
-    public void setMensagens(List<Mensagem> mensagens) {
+    public void setMensagens(List<MensagemGrupo> mensagens) {
         this.mensagens = mensagens;
     }
 
-    public static class Builder {
-        private Long id;
-        private Long anfitriaoId;
-        private String nomeGrupo;
-        private List<Membro> membros;
-        private List<Mensagem> mensagens;
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
-
-        public Builder anfitriaoId(Long anfitriaoId) {
-            this.anfitriaoId = anfitriaoId;
-            return this;
-        }
-
-        public Builder nomeGrupo(String nomeGrupo) {
-            this.nomeGrupo = nomeGrupo;
-            return this;
-        }
-
-        public Builder membros(List<Membro> membros) {
-            this.membros = membros;
-            return this;
-        }
-
-        public Builder mensagens(List<Mensagem> mensagens) {
-            this.mensagens = mensagens;
-            return this;
-        }
-
-        public Grupo build () {
-            return new Grupo(this);
-        }
-    }
+    public void addMensagem(MensagemGrupo mensagem) {this.mensagens.add(mensagem);}
 }

@@ -57,6 +57,11 @@ public class ColegaService implements IColega {
         );
     }
 
+    @Override
+    public boolean verificarExistencia(Long id) {
+        return colegaRepository.existsById(id);
+    }
+
     @Transactional
     public ColegaResponse createColega(CreateColegaRequest request) {
 

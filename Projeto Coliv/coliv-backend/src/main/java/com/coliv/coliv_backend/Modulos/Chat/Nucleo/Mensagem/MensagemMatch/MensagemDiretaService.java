@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem;
+package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch;
 
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat.ChatCriadoViaMatch;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat.ChatIDNaoEncontrado;
@@ -16,10 +16,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-public class MensagemService {
+public class MensagemDiretaService {
 
     @Autowired
-    private MensagemRepository msgRepository;
+    private MensagemDiretaRepository msgRepository;
     @Autowired
     private ChatRepository chatRepository;
 
@@ -36,8 +36,8 @@ public class MensagemService {
     }
 
     public List<MensagemResponseDTO> buscarPorUsuarioId(Long usuarioId, TipoUsuario tipoUsuario) {
-        return msgRepository.findByUsuarioIdAndTipoUsuario(usuarioId, tipoUsuario).stream().map(mensagem ->
-                new MensagemResponseDTO(mensagem.getSequencialId(), mensagem.getTexto(), mensagem.getTipoUsuario(),
+        return msgRepository.findByUsuarioIdAndTipoUsuario(usuarioId, tipoUsuario).stream().map(mensagem
+                -> new MensagemResponseDTO(mensagem.getSequencialId(), mensagem.getTexto(), mensagem.getTipoUsuario(),
                         mensagem.getCriadoEm(), mensagem.getArquivoId(), mensagem.getUsuarioId())).toList();
     }
 
@@ -58,47 +58,44 @@ public class MensagemService {
     public MensagemResponseDTO criarMensagem(Long usuarioId, Long chatId, MensagemRequestDTO dto) {
         Long max = msgRepository.findMaxSequencialIdByChatId(chatId);
 
-        Mensagem mensagem = new Mensagem.Builder().
-                texto(dto.texto()).
-                tipoUsuario(dto.tipoUsuario()).
-                chatId(chatId).
-                sequencialId(max + 1).
-                arquivoId(dto.arquivoId()).
-                usuarioId(usuarioId).
-                criadoEm(LocalDateTime.now()).
-                build();
+        MensagemDireta mensagemDireta = new MensagemDireta(max + 1L, dto.texto(), dto.arquivoId(), chatId,
+                usuarioId, dto.tipoUsuario());
 
-        mensagem = msgRepository.save(mensagem);
-        Chat chat =  chatRepository.findById(chatId).orElseThrow(() -> new ChatIDNaoEncontrado(chatId));
-        chat.addMensagens(mensagem);
+        mensagemDireta = msgRepository.save(mensagemDireta);
+        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ChatIDNaoEncontrado(chatId));
+        chat.addMensagens(mensagemDireta);
         chatRepository.save(chat);
 
-        return new MensagemResponseDTO(mensagem.getSequencialId(), mensagem.getTexto(), mensagem.getTipoUsuario(),
-                mensagem.getCriadoEm(), mensagem.getArquivoId(), mensagem.getUsuarioId());
+        return new MensagemResponseDTO(mensagemDireta.getSequencialId(), mensagemDireta.getTexto(),
+                mensagemDireta.getTipoUsuario(), mensagemDireta.getCriadoEm(), mensagemDireta.getArquivoId(),
+                mensagemDireta.getUsuarioId());
     }
 
     @Transactional
     public MensagemResponseDTO editarMensagem(Long sequencialId, Long chatId, Long usuarioId, MensagemRequestDTO dto) {
-        Mensagem mensagem = msgRepository.findBySequencialIdAndChatIdAndUsuarioId(sequencialId, chatId, usuarioId).
+        MensagemDireta mensagemDireta = msgRepository.findBySequencialIdAndChatIdAndUsuarioId(sequencialId, chatId,
+                        usuarioId).
                 orElseThrow(() -> new MensagemNaoEncontradaUsandoReferencias(sequencialId, chatId, usuarioId));
 
         if (dto.texto() != null && !dto.texto().isBlank()) {
-            mensagem.setTexto(dto.texto());
+            mensagemDireta.setTexto(dto.texto());
         }
 
-        mensagem.setArquivoId(dto.arquivoId());
-        mensagem.setAtualizadoEm(LocalDateTime.now());
+        mensagemDireta.setArquivoId(dto.arquivoId());
+        mensagemDireta.setAtualizadoEm(LocalDateTime.now());
 
-        mensagem = msgRepository.save(mensagem);
+        mensagemDireta = msgRepository.save(mensagemDireta);
 
-        return new MensagemResponseDTO(mensagem.getSequencialId(), mensagem.getTexto(), mensagem.getTipoUsuario(),
-                mensagem.getCriadoEm(), mensagem.getArquivoId(), mensagem.getUsuarioId());
+        return new MensagemResponseDTO(mensagemDireta.getSequencialId(), mensagemDireta.getTexto(),
+                mensagemDireta.getTipoUsuario(), mensagemDireta.getCriadoEm(), mensagemDireta.getArquivoId(),
+                mensagemDireta.getUsuarioId());
     }
 
     public void excluirMensagem(Long sequencialId, Long chatId, Long usuarioId) {
-        Mensagem mensagem = msgRepository.findBySequencialIdAndChatIdAndUsuarioId(sequencialId, chatId, usuarioId).
-                orElseThrow(() -> new MensagemNaoEncontradaUsandoReferencias(sequencialId, chatId, usuarioId));
-        msgRepository.deleteById(mensagem.getId());
+        MensagemDireta mensagemDireta = msgRepository.findBySequencialIdAndChatIdAndUsuarioId(sequencialId, chatId,
+                        usuarioId).orElseThrow(
+                                () -> new MensagemNaoEncontradaUsandoReferencias(sequencialId, chatId, usuarioId));
+        msgRepository.deleteById(mensagemDireta.getId());
     }
 
     @Transactional
@@ -107,18 +104,12 @@ public class MensagemService {
     }
 
     @Transactional
-    public Mensagem mensagemAutomaticaMatchEvento(ChatCriadoViaMatch dto) {
+    public MensagemDireta mensagemAutomaticaMatchEvento(ChatCriadoViaMatch dto) {
         Long max = msgRepository.findMaxSequencialIdByChatId(dto.dto().chat().getId());
 
-        Mensagem mensagem = msgRepository.save(new Mensagem.Builder().
-                texto(dto.dto().texto()).
-                tipoUsuario(dto.dto().tipoUsuario()).
-                chatId(dto.dto().chat().getId()).
-                criadoEm(dto.dto().criadoEm()).
-                sequencialId(max + 1).
-                usuarioId(dto.dto().usuarioId()).
-                build());
+        MensagemDireta mensagemDireta = msgRepository.save(new MensagemDireta(max + 1L, dto.dto().texto(),
+                null, dto.dto().chat().getId(), dto.dto().usuarioId(), dto.dto().tipoUsuario()));
 
-        return msgRepository.save(mensagem);
+        return msgRepository.save(mensagemDireta);
     }
 }

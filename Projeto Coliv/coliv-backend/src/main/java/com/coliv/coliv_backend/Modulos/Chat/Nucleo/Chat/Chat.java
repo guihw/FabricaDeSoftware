@@ -1,7 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat;
 
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Convite.Convite;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.Mensagem;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch.MensagemDireta;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -14,7 +13,7 @@ public class Chat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @OneToMany(cascade = CascadeType.ALL)
-    private List<Mensagem> mensagens = new ArrayList<>();
+    private List<MensagemDireta> mensagens = new ArrayList<>();
     @Column(name = "anfitriao_id", nullable = false)
     private Long anfitriaoId;
     @Column(name = "colega_id", nullable = false)
@@ -37,16 +36,16 @@ public class Chat {
         this.id = id;
     }
 
-    public List<Mensagem> getMensagens() {
+    public List<MensagemDireta> getMensagens() {
         return mensagens;
     }
 
-    public void setMensagens(List<Mensagem> mensagens) {
+    public void setMensagens(List<MensagemDireta> mensagens) {
         this.mensagens = mensagens;
     }
 
-    public void addMensagens(Mensagem mensagem) {
-        this.mensagens.add(mensagem);
+    public void addMensagens(MensagemDireta mensagemDireta) {
+        this.mensagens.add(mensagemDireta);
     }
 
     public Long getAnfitriaoId() {
@@ -67,7 +66,7 @@ public class Chat {
 
     public static class Builder {
         private Long id;
-        private List<Mensagem> mensagens;
+        private List<MensagemDireta> mensagens;
         private Long anfitriaoId;
         private Long colegaId;
 
@@ -76,7 +75,7 @@ public class Chat {
             return this;
         }
 
-        public Builder mensagens(List<Mensagem> mensagens) {
+        public Builder mensagens(List<MensagemDireta> mensagens) {
             this.mensagens = mensagens;
             return this;
         }

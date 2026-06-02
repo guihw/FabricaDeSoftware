@@ -14,6 +14,7 @@ import java.util.Map;
  * <b>Controller responsável pela comunicação entre Frontend e o Backend da entidade {@link Grupo}</b>
  *
  * <p>Fornece endpoints para a requisição e alteração de Grupos presentes no Sistema.</p>
+ * <br><br>
  *
  * @author Miguel Lima
  */

@@ -1,6 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Nucleo;
 
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.*;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.UsuarioColegaCriado;
 import jakarta.transaction.Transactional;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;

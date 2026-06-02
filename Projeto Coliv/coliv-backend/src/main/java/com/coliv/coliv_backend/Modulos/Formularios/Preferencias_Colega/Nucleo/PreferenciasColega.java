@@ -44,7 +44,7 @@ public class PreferenciasColega {
     @Column(name = "colega_id")
     private Long colegaId;
 
-    protected PreferenciasColega() {
+    public PreferenciasColega() {
     }
 
     private PreferenciasColega(Builder builder) {

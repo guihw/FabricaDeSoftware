@@ -2,8 +2,8 @@ package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat;
 
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat.*;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemAutomaticaDTO;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.Mensagem;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemService;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch.MensagemDireta;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch.MensagemDiretaService;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchEvento;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchEventoDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
@@ -23,7 +23,7 @@ class ChatService {
     @Autowired
     private ChatRepository chatRepository;
     @Autowired
-    private MensagemService msgService;
+    private MensagemDiretaService msgService;
     @Autowired
     private ApplicationEventPublisher publisher;
 
@@ -68,22 +68,22 @@ class ChatService {
             case ANFITRIAO -> {
                 String txt = "Olá! Vi que você tem interesse no imóvel. Fico à disposição para conversar!";
 
-                Mensagem mensagem = msgService.mensagemAutomaticaMatchEvento(new ChatCriadoViaMatch(new
+                MensagemDireta mensagemDireta = msgService.mensagemAutomaticaMatchEvento(new ChatCriadoViaMatch(new
                         MensagemAutomaticaDTO(txt, evento.dto().iniciador(), chat,
                         LocalDateTime.now(), evento.dto().anfitriaoId())));
 
-                chat.setMensagens(new ArrayList<>(){{add(mensagem);}});
+                chat.setMensagens(new ArrayList<>(){{add(mensagemDireta);}});
                 chatRepository.save(chat);
             }
 
             case COLEGA -> {
                 String txt = "Olá! Gostaria de saber mais sobre o anúncio.";
 
-                Mensagem mensagem = msgService.mensagemAutomaticaMatchEvento(new ChatCriadoViaMatch(new
+                MensagemDireta mensagemDireta = msgService.mensagemAutomaticaMatchEvento(new ChatCriadoViaMatch(new
                         MensagemAutomaticaDTO(txt, evento.dto().iniciador(), chat,
                         LocalDateTime.now(), evento.dto().colegaId())));
 
-                chat.setMensagens(new ArrayList<>(){{add(mensagem);}});
+                chat.setMensagens(new ArrayList<>(){{add(mensagemDireta);}});
                 chatRepository.save(chat);
             }
         }
