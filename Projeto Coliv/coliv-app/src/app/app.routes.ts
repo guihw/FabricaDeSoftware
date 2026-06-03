@@ -17,5 +17,5 @@ export const routes: Routes = [
   {path: 'feedanfitriao', component: FeedAnfitriao},
   {path: 'feedcolega', component: FeedColega},
   {path: 'criaranuncio', component: CriarAnuncio},
-  {path: 'chat', component: Chat}
+  {path: 'chat/:matchId',  component: Chat}
 ];

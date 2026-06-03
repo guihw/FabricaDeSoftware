@@ -1,34 +1,96 @@
-<article class="bg-surface-container-lowest rounded-xl overflow-hidden group transition-all duration-300">
-<div class="relative h-[280px] overflow-hidden rounded-xl m-2">
-<img alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="modern minimalist loft apartment with high ceilings, large windows, and designer furniture in neutral tones with soft morning light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBesAWdaM8chJSIvnJfTv6QH61A1ObcPdUihjoQQBTglQhi57kWzYhvILy7fJSEb_G2skbuFRrRUhmIeNTBsI7XW6aA-XxBhkwBeRwj3dYx3AKOiy0N4z3M7O4lzfuejLHv4keloBezoadOIsQDa6naQcNy8qHHOf0kxZPJ8koJ5zDFWd1f3NsAtUw2kXeeLG5MYGVxxnmi8eyEvTR-i5icLlud36PFZmDl9S6z7JMdxCqca4V8wugcbCuy52rIRAliGp2vSzVSV0E"/>
-<div class="absolute top-4 right-4 bg-[#79F7EA] text-[#007169] font-headline font-extrabold px-3 py-1.5 rounded-lg shadow-lg">
-                        98% Match
-                    </div>
-<div class="absolute bottom-4 left-4 bg-primary text-on-primary px-4 py-2 rounded-lg font-headline font-bold text-lg shadow-xl translate-y-1">
-                        R$ 2.450<span class="text-xs font-normal opacity-80">/mês</span>
-</div>
-</div>
-<div class="px-6 py-6 space-y-4">
-<div>
-<h3 class="font-headline font-bold text-xl text-on-surface mb-1">Loft Pinheiros Design</h3>
-<div class="flex items-center text-on-surface-variant gap-1.5">
-<span class="material-symbols-outlined text-sm">near_me</span>
-<span class="text-sm font-semibold tracking-tight">1.2km do seu trabalho</span>
-</div>
-</div>
-<div class="flex flex-wrap gap-2">
-<span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
-<span class="material-symbols-outlined text-[14px]">pets</span> Pet-friendly
-                        </span>
-<span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
-<span class="material-symbols-outlined text-[14px]">volume_off</span> Silencioso
-                        </span>
-</div>
-<div class="pt-2">
-<button class="w-full bg-gradient-primary text-on-primary font-label text-sm font-bold tracking-[0.05em] py-3.5 rounded-xl uppercase active:scale-[0.98] transition-transform">
-                            Ver Detalhes
-</button>
-</div>
-</div>
-</article>
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden group transition-all duration-300 flex flex-col">
 
+  <!-- Imagem / placeholder -->
+  <div class="relative h-[280px] overflow-hidden rounded-xl m-2 bg-surface-container-high flex-shrink-0">
+
+    <!-- Placeholder quando não há arquivos -->
+    <div *ngIf="!card.arquivos || card.arquivos.length === 0"
+      class="w-full h-full flex flex-col items-center justify-center gap-2 text-on-surface-variant">
+      <span class="material-symbols-outlined text-4xl opacity-40">apartment</span>
+      <span class="text-xs font-bold uppercase tracking-widest opacity-40">Sem fotos</span>
+    </div>
+
+    <!-- Quando há arquivos, exibe ícone representativo (upload de imagem real é etapa futura) -->
+    <div *ngIf="card.arquivos && card.arquivos.length > 0"
+      class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-container to-surface-container-high">
+      <span class="material-symbols-outlined text-6xl text-primary opacity-30">home</span>
+    </div>
+
+    <!-- Badge de score -->
+    <div class="absolute top-4 right-4 px-3 py-1.5 rounded-lg font-extrabold text-sm shadow-lg"
+      [ngClass]="corScore">
+      {{ score }}% Match
+    </div>
+
+    <!-- Preço -->
+    <div class="absolute bottom-4 left-4 bg-primary text-on-primary px-4 py-2 rounded-lg font-headline font-bold text-lg shadow-xl">
+      {{ precoFormatado }}<span class="text-xs font-normal opacity-80">/mês</span>
+    </div>
+  </div>
+
+  <!-- Corpo -->
+  <div class="px-6 py-5 flex flex-col gap-4 flex-grow">
+
+    <!-- Nome + localização -->
+    <div>
+      <h3 class="font-headline font-bold text-xl text-on-surface mb-1 line-clamp-1">
+        {{ card.nome }}
+      </h3>
+      <div class="flex items-center text-on-surface-variant gap-1.5">
+        <span class="material-symbols-outlined text-sm">location_on</span>
+        <span class="text-sm font-semibold tracking-tight line-clamp-1">
+          {{ card.localizacao || 'Localização não informada' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Descrição -->
+    <p *ngIf="card.descricao"
+      class="text-on-surface-variant text-sm line-clamp-2 leading-relaxed">
+      {{ card.descricao }}
+    </p>
+
+    <!-- Chips de detalhes -->
+    <div class="flex flex-wrap gap-2">
+      <span *ngIf="card.quartos > 0"
+        class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">bed</span>
+        {{ card.quartos }} {{ card.quartos === 1 ? 'quarto' : 'quartos' }}
+      </span>
+
+      <span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
+        <span class="material-symbols-outlined text-sm">person</span>
+        {{ card.email }}
+      </span>
+    </div>
+
+    <!-- Estrelas de classificação -->
+    <div *ngIf="card.classificacao" class="flex items-center gap-1">
+      <ng-container *ngFor="let n of [1,2,3,4,5]">
+        <span class="material-symbols-outlined text-sm"
+          [style.font-variation-settings]="estrelas(n) ? '\'FILL\' 1' : '\'FILL\' 0'"
+          [class.text-secondary]="estrelas(n)"
+          [class.text-outline-variant]="!estrelas(n)">
+          star
+        </span>
+      </ng-container>
+      <span class="text-xs text-on-surface-variant ml-1">{{ card.classificacao | number:'1.1-1' }}</span>
+    </div>
+
+    <!-- Resumo de compatibilidade -->
+    <div class="mt-auto pt-2 border-t border-outline-variant/20 flex items-center gap-2">
+      <span class="material-symbols-outlined text-sm text-secondary"
+        style="font-variation-settings: 'FILL' 1">psychology</span>
+      <span class="text-xs text-on-surface-variant font-medium italic">{{ resumo }}</span>
+    </div>
+
+    <!-- Botão de like -->
+    <button (click)="onLike()"
+      class="w-full text-on-primary font-label text-sm font-bold tracking-[0.05em] py-3.5 rounded-xl uppercase active:scale-[0.98] transition-transform bg-gradient-to-br from-primary to-primary-container flex items-center justify-center gap-2">
+      Tenho Interesse
+      <span class="material-symbols-outlined text-base"
+        style="font-variation-settings: 'FILL' 1">favorite</span>
+    </button>
+
+  </div>
+</article>
