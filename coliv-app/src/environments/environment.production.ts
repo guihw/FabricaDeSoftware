@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://SEU-BACKEND.up.railway.app',
+  apiUrl: 'fabricadesoftware-production.up.railway.app',
 };
