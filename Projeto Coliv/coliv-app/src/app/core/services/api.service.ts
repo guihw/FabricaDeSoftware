@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 export interface ApiError {
   status: number;
@@ -12,7 +13,7 @@ export interface ApiError {
 @Injectable({ providedIn: 'root' })
 export class ApiService {
   // Altere para a URL do backend quando for para produção
-  readonly baseUrl = 'http://localhost:8080';
+  readonly baseUrl = environment.apiUrl;
 
   protected http = inject(HttpClient);
 
@@ -44,7 +45,6 @@ export class ApiService {
     let message = 'Erro desconhecido. Tente novamente.';
 
     if (error.status === 0) {
-      // Erro de rede — backend inacessível
       message = 'Não foi possível conectar ao servidor. Verifique sua conexão.';
     } else if (error.status === 400) {
       message = 'Dados inválidos. Verifique os campos e tente novamente.';

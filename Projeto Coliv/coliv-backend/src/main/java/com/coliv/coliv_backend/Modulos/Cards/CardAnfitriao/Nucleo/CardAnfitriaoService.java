@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-class CardAnfitriaoService {
+public class CardAnfitriaoService {
 
     @Autowired
     private CardAnfitriaoRepository car;
