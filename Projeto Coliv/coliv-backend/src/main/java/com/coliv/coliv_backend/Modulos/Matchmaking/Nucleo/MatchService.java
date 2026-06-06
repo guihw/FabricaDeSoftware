@@ -1,72 +1,64 @@
 package com.coliv.coliv_backend.Modulos.Matchmaking.Nucleo;
 
-import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.*;
-import org.springframework.context.event.EventListener;
+import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchIdNaoEncontrado;
+import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
-class MatchService implements IMatchmaking {
+class MatchService {
 
-    private final MatchRepository repository;
+    @Autowired
+    private MatchRepository repository;
 
-    MatchService(MatchRepository repository) {
-        this.repository = repository;
-    }
-
-    @Override
-    public List<MatchResponse> listar() {
-
-        return repository.findAll()
-                .stream()
-                .map(match -> new MatchResponse(
-                        match.getId(),
-                        match.getIniciador(),
-                        match.getColegaId(),
-                        match.getAnfitriaoId()
-                ))
-                .toList();
-    }
-
-    @Override
-    public MatchResponse buscar(Long id) {
-
-        Match match = repository.findById(id)
-                .orElseThrow(() ->
-                        new MatchIdNaoEncontrado(id));
-
-        return new MatchResponse(
-                match.getId(),
-                match.getIniciador(),
-                match.getColegaId(),
-                match.getAnfitriaoId()
-        );
-    }
-
-    @EventListener
-    public void criarMatch(MatchEvent evento) {
+    public MatchResponse criar(
+            Long colegaId,
+            Long anfitriaoId
+    ) {
 
         Match match = new Match();
 
-        match.setIniciador(evento.iniciador());
-        match.setColegaId(evento.colegaId());
-        match.setAnfitriaoId(evento.anfitriaoId());
+        match.setColegaId(colegaId);
+        match.setAnfitriaoId(anfitriaoId);
+        match.setStatus(StatusMatch.PENDENTE);
+        match.setCriadoEm(LocalDateTime.now());
 
-        repository.save(match);
+        match = repository.save(match);
+
+        return new MatchResponse(
+                match.getId(),
+                match.getColegaId(),
+                match.getAnfitriaoId(),
+                match.getStatus()
+        );
     }
 
-    @EventListener
-    public void cancelarMatch(MatchCancelado evento) {
+    public MatchResponse buscar(Long id) {
 
-        Match match = repository
-                .findByColegaIdAndAnfitriaoId(
-                        evento.colegaId(),
-                        evento.anfitriaoId()
-                )
-                .orElseThrow(() ->
-                        new RuntimeException("Match não encontrado"));
+        Match match =
+                repository.findById(id)
+                        .orElseThrow(() ->
+                                new MatchIdNaoEncontrado(id));
 
-        repository.delete(match);
+        return new MatchResponse(
+                match.getId(),
+                match.getColegaId(),
+                match.getAnfitriaoId(),
+                match.getStatus()
+        );
+    }
+
+    public void cancelar(Long id) {
+
+        Match match =
+                repository.findById(id)
+                        .orElseThrow(() ->
+                                new MatchIdNaoEncontrado(id));
+
+        match.setStatus(StatusMatch.CANCELADO);
+
+        repository.save(match);
     }
 }
