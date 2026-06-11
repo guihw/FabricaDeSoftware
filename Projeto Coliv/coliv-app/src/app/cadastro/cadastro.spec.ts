@@ -8,7 +8,6 @@ import { Cadastro } from './cadastro';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
-import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
@@ -27,21 +26,21 @@ describe('Cadastro', () => {
 
   beforeEach(async () => {
     anfitriaoServiceSpy = jasmine.createSpyObj('AnfitriaoService', ['criar']);
-    colegaServiceSpy    = jasmine.createSpyObj('ColegaService',    ['criar']);
-    routerSpy           = jasmine.createSpyObj('Router',           ['navigate']);
+    colegaServiceSpy = jasmine.createSpyObj('ColegaService', ['criar']);
+    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      imports: [Cadastro, ReactiveFormsModule, CommonModule, RouterTestingModule],
+      imports: [Cadastro, ReactiveFormsModule, CommonModule],
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AnfitriaoService, useValue: anfitriaoServiceSpy },
-        { provide: ColegaService,    useValue: colegaServiceSpy    },
-        { provide: Router,           useValue: routerSpy           },
+        { provide: ColegaService, useValue: colegaServiceSpy },
+        { provide: Router, useValue: routerSpy},
       ],
     }).compileComponents();
 
-    fixture   = TestBed.createComponent(Cadastro);
+    fixture = TestBed.createComponent(Cadastro);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
