@@ -1,0 +1,118 @@
+<!-- ─── ANFITRIÃO: botão "Enviar Convite" (status null ou CANCELADO) ─── -->
+<ng-container *ngIf="isAnfitriao && (!convite || convite.status === 'CANCELADO')">
+  <button
+    (click)="onEnviar()"
+    [disabled]="enviando"
+    class="flex items-center gap-2 bg-secondary-container text-on-secondary-container px-4 py-3 rounded-xl active:scale-95 transition-transform shadow-sm w-fit disabled:opacity-60 disabled:cursor-not-allowed">
+    <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">handshake</span>
+    <span class="font-headline font-bold text-xs uppercase tracking-widest">
+      {{ enviando ? 'Enviando...' : 'Enviar Convite de Moradia' }}
+    </span>
+  </button>
+</ng-container>
+
+<!-- ─── ANFITRIÃO: convite pendente aguardando resposta ─── -->
+<ng-container *ngIf="isAnfitriao && convite?.status === 'PENDENTE'">
+  <div class="flex items-center justify-between gap-3 bg-surface-container-low border border-outline-variant/20 px-4 py-3 rounded-xl w-fit">
+    <div class="flex items-center gap-2">
+      <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+      <span class="font-label text-xs font-bold uppercase tracking-widest text-on-surface-variant">
+        Convite enviado — aguardando resposta
+      </span>
+    </div>
+    <button
+      (click)="onCancelar()"
+      [disabled]="cancelando"
+      class="text-error font-bold text-xs uppercase tracking-wider hover:opacity-80 transition-opacity disabled:opacity-40">
+      Cancelar
+    </button>
+  </div>
+</ng-container>
+
+<!-- ─── ANFITRIÃO: convite aceito ─── -->
+<ng-container *ngIf="isAnfitriao && convite?.status === 'ACEITO'">
+  <div class="flex items-center gap-2 bg-secondary-container text-on-secondary-container px-4 py-3 rounded-xl w-fit">
+    <span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+    <span class="font-label font-bold text-xs uppercase tracking-widest">
+      Moradia confirmada! Acesso às despesas liberado.
+    </span>
+  </div>
+</ng-container>
+
+<!-- ─── ANFITRIÃO: convite recusado ─── -->
+<ng-container *ngIf="isAnfitriao && convite?.status === 'RECUSADO'">
+  <div class="flex items-center gap-2 bg-error-container text-on-error-container px-4 py-3 rounded-xl w-fit">
+    <span class="material-symbols-outlined text-lg">cancel</span>
+    <span class="font-label font-bold text-xs uppercase tracking-widest">Convite recusado</span>
+    <button
+      (click)="onEnviar()"
+      class="ml-2 text-xs font-bold underline underline-offset-2 hover:opacity-80">
+      Reenviar
+    </button>
+  </div>
+</ng-container>
+
+<!-- ─── COLEGA: convite pendente recebido ─── -->
+<ng-container *ngIf="!isAnfitriao && convite?.status === 'PENDENTE'">
+  <div class="bg-surface-container-lowest border border-secondary-container/40 rounded-xl p-4 flex flex-col gap-3 shadow-md">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">handshake</span>
+      <p class="font-headline font-bold text-base text-primary">Convite de Moradia</p>
+    </div>
+    <p class="text-sm text-on-surface-variant leading-relaxed">
+      Você recebeu um convite para morar neste imóvel. Ao aceitar, você terá acesso à
+      área de gestão de despesas compartilhada.
+    </p>
+    <p *ngIf="convite?.mensagem" class="text-sm italic text-on-surface-variant border-l-2 border-secondary-container pl-3">
+      "{{ convite!.mensagem }}"
+    </p>
+    <div class="flex gap-3">
+      <button
+        (click)="onAceitar()"
+        [disabled]="respondendo"
+        class="flex-1 bg-gradient-to-br from-primary to-primary-container text-white font-label font-bold text-sm tracking-wide uppercase py-3 rounded-xl active:scale-95 transition-transform disabled:opacity-60">
+        {{ respondendo ? 'Processando...' : 'Aceitar Convite' }}
+      </button>
+      <button
+        (click)="onRecusar()"
+        [disabled]="respondendo"
+        class="flex-1 bg-surface-container-high text-on-surface-variant font-label font-bold text-sm tracking-wide uppercase py-3 rounded-xl hover:bg-surface-container-highest transition-colors active:scale-95 disabled:opacity-60">
+        Recusar
+      </button>
+    </div>
+  </div>
+</ng-container>
+
+<!-- ─── COLEGA: convite aceito ─── -->
+<ng-container *ngIf="!isAnfitriao && convite?.status === 'ACEITO'">
+  <div class="bg-secondary-container rounded-xl p-4 flex items-center justify-between gap-3">
+    <div class="flex items-center gap-2">
+      <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home_work</span>
+      <span class="font-label font-bold text-sm text-on-secondary-container uppercase tracking-wider">
+        Moradia confirmada
+      </span>
+    </div>
+    <a
+      routerLink="/despesas"
+      class="flex items-center gap-1 text-on-secondary-container font-bold text-xs uppercase tracking-widest underline underline-offset-4 hover:opacity-80">
+      Ver Despesas
+      <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </a>
+  </div>
+</ng-container>
+
+<!-- ─── COLEGA: convite recusado ─── -->
+<ng-container *ngIf="!isAnfitriao && convite?.status === 'RECUSADO'">
+  <div class="bg-error-container/40 text-on-error-container px-4 py-3 rounded-xl flex items-center gap-2">
+    <span class="material-symbols-outlined text-sm">info</span>
+    <span class="font-label text-xs font-bold uppercase tracking-widest">
+      Você recusou este convite.
+    </span>
+  </div>
+</ng-container>
+
+<!-- ─── Feedback de erro ─── -->
+<p *ngIf="erro" class="text-xs text-error font-medium mt-1 flex items-center gap-1">
+  <span class="material-symbols-outlined text-sm">error</span>
+  {{ erro }}
+</p>
