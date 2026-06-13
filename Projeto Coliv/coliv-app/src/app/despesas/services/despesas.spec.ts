@@ -65,7 +65,6 @@ describe('DespesasService', () => {
     const dadosSalvos = [{ ...despesaBase, id: 9999 }];
     localStorage.setItem('gastos', JSON.stringify(dadosSalvos));
 
-    // recria o serviço para disparar carregarDados()
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({});
     const novoService = TestBed.inject(DespesasService);
