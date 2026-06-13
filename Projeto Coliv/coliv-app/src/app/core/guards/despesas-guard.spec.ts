@@ -5,6 +5,7 @@ import {
   Router,
   CanActivateFn,
 } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { despesasGuard } from './despesas-guard';
 import { ConviteService, ConviteResponse } from '../services/convite.service';
@@ -134,9 +135,7 @@ describe('authInterceptor', () => {
   });
 
   it('deve passar requisição sem header Authorization quando não há token', () => {
-    const http = TestBed.inject(
-      (await import('@angular/common/http')).HttpClient
-    );
+    const http = TestBed.inject(HttpClient);
     http.get('http://localhost:8080/test').subscribe();
     const req = httpMock.expectOne('http://localhost:8080/test');
     expect(req.request.headers.has('Authorization')).toBeFalse();
