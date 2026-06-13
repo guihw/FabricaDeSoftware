@@ -98,11 +98,10 @@ describe('ApiService', () => {
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
 
-    expect(concluido).toBeTrue();
+    expect(concluido).toBe(true);
   });
 
-
-// aqui é pra tratar erros
+  // Isso aqui vamos deixar para tratar erros.
 
   it('deve retornar erro amigável para status 0 (sem conexão)', () => {
     let apiError: any;
@@ -178,8 +177,7 @@ describe('ApiService', () => {
       .expectOne(`${BASE}/test`)
       .flush({}, { status: 403, statusText: 'Forbidden' });
 
-    expect(apiError).toEqual(
-      jasmine.objectContaining({ status: 403, message: jasmine.any(String) })
-    );
+    expect(apiError.status).toBe(403);
+    expect(typeof apiError.message).toBe('string');
   });
 });
