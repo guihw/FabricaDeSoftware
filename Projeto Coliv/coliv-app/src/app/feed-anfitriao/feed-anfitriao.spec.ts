@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { of, throwError } from 'rxjs';
 import { provideRouter } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
 import { FeedAnfitriao } from './feed-anfitriao';
 import {
   RecomendacaoService,
@@ -17,7 +18,10 @@ function makeFeedColega(itens: RecomendacaoColegaDTO[]): FeedPageDTO<Recomendaca
 describe('FeedAnfitriao', () => {
   let component: FeedAnfitriao;
   let fixture: ComponentFixture<FeedAnfitriao>;
-  let recomendacaoSpy: jasmine.SpyObj<RecomendacaoService>;
+  let recomendacaoSpy: {
+    feedAnfitriao: ReturnType<typeof vi.fn>;
+    feedColega: ReturnType<typeof vi.fn>;
+  };
 
   const recColega: RecomendacaoColegaDTO = {
     colegaId: 3, nome: 'Lucas', email: 'lucas@email.com',
@@ -25,10 +29,11 @@ describe('FeedAnfitriao', () => {
   };
 
   beforeEach(async () => {
-    recomendacaoSpy = jasmine.createSpyObj('RecomendacaoService', [
-      'feedAnfitriao', 'feedColega',
-    ]);
-    recomendacaoSpy.feedAnfitriao.and.returnValue(of(makeFeedColega([recColega])));
+    recomendacaoSpy = {
+      feedAnfitriao: vi.fn(),
+      feedColega: vi.fn(),
+    };
+    recomendacaoSpy.feedAnfitriao.mockReturnValue(of(makeFeedColega([recColega])));
 
     sessionStorage.setItem('coliv_user_id', '5');
 
@@ -59,34 +64,36 @@ describe('FeedAnfitriao', () => {
   });
 
   it('deve definir carregando como false após sucesso', () => {
-    expect(component.carregando()).toBeFalse();
+    expect(component.carregando()).toBe(false);
   });
 
   it('deve exibir erro e desativar carregando quando feedAnfitriao falha', fakeAsync(() => {
-    recomendacaoSpy.feedAnfitriao.and.returnValue(
+    recomendacaoSpy.feedAnfitriao.mockReturnValue(
       throwError(() => ({ message: 'Erro de rede.' }))
     );
     component.carregarPagina(0);
     tick();
     expect(component.erro()).toBe('Erro de rede.');
-    expect(component.carregando()).toBeFalse();
+    expect(component.carregando()).toBe(false);
   }));
 
   it('deve exibir erro de sessão quando não há user_id no sessionStorage', fakeAsync(() => {
     sessionStorage.clear();
-   
+    // recria componente sem user_id
     fixture = TestBed.createComponent(FeedAnfitriao);
     component = fixture.componentInstance;
     fixture.detectChanges();
     tick();
     expect(component.erro()).toContain('Sessão');
-    expect(component.carregando()).toBeFalse();
+    expect(component.carregando()).toBe(false);
   }));
 
   it('deve avançar para próxima página', fakeAsync(() => {
     const pag1 = { ...makeFeedColega([recColega]), pagina: 0, temProxima: true };
     const pag2 = { ...makeFeedColega([recColega]), pagina: 1, temProxima: false };
-    recomendacaoSpy.feedAnfitriao.and.returnValues(of(pag1), of(pag2));
+    recomendacaoSpy.feedAnfitriao
+      .mockReturnValueOnce(of(pag1))
+      .mockReturnValueOnce(of(pag2));
     component.carregarPagina(0); tick();
     component.temProxima.set(true);
     component.proximaPagina();     tick();
@@ -95,15 +102,15 @@ describe('FeedAnfitriao', () => {
 
   it('não deve avançar página quando temProxima é false', fakeAsync(() => {
     component.carregarPagina(0); tick();
-    const chamadas = recomendacaoSpy.feedAnfitriao.calls.count();
+    const chamadas = recomendacaoSpy.feedAnfitriao.mock.calls.length;
     component.proximaPagina();
     tick();
-    expect(recomendacaoSpy.feedAnfitriao.calls.count()).toBe(chamadas);
+    expect(recomendacaoSpy.feedAnfitriao.mock.calls.length).toBe(chamadas);
   }));
 
   it('deve voltar para página anterior', fakeAsync(() => {
     component.pagina.set(1);
-    recomendacaoSpy.feedAnfitriao.and.returnValue(of(makeFeedColega([recColega])));
+    recomendacaoSpy.feedAnfitriao.mockReturnValue(of(makeFeedColega([recColega])));
     component.paginaAnterior();
     tick();
     expect(recomendacaoSpy.feedAnfitriao).toHaveBeenCalledWith(5, 0);
@@ -111,10 +118,10 @@ describe('FeedAnfitriao', () => {
 
   it('não deve voltar antes da página 0', fakeAsync(() => {
     component.pagina.set(0);
-    const chamadas = recomendacaoSpy.feedAnfitriao.calls.count();
+    const chamadas = recomendacaoSpy.feedAnfitriao.mock.calls.length;
     component.paginaAnterior();
     tick();
-    expect(recomendacaoSpy.feedAnfitriao.calls.count()).toBe(chamadas);
+    expect(recomendacaoSpy.feedAnfitriao.mock.calls.length).toBe(chamadas);
   }));
 
   it('onRecusar deve remover colega localmente da lista', () => {

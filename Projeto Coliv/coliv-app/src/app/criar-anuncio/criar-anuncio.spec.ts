@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
 import { CriarAnuncio } from './criar-anuncio';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovel } from '../core/models/formulario.model';
@@ -9,15 +10,15 @@ import { DadosImovel } from '../core/models/formulario.model';
 describe('CriarAnuncio', () => {
   let component: CriarAnuncio;
   let fixture: ComponentFixture<CriarAnuncio>;
-  let dadosImovelSpy: jasmine.SpyObj<DadosImovelService>;
+  let dadosImovelSpy: { criar: ReturnType<typeof vi.fn> };
 
   const imovelMock: DadosImovel = {
     id: 1, anfitriaoId: 5, descricao: 'Casa bonita', localizacao: 'SP', quartos: 2,
   };
 
   beforeEach(async () => {
-    dadosImovelSpy = jasmine.createSpyObj('DadosImovelService', ['criar']);
-    dadosImovelSpy.criar.and.returnValue(of(imovelMock));
+    dadosImovelSpy = { criar: vi.fn() };
+    dadosImovelSpy.criar.mockReturnValue(of(imovelMock));
 
     sessionStorage.setItem('coliv_user_id', '5');
 
@@ -33,6 +34,7 @@ describe('CriarAnuncio', () => {
 
   afterEach(() => sessionStorage.clear());
 
+  // ── Criação e formulário ──────────────────────────────────────
 
   it('deve ser criado', () => expect(component).toBeTruthy());
 
@@ -41,7 +43,7 @@ describe('CriarAnuncio', () => {
   });
 
   it('formulário deve ser inválido com campos vazios', () => {
-    expect(component.form.valid).toBeFalse();
+    expect(component.form.valid).toBe(false);
   });
 
   it('formulário deve ser válido com todos os campos preenchidos', () => {
@@ -51,9 +53,10 @@ describe('CriarAnuncio', () => {
       tipoVaga: 'Quarto Privativo',
       bairro: 'Pinheiros',
     });
-    expect(component.form.valid).toBeTrue();
+    expect(component.form.valid).toBe(true);
   });
 
+  // ── fotosPreenchidas ──────────────────────────────────────────
 
   it('fotosPreenchidas deve ser 0 inicialmente', () => {
     expect(component.fotosPreenchidas).toBe(0);
@@ -65,13 +68,14 @@ describe('CriarAnuncio', () => {
     expect(component.fotosPreenchidas).toBe(1);
   });
 
+  // ── prontoParaPublicar ────────────────────────────────────────
 
   it('prontoParaPublicar deve ser false sem fotos', () => {
     component.form.patchValue({
       manifesto: 'A'.repeat(50), preco: 1200,
       tipoVaga: 'Quarto Privativo', bairro: 'Centro',
     });
-    expect(component.prontoParaPublicar).toBeFalse();
+    expect(component.prontoParaPublicar).toBe(false);
   });
 
   it('prontoParaPublicar deve ser true com formulário válido e foto', () => {
@@ -85,7 +89,7 @@ describe('CriarAnuncio', () => {
       preview: 'data:image',
       principal: true,
     };
-    expect(component.prontoParaPublicar).toBeTrue();
+    expect(component.prontoParaPublicar).toBe(true);
   });
 
 
@@ -97,9 +101,11 @@ describe('CriarAnuncio', () => {
   });
 
   it('amenidadesSelecionadas deve retornar os ids selecionados', () => {
+    // Garante que piscina não está selecionada
     component.amenidades.find(a => a.id === 'piscina')!.selecionada = false;
     const selecionados = component.amenidadesSelecionadas;
     expect(selecionados).not.toContain('piscina');
+    // wifi começa como selecionado
     expect(selecionados).toContain('wifi');
   });
 
@@ -132,7 +138,7 @@ describe('CriarAnuncio', () => {
     };
     component.publicar();
     tick();
-    expect(dadosImovelSpy.criar).toHaveBeenCalledWith(5, jasmine.any(Object));
+    expect(dadosImovelSpy.criar).toHaveBeenCalledWith(5, expect.any(Object));
   }));
 
   it('deve definir publicado como true após sucesso', fakeAsync(() => {
@@ -148,12 +154,12 @@ describe('CriarAnuncio', () => {
     };
     component.publicar();
     tick();
-    expect(component.publicado).toBeTrue();
-    expect(component.publicando).toBeFalse();
+    expect(component.publicado).toBe(true);
+    expect(component.publicando).toBe(false);
   }));
 
   it('deve definir erroPublicacao quando publicar falha', fakeAsync(() => {
-    dadosImovelSpy.criar.and.returnValue(
+    dadosImovelSpy.criar.mockReturnValue(
       throwError(() => ({ status: 500, message: 'Erro no servidor.' }))
     );
     component.form.patchValue({
@@ -169,7 +175,7 @@ describe('CriarAnuncio', () => {
     component.publicar();
     tick();
     expect(component.erroPublicacao).toBe('Erro no servidor.');
-    expect(component.publicando).toBeFalse();
+    expect(component.publicando).toBe(false);
   }));
 
   it('deve exibir erro de sessão quando não há anfitriaoId', fakeAsync(() => {
@@ -194,19 +200,19 @@ describe('CriarAnuncio', () => {
   it('voltarParaEdicao deve resetar publicado para false', () => {
     component.publicado = true;
     component.voltarParaEdicao();
-    expect(component.publicado).toBeFalse();
+    expect(component.publicado).toBe(false);
   });
 
 
   it('campoInvalido deve retornar false quando intocado', () => {
-    expect(component.campoInvalido('manifesto')).toBeFalse();
+    expect(component.campoInvalido('manifesto')).toBe(false);
   });
 
   it('campoInvalido deve retornar true quando tocado e inválido', () => {
     const ctrl = component.form.get('manifesto')!;
     ctrl.markAsTouched();
     ctrl.setValue('');
-    expect(component.campoInvalido('manifesto')).toBeTrue();
+    expect(component.campoInvalido('manifesto')).toBe(true);
   });
 
 

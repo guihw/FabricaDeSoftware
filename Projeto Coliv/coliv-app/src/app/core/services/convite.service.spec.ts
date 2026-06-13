@@ -27,13 +27,13 @@ describe('ConviteService', () => {
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting(), ConviteService],
     });
-    service  = TestBed.inject(ConviteService);
+    service = TestBed.inject(ConviteService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => httpMock.verify());
 
- 
+  // ── enviar ────────────────────────────────────────────────────
 
   it('deve enviar convite via POST para /convites/enviar/:anfitriaoId', () => {
     const dto: ConviteRequestDTO = { matchId: 10, colegaId: 3, mensagem: 'Olá!' };
@@ -49,6 +49,7 @@ describe('ConviteService', () => {
     expect(resultado).toEqual(conviteMock);
   });
 
+  // ── aceitar ───────────────────────────────────────────────────
 
   it('deve aceitar convite via PATCH para /convites/:id/aceitar', () => {
     const aceito = { ...conviteMock, status: 'ACEITO' as const };
@@ -63,7 +64,7 @@ describe('ConviteService', () => {
     expect(resultado?.status).toBe('ACEITO');
   });
 
- 
+  // ── recusar ───────────────────────────────────────────────────
 
   it('deve recusar convite via PATCH para /convites/:id/recusar', () => {
     const recusado = { ...conviteMock, status: 'RECUSADO' as const };
@@ -78,6 +79,7 @@ describe('ConviteService', () => {
     expect(resultado?.status).toBe('RECUSADO');
   });
 
+  // ── cancelar ──────────────────────────────────────────────────
 
   it('deve cancelar convite via PATCH para /convites/:id/cancelar', () => {
     const cancelado = { ...conviteMock, status: 'CANCELADO' as const };
@@ -92,6 +94,7 @@ describe('ConviteService', () => {
     expect(resultado?.status).toBe('CANCELADO');
   });
 
+  // ── listarParaColega ──────────────────────────────────────────
 
   it('deve listar convites do colega via GET /convites/colega/:colegaId', () => {
     let resultado: ConviteResponse[] | undefined;
@@ -106,7 +109,7 @@ describe('ConviteService', () => {
     expect(resultado?.[0].colegaId).toBe(3);
   });
 
-
+  // ── listarDoAnfitriao ─────────────────────────────────────────
 
   it('deve listar convites do anfitrião via GET /convites/anfitriao/:anfitriaoId', () => {
     let resultado: ConviteResponse[] | undefined;
@@ -120,6 +123,7 @@ describe('ConviteService', () => {
     expect(resultado?.[0].anfitriaoId).toBe(5);
   });
 
+  // ── buscarPorMatch ────────────────────────────────────────────
 
   it('deve buscar convite por matchId via GET /convites/match/:matchId', () => {
     let resultado: ConviteResponse | null | undefined;

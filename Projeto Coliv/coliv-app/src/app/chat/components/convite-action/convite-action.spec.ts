@@ -1,15 +1,21 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
 import { provideRouter } from '@angular/router';
+import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
 import { ConviteActionComponent } from './convite-action';
 import { ConviteService, ConviteResponse } from '../../../core/services/convite.service';
 
 describe('ConviteActionComponent', () => {
   let component: ConviteActionComponent;
   let fixture: ComponentFixture<ConviteActionComponent>;
-  let conviteServiceSpy: jasmine.SpyObj<ConviteService>;
+  let conviteServiceSpy: {
+    buscarPorMatch: ReturnType<typeof vi.fn>;
+    enviar: ReturnType<typeof vi.fn>;
+    cancelar: ReturnType<typeof vi.fn>;
+    aceitar: ReturnType<typeof vi.fn>;
+    recusar: ReturnType<typeof vi.fn>;
+  };
 
   const convitePendente: ConviteResponse = {
     id: 1, matchId: 10, anfitriaoId: 5, colegaId: 3,
@@ -30,11 +36,15 @@ describe('ConviteActionComponent', () => {
   }
 
   beforeEach(async () => {
-    conviteServiceSpy = jasmine.createSpyObj('ConviteService', [
-      'buscarPorMatch', 'enviar', 'cancelar', 'aceitar', 'recusar',
-    ]);
-  
-    conviteServiceSpy.buscarPorMatch.and.returnValue(of(null));
+    conviteServiceSpy = {
+      buscarPorMatch: vi.fn(),
+      enviar: vi.fn(),
+      cancelar: vi.fn(),
+      aceitar: vi.fn(),
+      recusar: vi.fn(),
+    };
+    // Padrão: sem convite existente
+    conviteServiceSpy.buscarPorMatch.mockReturnValue(of(null));
 
     await TestBed.configureTestingModule({
       imports: [ConviteActionComponent, CommonModule],
@@ -44,10 +54,11 @@ describe('ConviteActionComponent', () => {
       ],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(ConviteActionComponent);
+    fixture   = TestBed.createComponent(ConviteActionComponent);
     component = fixture.componentInstance;
   });
 
+  // ── Inicialização ─────────────────────────────────────────────
 
   it('deve ser criado', () => {
     configureComponent();
@@ -65,7 +76,7 @@ describe('ConviteActionComponent', () => {
   });
 
   it('deve emitir conviteAtualizado ao carregar convite existente', () => {
-    conviteServiceSpy.buscarPorMatch.and.returnValue(of(convitePendente));
+    conviteServiceSpy.buscarPorMatch.mockReturnValue(of(convitePendente));
     let emitido: ConviteResponse | null | undefined;
     component.matchId = 10; component.isAnfitriao = true;
     component.anfitriaoId = 5; component.colegaId = 3;
@@ -74,9 +85,10 @@ describe('ConviteActionComponent', () => {
     expect(emitido).toEqual(convitePendente);
   });
 
+  // ── onEnviar ──────────────────────────────────────────────────
 
   it('deve chamar conviteService.enviar ao executar onEnviar', fakeAsync(() => {
-    conviteServiceSpy.enviar.and.returnValue(of(convitePendente));
+    conviteServiceSpy.enviar.mockReturnValue(of(convitePendente));
     configureComponent();
     component.onEnviar();
     tick();
@@ -86,27 +98,27 @@ describe('ConviteActionComponent', () => {
   }));
 
   it('deve atualizar convite após envio com sucesso', fakeAsync(() => {
-    conviteServiceSpy.enviar.and.returnValue(of(convitePendente));
+    conviteServiceSpy.enviar.mockReturnValue(of(convitePendente));
     configureComponent();
     component.onEnviar();
     tick();
     expect(component.convite).toEqual(convitePendente);
-    expect(component.enviando).toBeFalse();
+    expect(component.enviando).toBe(false);
   }));
 
   it('deve definir erro e desativar enviando quando onEnviar falha', fakeAsync(() => {
-    conviteServiceSpy.enviar.and.returnValue(
+    conviteServiceSpy.enviar.mockReturnValue(
       throwError(() => ({ message: 'Falha ao enviar.' }))
     );
     configureComponent();
     component.onEnviar();
     tick();
     expect(component.erro).toBe('Falha ao enviar.');
-    expect(component.enviando).toBeFalse();
+    expect(component.enviando).toBe(false);
   }));
 
   it('não deve chamar enviar duas vezes se já está enviando', fakeAsync(() => {
-    conviteServiceSpy.enviar.and.returnValue(of(convitePendente));
+    conviteServiceSpy.enviar.mockReturnValue(of(convitePendente));
     configureComponent();
     component.enviando = true;
     component.onEnviar();
@@ -114,15 +126,16 @@ describe('ConviteActionComponent', () => {
     expect(conviteServiceSpy.enviar).not.toHaveBeenCalled();
   }));
 
+  // ── onCancelar ────────────────────────────────────────────────
 
   it('deve cancelar convite pendente', fakeAsync(() => {
-    conviteServiceSpy.cancelar.and.returnValue(of(conviteCancelado));
+    conviteServiceSpy.cancelar.mockReturnValue(of(conviteCancelado));
     configureComponent();
     component.convite = convitePendente;
     component.onCancelar();
     tick();
     expect(component.convite?.status).toBe('CANCELADO');
-    expect(component.cancelando).toBeFalse();
+    expect(component.cancelando).toBe(false);
   }));
 
   it('não deve chamar cancelar se não há convite', fakeAsync(() => {
@@ -134,7 +147,7 @@ describe('ConviteActionComponent', () => {
   }));
 
   it('deve definir erro quando cancelar falha', fakeAsync(() => {
-    conviteServiceSpy.cancelar.and.returnValue(
+    conviteServiceSpy.cancelar.mockReturnValue(
       throwError(() => ({ message: 'Erro ao cancelar.' }))
     );
     configureComponent();
@@ -144,15 +157,16 @@ describe('ConviteActionComponent', () => {
     expect(component.erro).toBe('Erro ao cancelar.');
   }));
 
+  // ── onAceitar ─────────────────────────────────────────────────
 
   it('deve aceitar convite e atualizar status para ACEITO', fakeAsync(() => {
-    conviteServiceSpy.aceitar.and.returnValue(of(conviteAceito));
+    conviteServiceSpy.aceitar.mockReturnValue(of(conviteAceito));
     configureComponent(false); // colega
     component.convite = convitePendente;
     component.onAceitar();
     tick();
     expect(component.convite?.status).toBe('ACEITO');
-    expect(component.respondendo).toBeFalse();
+    expect(component.respondendo).toBe(false);
   }));
 
   it('não deve aceitar se já está respondendo', fakeAsync(() => {
@@ -165,7 +179,7 @@ describe('ConviteActionComponent', () => {
   }));
 
   it('deve definir erro quando aceitar falha', fakeAsync(() => {
-    conviteServiceSpy.aceitar.and.returnValue(
+    conviteServiceSpy.aceitar.mockReturnValue(
       throwError(() => ({ message: 'Erro ao aceitar.' }))
     );
     configureComponent(false);
@@ -175,9 +189,10 @@ describe('ConviteActionComponent', () => {
     expect(component.erro).toBe('Erro ao aceitar.');
   }));
 
+  // ── onRecusar ─────────────────────────────────────────────────
 
   it('deve recusar convite e atualizar status para RECUSADO', fakeAsync(() => {
-    conviteServiceSpy.recusar.and.returnValue(of(conviteRecusado));
+    conviteServiceSpy.recusar.mockReturnValue(of(conviteRecusado));
     configureComponent(false);
     component.convite = convitePendente;
     component.onRecusar();
@@ -196,7 +211,7 @@ describe('ConviteActionComponent', () => {
   // ── Emissão de eventos ────────────────────────────────────────
 
   it('deve emitir conviteAtualizado ao aceitar', fakeAsync(() => {
-    conviteServiceSpy.aceitar.and.returnValue(of(conviteAceito));
+    conviteServiceSpy.aceitar.mockReturnValue(of(conviteAceito));
     configureComponent(false);
     component.convite = convitePendente;
     let emitido: ConviteResponse | null | undefined;
@@ -207,7 +222,7 @@ describe('ConviteActionComponent', () => {
   }));
 
   it('deve emitir conviteAtualizado ao cancelar', fakeAsync(() => {
-    conviteServiceSpy.cancelar.and.returnValue(of(conviteCancelado));
+    conviteServiceSpy.cancelar.mockReturnValue(of(conviteCancelado));
     configureComponent();
     component.convite = convitePendente;
     let emitido: ConviteResponse | null | undefined;

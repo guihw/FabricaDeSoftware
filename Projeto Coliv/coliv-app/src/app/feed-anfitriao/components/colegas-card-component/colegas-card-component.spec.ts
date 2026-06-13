@@ -36,6 +36,7 @@ describe('ColegasCardComponent', () => {
     expect(component.resumo).toBe('Hábitos similares');
   });
 
+  // ── iniciais ──────────────────────────────────────────────────
 
   it('deve retornar iniciais do nome (2 primeiras palavras)', () => {
     expect(component.iniciais).toBe('AB');
@@ -51,6 +52,7 @@ describe('ColegasCardComponent', () => {
     expect(component.iniciais).toBe('MJ');
   });
 
+  // ── corScore ──────────────────────────────────────────────────
 
   it('deve retornar classe verde para score >= 80', () => {
     expect(component.corScore).toContain('secondary-container');
@@ -66,6 +68,7 @@ describe('ColegasCardComponent', () => {
     expect(component.corScore).toContain('surface-container-high');
   });
 
+  // ── Eventos ───────────────────────────────────────────────────
 
   it('deve emitir evento aceitar ao chamar onAceitar', () => {
     let emitido: RecomendacaoColegaDTO | undefined;

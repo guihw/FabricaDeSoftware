@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { CommonModule } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-
+import { vi } from 'vitest';
 import { FeedColega } from './feed-colega';
 import {
   RecomendacaoService,
@@ -29,15 +29,19 @@ function makeFeedMoradia(itens: RecomendacaoCardAnfitriaoDTO[]): FeedPageDTO<Rec
 describe('FeedColega', () => {
   let component: FeedColega;
   let fixture: ComponentFixture<FeedColega>;
-  let recomendacaoSpy: jasmine.SpyObj<RecomendacaoService>;
+  let recomendacaoSpy: {
+    feedColega: ReturnType<typeof vi.fn>;
+    feedAnfitriao: ReturnType<typeof vi.fn>;
+  };
 
   const card = makeCardDTO();
 
   beforeEach(async () => {
-    recomendacaoSpy = jasmine.createSpyObj('RecomendacaoService', [
-      'feedColega', 'feedAnfitriao',
-    ]);
-    recomendacaoSpy.feedColega.and.returnValue(of(makeFeedMoradia([card])));
+    recomendacaoSpy = {
+      feedColega: vi.fn(),
+      feedAnfitriao: vi.fn(),
+    };
+    recomendacaoSpy.feedColega.mockReturnValue(of(makeFeedMoradia([card])));
 
     sessionStorage.setItem('coliv_user_id', '3');
 
@@ -67,11 +71,11 @@ describe('FeedColega', () => {
   });
 
   it('deve definir carregando como false após sucesso', () => {
-    expect(component.carregando()).toBeFalse();
+    expect(component.carregando()).toBe(false);
   });
 
   it('deve exibir erro quando feedColega falha', fakeAsync(() => {
-    recomendacaoSpy.feedColega.and.returnValue(
+    recomendacaoSpy.feedColega.mockReturnValue(
       throwError(() => ({ message: 'Sem conexão.' }))
     );
     component.carregarPagina(0);

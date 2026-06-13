@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { MoradiaCardComponent } from './moradia-card-component';
-import { RecomendacaoCardAnfitriaoDTO} from '../../../core/services/recomendacao.service';
+import { RecomendacaoCardAnfitriaoDTO } from '../../../core/services/recomendacao.service';
 
 describe('MoradiaCardComponent', () => {
   let component: MoradiaCardComponent;
@@ -28,7 +28,7 @@ describe('MoradiaCardComponent', () => {
       imports: [MoradiaCardComponent, CommonModule],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(MoradiaCardComponent);
+    fixture   = TestBed.createComponent(MoradiaCardComponent);
     component = fixture.componentInstance;
     component.recomendacao = recomendacaoBase;
     fixture.detectChanges();
@@ -48,6 +48,7 @@ describe('MoradiaCardComponent', () => {
     expect(component.resumo).toBe('Perfil compatível');
   });
 
+  // ── precoFormatado ─────────────────────────────────────────────
 
   it('deve formatar preço em BRL corretamente', () => {
     expect(component.precoFormatado).toContain('2.500');
@@ -61,6 +62,7 @@ describe('MoradiaCardComponent', () => {
     expect(component.precoFormatado).toBe('A consultar');
   });
 
+  // ── corScore ──────────────────────────────────────────────────
 
   it('deve retornar classe verde para score >= 80', () => {
     component.recomendacao = { ...recomendacaoBase, score: 90 };
@@ -76,13 +78,14 @@ describe('MoradiaCardComponent', () => {
     expect(component.corScore).toContain('surface-container-high');
   });
 
+  // ── estrelas ──────────────────────────────────────────────────
 
   it('estrelas(4) deve retornar true para classificação 4.2', () => {
-    expect(component.estrelas(4)).toBeTrue();
+    expect(component.estrelas(4)).toBe(true);
   });
 
   it('estrelas(5) deve retornar false para classificação 4.2', () => {
-    expect(component.estrelas(5)).toBeFalse();
+    expect(component.estrelas(5)).toBe(false);
   });
 
   it('estrelas deve retornar false quando classificação é null', () => {
@@ -90,7 +93,7 @@ describe('MoradiaCardComponent', () => {
       ...recomendacaoBase,
       card: { ...recomendacaoBase.card, classificacao: null },
     };
-    expect(component.estrelas(1)).toBeFalse();
+    expect(component.estrelas(1)).toBe(false);
   });
 
   it('deve emitir evento like com a recomendação ao clicar', () => {
