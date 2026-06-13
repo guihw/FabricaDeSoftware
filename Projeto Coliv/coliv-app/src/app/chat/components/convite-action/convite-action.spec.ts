@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ConviteActionComponent } from './convite-action';
 
-import { ConviteAction } from './convite-action';
 
 describe('ConviteAction', () => {
-  let component: ConviteAction;
-  let fixture: ComponentFixture<ConviteAction>;
+  let component: ConviteActionComponent;
+  let fixture: ComponentFixture<ConviteActionComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ConviteAction]
+      imports: [ConviteActionComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ConviteAction);
+    fixture = TestBed.createComponent(ConviteActionComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });
