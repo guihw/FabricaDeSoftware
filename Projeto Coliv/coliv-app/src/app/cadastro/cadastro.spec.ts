@@ -3,7 +3,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { of, throwError } from 'rxjs';
-
+import { provideRouter } from '@angular/router';
 import { Cadastro } from './cadastro';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
@@ -34,9 +34,10 @@ describe('Cadastro', () => {
       providers: [
         provideHttpClient(),
         provideHttpClientTesting(),
+        provideRouter([]),
         { provide: AnfitriaoService, useValue: anfitriaoServiceSpy },
-        { provide: ColegaService, useValue: colegaServiceSpy },
-        { provide: Router, useValue: routerSpy},
+        { provide: ColegaService,    useValue: colegaServiceSpy    },
+        { provide: Router,           useValue: routerSpy           },
       ],
     }).compileComponents();
 

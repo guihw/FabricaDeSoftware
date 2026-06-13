@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { CommonModule } from '@angular/common';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
-
+import { provideRouter } from '@angular/router';
 import { ConviteActionComponent } from './convite-action';
 import { ConviteService, ConviteResponse } from '../../../core/services/convite.service';
 
@@ -37,11 +37,14 @@ describe('ConviteActionComponent', () => {
     conviteServiceSpy.buscarPorMatch.and.returnValue(of(null));
 
     await TestBed.configureTestingModule({
-      imports: [ConviteActionComponent, CommonModule, RouterTestingModule],
-      providers: [{ provide: ConviteService, useValue: conviteServiceSpy }],
+      imports: [ConviteActionComponent, CommonModule],
+      providers: [
+        provideRouter([]),
+        { provide: ConviteService, useValue: conviteServiceSpy },
+      ],
     }).compileComponents();
 
-    fixture   = TestBed.createComponent(ConviteActionComponent);
+    fixture = TestBed.createComponent(ConviteActionComponent);
     component = fixture.componentInstance;
   });
 
