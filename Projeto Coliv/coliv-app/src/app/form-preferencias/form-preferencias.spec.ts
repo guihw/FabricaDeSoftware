@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
+
 import { FormPreferencias } from './form-preferencias';
 import { PreferenciasAnfitriaoService } from '../core/services/preferencias-anfitriao.service';
 import { PreferenciasColegaService } from '../core/services/preferencias-colega.service';
@@ -11,9 +12,9 @@ import { PreferenciasColegaService } from '../core/services/preferencias-colega.
 describe('FormPreferencias', () => {
   let component: FormPreferencias;
   let fixture: ComponentFixture<FormPreferencias>;
-  let anfitriaoService: jasmine.SpyObj<PreferenciasAnfitriaoService>;
-  let colegaService: jasmine.SpyObj<PreferenciasColegaService>;
-  let router: jasmine.SpyObj<Router>;
+  let anfitriaoService: { criar: ReturnType<typeof vi.fn> };
+  let colegaService: { criar: ReturnType<typeof vi.fn> };
+  let router: { navigate: ReturnType<typeof vi.fn> };
 
   const prefAnfitriaoMock = {
     id: 1, anfitriaoId: 5,
@@ -39,17 +40,17 @@ describe('FormPreferencias', () => {
   }
 
   beforeEach(async () => {
-    anfitriaoService = jasmine.createSpyObj('PreferenciasAnfitriaoService', ['criar']);
-    colegaService  = jasmine.createSpyObj('PreferenciasColegaService',    ['criar']);
-    router = jasmine.createSpyObj('Router', ['navigate']);
+    anfitriaoService = { criar: vi.fn() };
+    colegaService    = { criar: vi.fn() };
+    router           = { navigate: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [FormPreferencias, CommonModule, ReactiveFormsModule],
       providers: [
         provideRouter([]),
         { provide: PreferenciasAnfitriaoService, useValue: anfitriaoService },
-        { provide: PreferenciasColegaService, useValue: colegaService },
-        { provide: Router, useValue: router },
+        { provide: PreferenciasColegaService,    useValue: colegaService    },
+        { provide: Router,                       useValue: router           },
       ],
     }).compileComponents();
 
@@ -58,6 +59,8 @@ describe('FormPreferencias', () => {
   });
 
   afterEach(() => sessionStorage.clear());
+
+
 
   it('deve ser criado', () => {
     setupSession('colega');
@@ -68,13 +71,13 @@ describe('FormPreferencias', () => {
   it('deve detectar tipo "anfitriao" pelo sessionStorage', () => {
     setupSession('anfitriao');
     fixture.detectChanges();
-    expect(component.isAnfitriao()).toBeTrue();
+    expect(component.isAnfitriao()).toBe(true);
   });
 
   it('deve detectar tipo "colega" pelo sessionStorage', () => {
     setupSession('colega');
     fixture.detectChanges();
-    expect(component.isAnfitriao()).toBeFalse();
+    expect(component.isAnfitriao()).toBe(false);
   });
 
   it('deve carregar userId do sessionStorage', () => {
@@ -99,23 +102,23 @@ describe('FormPreferencias', () => {
   it('ativo() deve retornar true quando valor coincide', () => {
     setupSession('colega');
     fixture.detectChanges();
-    expect(component.ativo(component.ritmoSono, 'EQUILIBRADO')).toBeTrue();
+    expect(component.ativo(component.ritmoSono, 'EQUILIBRADO')).toBe(true);
   });
 
   it('ativo() deve retornar false quando valor não coincide', () => {
     setupSession('colega');
     fixture.detectChanges();
-    expect(component.ativo(component.ritmoSono, 'NOTURNO')).toBeFalse();
+    expect(component.ativo(component.ritmoSono, 'NOTURNO')).toBe(false);
   });
 
   it('togglePets deve alternar o estado de aceitaPets', () => {
     setupSession('colega');
     fixture.detectChanges();
-    expect(component.aceitaPets()).toBeFalse();
+    expect(component.aceitaPets()).toBe(false);
     component.togglePets();
-    expect(component.aceitaPets()).toBeTrue();
+    expect(component.aceitaPets()).toBe(true);
     component.togglePets();
-    expect(component.aceitaPets()).toBeFalse();
+    expect(component.aceitaPets()).toBe(false);
   });
 
 
@@ -124,7 +127,7 @@ describe('FormPreferencias', () => {
     fixture.detectChanges();
     component.form.patchValue({ localizacao: '' });
     component.salvar();
-    expect(component.form.get('localizacao')?.touched).toBeTrue();
+    expect(component.form.get('localizacao')?.touched).toBe(true);
   });
 
   it('deve exibir erro quando não há userId na sessão', () => {
@@ -135,21 +138,22 @@ describe('FormPreferencias', () => {
     expect(component.erro()).toContain('Sessão');
   });
 
+  // ── Salvar Colega ─────────────────────────────────────────────
 
   it('deve chamar colegaService.criar para perfil colega', fakeAsync(() => {
-    colegaService.criar.and.returnValue(of(prefColegaMock));
+    colegaService.criar.mockReturnValue(of(prefColegaMock));
     setupSession('colega', 3);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 800, precoMax: 2000 });
     component.salvar();
     tick();
-    expect(colegaService.criar).toHaveBeenCalledWith(3, jasmine.objectContaining({
+    expect(colegaService.criar).toHaveBeenCalledWith(3, expect.objectContaining({
       localizacao: 'SP', precoMinimo: 800, precoMaximo: 2000,
     }));
   }));
 
   it('deve navegar para /feedcolega após salvar colega com sucesso', fakeAsync(() => {
-    colegaService.criar.and.returnValue(of(prefColegaMock));
+    colegaService.criar.mockReturnValue(of(prefColegaMock));
     setupSession('colega', 3);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 800, precoMax: 2000 });
@@ -169,7 +173,7 @@ describe('FormPreferencias', () => {
   }));
 
   it('deve exibir erro quando colegaService.criar falha', fakeAsync(() => {
-    colegaService.criar.and.returnValue(
+    colegaService.criar.mockReturnValue(
       throwError(() => ({ status: 400, message: 'Dados inválidos.' }))
     );
     setupSession('colega', 3);
@@ -178,22 +182,23 @@ describe('FormPreferencias', () => {
     component.salvar();
     tick();
     expect(component.erro()).toBe('Dados inválidos.');
-    expect(component.carregando()).toBeFalse();
+    expect(component.carregando()).toBe(false);
   }));
 
+  // ── Salvar Anfitrião ──────────────────────────────────────────
 
   it('deve chamar anfitriaoService.criar para perfil anfitriao', fakeAsync(() => {
-    anfitriaoService.criar.and.returnValue(of(prefAnfitriaoMock));
+    anfitriaoService.criar.mockReturnValue(of(prefAnfitriaoMock));
     setupSession('anfitriao', 5);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP' });
     component.salvar();
     tick();
-    expect(anfitriaoService.criar).toHaveBeenCalledWith(5, jasmine.any(Object));
+    expect(anfitriaoService.criar).toHaveBeenCalledWith(5, expect.any(Object));
   }));
 
   it('deve navegar para /feedanfitriao após salvar anfitrião com sucesso', fakeAsync(() => {
-    anfitriaoService.criar.and.returnValue(of(prefAnfitriaoMock));
+    anfitriaoService.criar.mockReturnValue(of(prefAnfitriaoMock));
     setupSession('anfitriao', 5);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP' });
@@ -203,17 +208,17 @@ describe('FormPreferencias', () => {
   }));
 
   it('deve definir sucesso como true após salvar anfitrião', fakeAsync(() => {
-    anfitriaoService.criar.and.returnValue(of(prefAnfitriaoMock));
+    anfitriaoService.criar.mockReturnValue(of(prefAnfitriaoMock));
     setupSession('anfitriao', 5);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP' });
     component.salvar();
     tick();
-    expect(component.sucesso()).toBeTrue();
+    expect(component.sucesso()).toBe(true);
   }));
 
   it('deve incluir aceitaAnimais no dto do colega', fakeAsync(() => {
-    colegaService.criar.and.returnValue(of(prefColegaMock));
+    colegaService.criar.mockReturnValue(of(prefColegaMock));
     setupSession('colega', 3);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 800, precoMax: 2000 });
@@ -221,7 +226,7 @@ describe('FormPreferencias', () => {
     component.salvar();
     tick();
     expect(colegaService.criar).toHaveBeenCalledWith(3,
-      jasmine.objectContaining({ aceitaAnimais: true })
+      expect.objectContaining({ aceitaAnimais: true })
     );
   }));
 });

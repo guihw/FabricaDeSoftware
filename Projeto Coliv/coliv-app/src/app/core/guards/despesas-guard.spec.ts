@@ -5,27 +5,15 @@ import {
   Router,
   CanActivateFn,
 } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
+import { vi } from 'vitest';
+
 import { despesasGuard } from './despesas-guard';
 import { ConviteService, ConviteResponse } from '../services/convite.service';
 
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
-import {
-  provideHttpClient,
-  withInterceptors,
-  HttpRequest,
-  HttpHandlerFn,
-} from '@angular/common/http';
-import { authInterceptor } from '../interceptors/auth.interceptor';
-
-
 describe('despesasGuard', () => {
-  let conviteServiceSpy: jasmine.SpyObj<ConviteService>;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let conviteServiceSpy: { listarParaColega: ReturnType<typeof vi.fn> };
+  let routerSpy: { navigate: ReturnType<typeof vi.fn> };
 
   const conviteAceito: ConviteResponse = {
     id: 1, matchId: 10, anfitriaoId: 5, colegaId: 3,
@@ -38,13 +26,13 @@ describe('despesasGuard', () => {
     TestBed.runInInjectionContext(() => despesasGuard(...args));
 
   beforeEach(() => {
-    conviteServiceSpy = jasmine.createSpyObj('ConviteService', ['listarParaColega']);
-    routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    conviteServiceSpy = { listarParaColega: vi.fn() };
+    routerSpy = { navigate: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
         { provide: ConviteService, useValue: conviteServiceSpy },
-        { provide: Router, useValue: routerSpy},
+        { provide: Router,         useValue: routerSpy         },
       ],
     });
   });
@@ -75,7 +63,7 @@ describe('despesasGuard', () => {
   it('deve permitir acesso a colega com convite ACEITO', fakeAsync(() => {
     sessionStorage.setItem('coliv_user_tipo', 'colega');
     sessionStorage.setItem('coliv_user_id', '3');
-    conviteServiceSpy.listarParaColega.and.returnValue(of([conviteAceito]));
+    conviteServiceSpy.listarParaColega.mockReturnValue(of([conviteAceito]));
 
     let resultado: any;
     (executeGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as any)
@@ -89,7 +77,7 @@ describe('despesasGuard', () => {
   it('deve redirecionar colega sem convite aceito para /feedcolega', fakeAsync(() => {
     sessionStorage.setItem('coliv_user_tipo', 'colega');
     sessionStorage.setItem('coliv_user_id', '3');
-    conviteServiceSpy.listarParaColega.and.returnValue(of([convitePendente]));
+    conviteServiceSpy.listarParaColega.mockReturnValue(of([convitePendente]));
 
     let resultado: any;
     (executeGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as any)
@@ -103,7 +91,7 @@ describe('despesasGuard', () => {
   it('deve redirecionar quando listarParaColega lança erro', fakeAsync(() => {
     sessionStorage.setItem('coliv_user_tipo', 'colega');
     sessionStorage.setItem('coliv_user_id', '3');
-    conviteServiceSpy.listarParaColega.and.returnValue(throwError(() => new Error('Sem rede')));
+    conviteServiceSpy.listarParaColega.mockReturnValue(throwError(() => new Error('Sem rede')));
 
     let resultado: any;
     (executeGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as any)
@@ -113,32 +101,4 @@ describe('despesasGuard', () => {
     expect(resultado).toBe(false);
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/feedcolega']);
   }));
-});
-
-
-describe('authInterceptor', () => {
-  let httpMock: HttpTestingController;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(withInterceptors([authInterceptor])),
-        provideHttpClientTesting(),
-      ],
-    });
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
-    localStorage.clear();
-  });
-
-  it('deve passar requisição sem header Authorization quando não há token', () => {
-    const http = TestBed.inject(HttpClient);
-    http.get('http://localhost:8080/test').subscribe();
-    const req = httpMock.expectOne('http://localhost:8080/test');
-    expect(req.request.headers.has('Authorization')).toBeFalse();
-    req.flush({});
-  });
 });

@@ -33,7 +33,10 @@ export class Despesas implements OnInit {
     descricao: new FormControl(''),
   })
   isOpen = false;
-  despesaSelecionada!: Despesa;
+  despesaSelecionada: Despesa = {
+    id: 0, nome: '', valor: 0, dataVencimento: new Date(),
+    categoria: '', tipodeDespesa: '', descricao: '',
+  };
   modoEdicao = false;
 
   openPanel(despesa: Despesa) {

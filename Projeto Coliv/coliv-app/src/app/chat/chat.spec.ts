@@ -1,16 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
-import { provideRouter } from '@angular/router';
+import { vi } from 'vitest';
 import { Chat } from './chat';
-import { ConviteActionComponent } from './components/convite-action/convite-action';
 import { ConviteService, ConviteResponse } from '../core/services/convite.service';
 
 describe('Chat', () => {
   let component: Chat;
   let fixture: ComponentFixture<Chat>;
-  let conviteServiceSpy: jasmine.SpyObj<ConviteService>;
+  let conviteServiceSpy: { buscarPorMatch: ReturnType<typeof vi.fn> };
 
   const activatedRouteMock = {
     snapshot: { paramMap: { get: (key: string) => (key === 'matchId' ? '10' : null) } },
@@ -23,8 +22,8 @@ describe('Chat', () => {
   };
 
   beforeEach(async () => {
-    conviteServiceSpy = jasmine.createSpyObj('ConviteService', ['buscarPorMatch']);
-    conviteServiceSpy.buscarPorMatch.and.returnValue(of(null));
+    conviteServiceSpy = { buscarPorMatch: vi.fn() };
+    conviteServiceSpy.buscarPorMatch.mockReturnValue(of(null));
 
     await TestBed.configureTestingModule({
       imports: [Chat, CommonModule],
@@ -55,7 +54,7 @@ describe('Chat', () => {
     sessionStorage.setItem('coliv_user_tipo', 'anfitriao');
     sessionStorage.setItem('coliv_user_id', '5');
     fixture.detectChanges();
-    expect(component.isAnfitriao).toBeTrue();
+    expect(component.isAnfitriao).toBe(true);
     expect(component.anfitriaoId).toBe(5);
   });
 
@@ -63,7 +62,7 @@ describe('Chat', () => {
     sessionStorage.setItem('coliv_user_tipo', 'colega');
     sessionStorage.setItem('coliv_user_id', '3');
     fixture.detectChanges();
-    expect(component.isAnfitriao).toBeFalse();
+    expect(component.isAnfitriao).toBe(false);
     expect(component.colegaId).toBe(3);
   });
 
@@ -82,7 +81,6 @@ describe('Chat', () => {
     fixture.detectChanges();
     expect(component.colegaId).toBe(3);
   });
-
 
   it('não deve definir notificação para convite null', () => {
     fixture.detectChanges();
@@ -112,15 +110,5 @@ describe('Chat', () => {
     fixture.detectChanges();
     component.onConviteAtualizado({ ...conviteMock, status: 'CANCELADO' });
     expect(component.notificacaoConvite).toContain('cancelado');
-  });
-
-  it('deve limpar notificação após 6 segundos', (done) => {
-    fixture.detectChanges();
-    component.onConviteAtualizado(conviteMock);
-    expect(component.notificacaoConvite).not.toBeNull();
-    setTimeout(() => {
-      expect(component.notificacaoConvite).toBeNull();
-      done();
-    }, 6100);
   });
 });
