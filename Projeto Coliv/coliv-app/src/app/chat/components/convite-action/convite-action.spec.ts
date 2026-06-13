@@ -1,142 +1,216 @@
-import { TestBed } from '@angular/core/testing';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
+import { RouterTestingModule } from '@angular/router/testing';
+import { of, throwError } from 'rxjs';
 
-import { ConviteService, ConviteResponse, ConviteRequestDTO } from '../../../core/services/convite.service';
+import { ConviteActionComponent } from './convite-action';
+import { ConviteService, ConviteResponse } from '../../../core/services/convite.service';
 
-describe('ConviteService', () => {
-  let service: ConviteService;
-  let httpMock: HttpTestingController;
-  const BASE = 'http://localhost:8080/convites';
+describe('ConviteActionComponent', () => {
+  let component: ConviteActionComponent;
+  let fixture: ComponentFixture<ConviteActionComponent>;
+  let conviteServiceSpy: jasmine.SpyObj<ConviteService>;
 
-  const conviteMock: ConviteResponse = {
-    id: 1,
-    matchId: 10,
-    anfitriaoId: 5,
-    colegaId: 3,
-    status: 'PENDENTE',
-    criadoEm: '2025-06-01T10:00:00Z',
-    respondidoEm: null,
-    mensagem: 'Olá, temos interesse!',
+  const convitePendente: ConviteResponse = {
+    id: 1, matchId: 10, anfitriaoId: 5, colegaId: 3,
+    status: 'PENDENTE', criadoEm: '2025-01-01T00:00:00Z',
+    respondidoEm: null, mensagem: null,
   };
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), ConviteService],
+  const conviteAceito: ConviteResponse    = { ...convitePendente, status: 'ACEITO'    };
+  const conviteRecusado: ConviteResponse  = { ...convitePendente, status: 'RECUSADO'  };
+  const conviteCancelado: ConviteResponse = { ...convitePendente, status: 'CANCELADO' };
+
+  function configureComponent(isAnfitriao = true) {
+    component.matchId     = 10;
+    component.isAnfitriao = isAnfitriao;
+    component.anfitriaoId = 5;
+    component.colegaId    = 3;
+    fixture.detectChanges();
+  }
+
+  beforeEach(async () => {
+    conviteServiceSpy = jasmine.createSpyObj('ConviteService', [
+      'buscarPorMatch', 'enviar', 'cancelar', 'aceitar', 'recusar',
+    ]);
+  
+    conviteServiceSpy.buscarPorMatch.and.returnValue(of(null));
+
+    await TestBed.configureTestingModule({
+      imports: [ConviteActionComponent, CommonModule, RouterTestingModule],
+      providers: [{ provide: ConviteService, useValue: conviteServiceSpy }],
+    }).compileComponents();
+
+    fixture   = TestBed.createComponent(ConviteActionComponent);
+    component = fixture.componentInstance;
+  });
+
+
+  it('deve ser criado', () => {
+    configureComponent();
+    expect(component).toBeTruthy();
+  });
+
+  it('deve chamar buscarPorMatch no ngOnInit com o matchId fornecido', () => {
+    configureComponent();
+    expect(conviteServiceSpy.buscarPorMatch).toHaveBeenCalledWith(10);
+  });
+
+  it('deve definir convite como null quando não há convite existente', () => {
+    configureComponent();
+    expect(component.convite).toBeNull();
+  });
+
+  it('deve emitir conviteAtualizado ao carregar convite existente', () => {
+    conviteServiceSpy.buscarPorMatch.and.returnValue(of(convitePendente));
+    let emitido: ConviteResponse | null | undefined;
+    component.matchId = 10; component.isAnfitriao = true;
+    component.anfitriaoId = 5; component.colegaId = 3;
+    component.conviteAtualizado.subscribe(c => (emitido = c));
+    fixture.detectChanges();
+    expect(emitido).toEqual(convitePendente);
+  });
+
+
+  it('deve chamar conviteService.enviar ao executar onEnviar', fakeAsync(() => {
+    conviteServiceSpy.enviar.and.returnValue(of(convitePendente));
+    configureComponent();
+    component.onEnviar();
+    tick();
+    expect(conviteServiceSpy.enviar).toHaveBeenCalledWith(5, {
+      matchId: 10, colegaId: 3, mensagem: undefined,
     });
-    service  = TestBed.inject(ConviteService);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
+  }));
 
-  afterEach(() => httpMock.verify());
+  it('deve atualizar convite após envio com sucesso', fakeAsync(() => {
+    conviteServiceSpy.enviar.and.returnValue(of(convitePendente));
+    configureComponent();
+    component.onEnviar();
+    tick();
+    expect(component.convite).toEqual(convitePendente);
+    expect(component.enviando).toBeFalse();
+  }));
 
+  it('deve definir erro e desativar enviando quando onEnviar falha', fakeAsync(() => {
+    conviteServiceSpy.enviar.and.returnValue(
+      throwError(() => ({ message: 'Falha ao enviar.' }))
+    );
+    configureComponent();
+    component.onEnviar();
+    tick();
+    expect(component.erro).toBe('Falha ao enviar.');
+    expect(component.enviando).toBeFalse();
+  }));
 
-  it('deve enviar convite via POST para /convites/enviar/:anfitriaoId', () => {
-    const dto: ConviteRequestDTO = { matchId: 10, colegaId: 3, mensagem: 'Olá!' };
-    let resultado: ConviteResponse | undefined;
-
-    service.enviar(5, dto).subscribe(r => (resultado = r));
-
-    const req = httpMock.expectOne(`${BASE}/enviar/5`);
-    expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(dto);
-    req.flush(conviteMock);
-
-    expect(resultado).toEqual(conviteMock);
-  });
-
-
-  it('deve aceitar convite via PATCH para /convites/:id/aceitar', () => {
-    const aceito = { ...conviteMock, status: 'ACEITO' as const };
-    let resultado: ConviteResponse | undefined;
-
-    service.aceitar(1).subscribe(r => (resultado = r));
-
-    const req = httpMock.expectOne(`${BASE}/1/aceitar`);
-    expect(req.request.method).toBe('PATCH');
-    req.flush(aceito);
-
-    expect(resultado?.status).toBe('ACEITO');
-  });
+  it('não deve chamar enviar duas vezes se já está enviando', fakeAsync(() => {
+    conviteServiceSpy.enviar.and.returnValue(of(convitePendente));
+    configureComponent();
+    component.enviando = true;
+    component.onEnviar();
+    tick();
+    expect(conviteServiceSpy.enviar).not.toHaveBeenCalled();
+  }));
 
 
-  it('deve recusar convite via PATCH para /convites/:id/recusar', () => {
-    const recusado = { ...conviteMock, status: 'RECUSADO' as const };
-    let resultado: ConviteResponse | undefined;
+  it('deve cancelar convite pendente', fakeAsync(() => {
+    conviteServiceSpy.cancelar.and.returnValue(of(conviteCancelado));
+    configureComponent();
+    component.convite = convitePendente;
+    component.onCancelar();
+    tick();
+    expect(component.convite?.status).toBe('CANCELADO');
+    expect(component.cancelando).toBeFalse();
+  }));
 
-    service.recusar(1).subscribe(r => (resultado = r));
+  it('não deve chamar cancelar se não há convite', fakeAsync(() => {
+    configureComponent();
+    component.convite = null;
+    component.onCancelar();
+    tick();
+    expect(conviteServiceSpy.cancelar).not.toHaveBeenCalled();
+  }));
 
-    const req = httpMock.expectOne(`${BASE}/1/recusar`);
-    expect(req.request.method).toBe('PATCH');
-    req.flush(recusado);
-
-    expect(resultado?.status).toBe('RECUSADO');
-  });
-
-
-  it('deve cancelar convite via PATCH para /convites/:id/cancelar', () => {
-    const cancelado = { ...conviteMock, status: 'CANCELADO' as const };
-    let resultado: ConviteResponse | undefined;
-
-    service.cancelar(1).subscribe(r => (resultado = r));
-
-    const req = httpMock.expectOne(`${BASE}/1/cancelar`);
-    expect(req.request.method).toBe('PATCH');
-    req.flush(cancelado);
-
-    expect(resultado?.status).toBe('CANCELADO');
-  });
-
-
-  it('deve listar convites do colega via GET /convites/colega/:colegaId', () => {
-    let resultado: ConviteResponse[] | undefined;
-
-    service.listarParaColega(3).subscribe(r => (resultado = r));
-
-    const req = httpMock.expectOne(`${BASE}/colega/3`);
-    expect(req.request.method).toBe('GET');
-    req.flush([conviteMock]);
-
-    expect(resultado?.length).toBe(1);
-    expect(resultado?.[0].colegaId).toBe(3);
-  });
+  it('deve definir erro quando cancelar falha', fakeAsync(() => {
+    conviteServiceSpy.cancelar.and.returnValue(
+      throwError(() => ({ message: 'Erro ao cancelar.' }))
+    );
+    configureComponent();
+    component.convite = convitePendente;
+    component.onCancelar();
+    tick();
+    expect(component.erro).toBe('Erro ao cancelar.');
+  }));
 
 
-  it('deve listar convites do anfitrião via GET /convites/anfitriao/:anfitriaoId', () => {
-    let resultado: ConviteResponse[] | undefined;
+  it('deve aceitar convite e atualizar status para ACEITO', fakeAsync(() => {
+    conviteServiceSpy.aceitar.and.returnValue(of(conviteAceito));
+    configureComponent(false); // colega
+    component.convite = convitePendente;
+    component.onAceitar();
+    tick();
+    expect(component.convite?.status).toBe('ACEITO');
+    expect(component.respondendo).toBeFalse();
+  }));
 
-    service.listarDoAnfitriao(5).subscribe(r => (resultado = r));
+  it('não deve aceitar se já está respondendo', fakeAsync(() => {
+    configureComponent(false);
+    component.convite = convitePendente;
+    component.respondendo = true;
+    component.onAceitar();
+    tick();
+    expect(conviteServiceSpy.aceitar).not.toHaveBeenCalled();
+  }));
 
-    const req = httpMock.expectOne(`${BASE}/anfitriao/5`);
-    expect(req.request.method).toBe('GET');
-    req.flush([conviteMock]);
+  it('deve definir erro quando aceitar falha', fakeAsync(() => {
+    conviteServiceSpy.aceitar.and.returnValue(
+      throwError(() => ({ message: 'Erro ao aceitar.' }))
+    );
+    configureComponent(false);
+    component.convite = convitePendente;
+    component.onAceitar();
+    tick();
+    expect(component.erro).toBe('Erro ao aceitar.');
+  }));
 
-    expect(resultado?.[0].anfitriaoId).toBe(5);
-  });
 
+  it('deve recusar convite e atualizar status para RECUSADO', fakeAsync(() => {
+    conviteServiceSpy.recusar.and.returnValue(of(conviteRecusado));
+    configureComponent(false);
+    component.convite = convitePendente;
+    component.onRecusar();
+    tick();
+    expect(component.convite?.status).toBe('RECUSADO');
+  }));
 
-  it('deve buscar convite por matchId via GET /convites/match/:matchId', () => {
-    let resultado: ConviteResponse | null | undefined;
+  it('não deve recusar se não há convite', fakeAsync(() => {
+    configureComponent(false);
+    component.convite = null;
+    component.onRecusar();
+    tick();
+    expect(conviteServiceSpy.recusar).not.toHaveBeenCalled();
+  }));
 
-    service.buscarPorMatch(10).subscribe(r => (resultado = r));
+  // ── Emissão de eventos ────────────────────────────────────────
 
-    const req = httpMock.expectOne(`${BASE}/match/10`);
-    expect(req.request.method).toBe('GET');
-    req.flush(conviteMock);
+  it('deve emitir conviteAtualizado ao aceitar', fakeAsync(() => {
+    conviteServiceSpy.aceitar.and.returnValue(of(conviteAceito));
+    configureComponent(false);
+    component.convite = convitePendente;
+    let emitido: ConviteResponse | null | undefined;
+    component.conviteAtualizado.subscribe(c => (emitido = c));
+    component.onAceitar();
+    tick();
+    expect(emitido?.status).toBe('ACEITO');
+  }));
 
-    expect(resultado?.matchId).toBe(10);
-  });
-
-  it('deve retornar null quando não há convite para o match', () => {
-    let resultado: ConviteResponse | null | undefined;
-
-    service.buscarPorMatch(99).subscribe(r => (resultado = r));
-
-    httpMock.expectOne(`${BASE}/match/99`).flush(null);
-
-    expect(resultado).toBeNull();
-  });
+  it('deve emitir conviteAtualizado ao cancelar', fakeAsync(() => {
+    conviteServiceSpy.cancelar.and.returnValue(of(conviteCancelado));
+    configureComponent();
+    component.convite = convitePendente;
+    let emitido: ConviteResponse | null | undefined;
+    component.conviteAtualizado.subscribe(c => (emitido = c));
+    component.onCancelar();
+    tick();
+    expect(emitido?.status).toBe('CANCELADO');
+  }));
 });
