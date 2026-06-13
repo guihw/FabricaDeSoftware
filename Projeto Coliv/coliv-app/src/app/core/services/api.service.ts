@@ -12,7 +12,7 @@ export interface ApiError {
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  // Altere para a URL do backend quando for para produção
+
   readonly baseUrl = environment.apiUrl;
 
   protected http = inject(HttpClient);
