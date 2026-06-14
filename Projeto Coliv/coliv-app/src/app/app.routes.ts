@@ -7,15 +7,22 @@ import { FeedAnfitriao } from './feed-anfitriao/feed-anfitriao';
 import { FeedColega } from './feed-colega/feed-colega';
 import { CriarAnuncio } from './criar-anuncio/criar-anuncio';
 import { Chat } from './chat/chat';
+import { authGuard } from './core/guards/auth-guard-guard';
+import { despesasGuard } from './core/guards/despesas-guard';
+import { anfitriaoGuard, colegaGuard } from './core/guards/role-guard-guard';
+import { Login } from './login/login';
+
 
 
 export const routes: Routes = [
-  {path: '', component: Home},
-  {path: 'despesas', component: Despesas}, 
-  {path: 'cadastro', component: Cadastro},
-  {path: 'preferencias', component: FormPreferencias},
-  {path: 'feedanfitriao', component: FeedAnfitriao},
-  {path: 'feedcolega', component: FeedColega},
-  {path: 'criaranuncio', component: CriarAnuncio},
-  {path: 'chat/:matchId',  component: Chat}
+  { path: '', component: Home },
+  { path: 'login', component: Login },
+  { path: 'cadastro', component: Cadastro },
+
+  { path: 'feedcolega', component: FeedColega, canActivate: [colegaGuard] },
+  { path: 'feedanfitriao', component: FeedAnfitriao, canActivate: [anfitriaoGuard] },
+  { path: 'criaranuncio', component: CriarAnuncio, canActivate: [anfitriaoGuard] },
+  { path: 'preferencias', component: FormPreferencias, canActivate: [authGuard] },
+  { path: 'despesas', component: Despesas, canActivate: [authGuard, despesasGuard] },
+  { path: 'chat/:matchId', component: Chat, canActivate: [authGuard] },
 ];

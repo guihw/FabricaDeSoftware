@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Nucleo;
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelDTO;
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.DadosImovelRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,8 +31,10 @@ class DadosImovelController {
         return dis.criarDadosImovel(anfitriaoId, dto);
     }
 
+    @PreAuthorize("#anfitriaoId == authentication.principal.id")
     @PutMapping("/editar/{anfitriaoId}")
-    public DadosImovelRequestDTO editarDadosImovel (@PathVariable Long anfitriaoId, @RequestBody DadosImovelRequestDTO dto) {
+    public DadosImovelRequestDTO editarDadosImovel(@PathVariable Long anfitriaoId,
+                                                   @RequestBody DadosImovelRequestDTO dto) {
         return dis.editarDadosImovel(anfitriaoId, dto);
     }
 

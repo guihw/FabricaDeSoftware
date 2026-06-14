@@ -1,36 +1,13 @@
-import {
-  HttpInterceptorFn,
-  HttpRequest,
-  HttpHandlerFn,
-} from '@angular/common/http';
+import { HttpInterceptorFn } from '@angular/common/http';
+import { inject } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
-// ──────────────────────────────────────────────────────────────
-// Interceptor de Autenticação
-//
-// Por enquanto o backend usa BasicAuth / sem auth em rotas públicas.
-// Quando o JWT for implementado, descomente o bloco abaixo e
-// substitua getToken() pela leitura real do storage.
-// ──────────────────────────────────────────────────────────────
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  const token = inject(AuthService).getToken();
 
-function getToken(): string | null {
-  // TODO: substituir por leitura do token JWT quando implementado
-  // return localStorage.getItem('coliv_token');
-  return null;
-}
+  if (!token) return next(req);
 
-export const authInterceptor: HttpInterceptorFn = (
-  req: HttpRequest<unknown>,
-  next: HttpHandlerFn
-) => {
-  const token = getToken();
-
-  if (!token) {
-    return next(req);
-  }
-
-  const authReq = req.clone({
+  return next(req.clone({
     setHeaders: { Authorization: `Bearer ${token}` },
-  });
-
-  return next(authReq);
+  }));
 };
