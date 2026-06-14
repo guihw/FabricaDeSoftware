@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -33,7 +34,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -49,8 +50,14 @@ public class SecurityConfig {
                                 "/cards/anfitriao/**",
                                 "/recomendacoes/feed/anfitriao/**").hasRole("ANFITRIAO")
 
-                        .requestMatchers("/usuarios/anfitriao/**", "/formularios/preferencias-anfitriao/**").permitAll().anyRequest().authenticated()).
-        httpBasic(Customizer.withDefaults());
+                        // Exclusivo de colega
+                        .requestMatchers("/formularios/preferencias-colega/**",
+                                "/recomendacoes/feed/colega/**",
+                                "/cards/colega/**").hasRole("COLEGA")
+
+                        // Demais rotas exigem apenas estar autenticado (anfitrião ou colega)
+                        .anyRequest().authenticated())
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -60,14 +67,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails userDetails = User.withUsername("teste").
-                username("teste").
-                password(encoder().encode("senhateste")).
-                roles("USER").
-                build();
-
-        return new InMemoryUserDetailsManager(userDetails);
-    }
 }
