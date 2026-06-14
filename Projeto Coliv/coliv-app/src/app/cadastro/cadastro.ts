@@ -14,6 +14,8 @@ import { AnfitriaoDTO, CreateColegaRequest } from '../core/models/usuario.model'
 import { ApiError } from '../core/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime } from 'rxjs/operators';
+import { AuthService } from '../core/services/auth.service';
+
 
 type PerfilTipo = 'colega' | 'anfitriao';
 
@@ -37,7 +39,8 @@ export class Cadastro implements OnInit {
     private router: Router,
     private anfitriaoService: AnfitriaoService,
     private colegaService: ColegaService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -103,34 +106,45 @@ export class Cadastro implements OnInit {
     }
   }
 
-  private cadastrarAnfitriao(dto: AnfitriaoDTO): void {
-    this.anfitriaoService.criar(dto).subscribe({
-      next: (anfitriao) => {
-        this.carregando.set(false);
-        // Armazena o ID para uso na tela de preferências
-        sessionStorage.setItem('coliv_user_id', String(anfitriao.id));
-        sessionStorage.setItem('coliv_user_tipo', 'anfitriao');
-        this.router.navigate(['/preferencias']);
-      },
-      error: (err: ApiError) => {
-        this.carregando.set(false);
-        this.erro.set(err.message);
-      },
-    });
-  }
+  private cadastrarAnfitriao(request: AnfitriaoDTO): void {
+  this.anfitriaoService.criar(request).subscribe({
+    next: () => {
+      this.authService.login({ email: request.email, senha: request.senha }).subscribe({
+        next: () => {
+          this.carregando.set(false);
+          this.router.navigate(['/preferencias']);
+        },
+        error: (err: ApiError) => {
+          this.carregando.set(false);
+          this.erro.set(err.message);
+        },
+      });
+    },
+    error: (err: ApiError) => {
+      this.carregando.set(false);
+      this.erro.set(err.message);
+    },
+  });
+}
 
   private cadastrarColega(request: CreateColegaRequest): void {
-    this.colegaService.criar(request).subscribe({
-      next: (colega) => {
-        this.carregando.set(false);
-        sessionStorage.setItem('coliv_user_id', String(colega.id));
-        sessionStorage.setItem('coliv_user_tipo', 'colega');
-        this.router.navigate(['/preferencias']);
-      },
-      error: (err: ApiError) => {
-        this.carregando.set(false);
-        this.erro.set(err.message);
-      },
-    });
-  }
+  this.colegaService.criar(request).subscribe({
+    next: () => {
+      this.authService.login({ email: request.email, senha: request.password }).subscribe({
+        next: () => {
+          this.carregando.set(false);
+          this.router.navigate(['/preferencias']);
+        },
+        error: (err: ApiError) => {
+          this.carregando.set(false);
+          this.erro.set(err.message);
+        },
+      });
+    },
+    error: (err: ApiError) => {
+      this.carregando.set(false);
+      this.erro.set(err.message);
+    },
+  });
+}
 }

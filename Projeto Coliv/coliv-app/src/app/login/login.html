@@ -1,0 +1,131 @@
+<!-- Background Decoration -->
+<div class="fixed top-0 right-0 -z-10 w-[600px] h-[600px] bg-secondary-container/20 blur-[120px] rounded-full translate-x-1/2 -translate-y-1/2"></div>
+<div class="fixed bottom-0 left-0 -z-10 w-[500px] h-[500px] bg-primary/5 blur-[100px] rounded-full -translate-x-1/2 translate-y-1/2"></div>
+
+<!-- Auth Container -->
+<main class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-2 overflow-hidden bg-surface-container-lowest rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)]">
+
+  <!-- Left Side: Visual/Editorial -->
+  <section class="hidden lg:flex relative overflow-hidden flex-col justify-end p-12 bg-gradient-primary">
+    <div class="absolute inset-0 opacity-40 mix-blend-overlay">
+      <img alt="Co-living space" class="w-full h-full object-cover"
+        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV93adOkqKDMFyCFGCddSDJ_Zn6RrKwUYnx16ZwFGkoCGm4n5Dab7UzSWIr8wr77VgAtQWoVveN7C7J-ezWYU-WrfV8e6zFsqYXFypKcgETVbVo7FA9xC7T2ltOrVjod9Cx-nFsYuSKGzy8-WzEaa3j5WQNvH__gj68hN852ECNuA-0ItyzF6_-Dp70lQv8AsHyaCHhljyvP4TpXr2RXQN78--7SrI_RHodBgyaEYE-_MoMYXYp50bR2bKzDGQzjIl-9hsw555Lp4"/>
+    </div>
+    <div class="relative z-10 space-y-4">
+      <div class="inline-flex items-center px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label text-[10px] font-bold tracking-widest uppercase">
+        Comunidade Curada
+      </div>
+      <h1 class="font-headline text-5xl font-extrabold text-white tracking-tighter leading-[0.9]">
+        Sua nova forma<br/>de morar.
+      </h1>
+      <p class="text-on-primary-container font-body text-lg max-w-sm">
+        Entre para a rede exclusiva de coliving e descubra espaços que respiram design e conexão.
+      </p>
+    </div>
+    <!-- Branding Anchor -->
+    <div class="absolute top-12 left-12 flex items-center gap-2">
+      <span class="font-headline font-black text-3xl text-white tracking-tighter">Coliv</span>
+    </div>
+  </section>
+
+  <!-- Right Side: Interaction -->
+  <section class="p-8 lg:p-16 flex flex-col justify-center">
+    <div class="max-w-md w-full mx-auto space-y-10">
+
+      <!-- Mobile Branding -->
+      <div class="lg:hidden mb-8">
+        <span class="font-headline font-black text-2xl text-primary tracking-tighter">Coliv</span>
+      </div>
+
+      <div class="space-y-2">
+        <h2 class="font-headline text-3xl font-bold text-on-surface tracking-tight">Bem-vindo de volta</h2>
+        <p class="text-on-surface-variant font-body">Acesse sua conta para gerenciar seu espaço.</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <div class="space-y-4">
+
+          <!-- Email Field -->
+          <div class="space-y-2">
+            <label class="font-label text-sm font-bold text-on-surface-variant px-1" for="email">E-mail</label>
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-on-surface-variant group-focus-within:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[20px]">mail</span>
+              </div>
+              <input
+                formControlName="email"
+                id="email"
+                type="email"
+                placeholder="nome@exemplo.com"
+                class="w-full pl-12 pr-4 py-4 bg-surface-container-low border-none rounded-xl focus:ring-0 focus:bg-surface-container-lowest transition-all placeholder:text-on-surface-variant/50 text-on-surface ring-1 ring-transparent focus:ring-1 focus:ring-primary/10"/>
+            </div>
+            <p *ngIf="campoInvalido('email')" class="text-xs text-error font-medium px-1">
+              Informe um e-mail válido.
+            </p>
+          </div>
+
+          <!-- Password Field -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center px-1">
+              <label class="font-label text-sm font-bold text-on-surface-variant" for="password">Senha</label>
+              <a class="text-xs font-bold text-secondary hover:text-on-secondary-container transition-colors" href="#">Esqueci minha senha</a>
+            </div>
+            <div class="relative group">
+              <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none text-on-surface-variant group-focus-within:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[20px]">lock</span>
+              </div>
+              <input
+                formControlName="senha"
+                id="password"
+                [type]="mostrarSenha() ? 'text' : 'password'"
+                placeholder="••••••••"
+                class="w-full pl-12 pr-12 py-4 bg-surface-container-low border-none rounded-xl focus:ring-0 focus:bg-surface-container-lowest transition-all placeholder:text-on-surface-variant/50 text-on-surface ring-1 ring-transparent focus:ring-1 focus:ring-primary/10"/>
+              <button
+                type="button"
+                (click)="toggleSenha()"
+                class="absolute inset-y-0 right-4 flex items-center text-on-surface-variant">
+                <span class="material-symbols-outlined text-[20px]">{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            <p *ngIf="campoInvalido('senha')" class="text-xs text-error font-medium px-1">
+              Informe sua senha.
+            </p>
+          </div>
+        </div>
+
+        <!-- Erro -->
+        <div *ngIf="erro()" class="p-4 bg-error-container text-on-error-container rounded-xl text-sm font-medium">
+          {{ erro() }}
+        </div>
+
+        <!-- CTA Action -->
+        <button
+          type="submit"
+          [disabled]="carregando()"
+          class="w-full py-4 px-6 bg-gradient-primary text-white rounded-xl font-label font-bold text-sm tracking-widest uppercase shadow-xl shadow-primary/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70">
+          <span *ngIf="!carregando()">Entrar na conta</span>
+          <span *ngIf="carregando()" class="flex items-center gap-2">
+            <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+            Entrando...
+          </span>
+        </button>
+      </form>
+
+      <!-- Footer Links -->
+      <div class="pt-6 text-center space-y-6">
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-outline-variant/15"></div>
+          </div>
+          
+        </div>
+        
+        <p class="text-sm font-body text-on-surface-variant">
+          Ainda não faz parte?
+          <a routerLink="/cadastro" class="font-bold text-primary hover:underline underline-offset-4">Criar conta</a>
+        </p>
+      </div>
+
+    </div>
+  </section>
+</main>
