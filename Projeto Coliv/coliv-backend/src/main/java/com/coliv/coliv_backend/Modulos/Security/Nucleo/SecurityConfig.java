@@ -32,9 +32,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(
-            AutenticacaoUserDetailsService uds, PasswordEncoder encoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(uds);
-        provider.setPasswordEncoder(encoder);
+            AutenticacaoUserDetailsService authenticationUserDetailsService,
+            PasswordEncoder passwordEncoder) {
+
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(authenticationUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder);
+
         return new ProviderManager(provider);
     }
 
