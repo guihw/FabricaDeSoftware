@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch;
+package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta;
 
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat.ChatCriadoViaMatch;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat.ChatIDNaoEncontrado;
@@ -55,6 +55,7 @@ public class MensagemDiretaService {
                         mensagem.getUsuarioId())).toList();
     }
 
+    @Transactional
     public MensagemResponseDTO criarMensagem(Long usuarioId, Long chatId, MensagemRequestDTO dto) {
         Long max = msgRepository.findMaxSequencialIdByChatId(chatId);
 
@@ -91,6 +92,7 @@ public class MensagemDiretaService {
                 mensagemDireta.getUsuarioId());
     }
 
+    @Transactional
     public void excluirMensagem(Long sequencialId, Long chatId, Long usuarioId) {
         MensagemDireta mensagemDireta = msgRepository.findBySequencialIdAndChatIdAndUsuarioId(sequencialId, chatId,
                         usuarioId).orElseThrow(

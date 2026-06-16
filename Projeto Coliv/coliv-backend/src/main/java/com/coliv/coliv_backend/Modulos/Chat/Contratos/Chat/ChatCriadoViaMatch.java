@@ -1,6 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat;
 
-import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemAutomaticaDTO;
+import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemAutomaticaMatchDTO;
 
-public record ChatCriadoViaMatch(MensagemAutomaticaDTO dto) {
+public record ChatCriadoViaMatch(MensagemAutomaticaMatchDTO dto) {
 }

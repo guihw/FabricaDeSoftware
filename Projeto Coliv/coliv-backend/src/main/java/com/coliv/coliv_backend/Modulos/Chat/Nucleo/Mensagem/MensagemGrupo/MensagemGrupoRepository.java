@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface MensagemGrupoRepository extends JpaRepository<MensagemGrupo, Long> {
 
@@ -19,4 +20,6 @@ public interface MensagemGrupoRepository extends JpaRepository<MensagemGrupo, Lo
 
     @Query("select coalesce(max(mg.sequencialId), 0L) from MensagemGrupo mg where mg.grupoId = :grupoId")
     Long findMaxSequence(@Param("grupoId") Long grupoId);
+
+    Optional<MensagemGrupo> findBySequencialIdAndGrupoIdAndUsuarioId(Long id, Long grupoId, Long usuarioId);
 }

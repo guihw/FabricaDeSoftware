@@ -1,6 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat;
 
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch.MensagemDireta;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta.MensagemDireta;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;

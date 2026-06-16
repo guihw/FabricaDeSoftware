@@ -1,10 +1,8 @@
-package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch;
+package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta;
 
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.Mensagem;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import jakarta.persistence.*;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "mensagem_direta")

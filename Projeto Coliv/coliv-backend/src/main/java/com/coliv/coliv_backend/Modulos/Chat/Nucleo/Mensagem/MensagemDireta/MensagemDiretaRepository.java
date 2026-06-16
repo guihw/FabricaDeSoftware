@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch;
+package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta;
 
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import org.springframework.data.jpa.repository.JpaRepository;

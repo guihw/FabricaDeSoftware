@@ -1,9 +1,9 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat;
 
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat.*;
-import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemAutomaticaDTO;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch.MensagemDireta;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch.MensagemDiretaService;
+import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemAutomaticaMatchDTO;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta.MensagemDireta;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta.MensagemDiretaService;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchEvento;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchEventoDTO;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
@@ -69,7 +69,7 @@ class ChatService {
                 String txt = "Olá! Vi que você tem interesse no imóvel. Fico à disposição para conversar!";
 
                 MensagemDireta mensagemDireta = msgService.mensagemAutomaticaMatchEvento(new ChatCriadoViaMatch(new
-                        MensagemAutomaticaDTO(txt, evento.dto().iniciador(), chat,
+                        MensagemAutomaticaMatchDTO(txt, evento.dto().iniciador(), chat,
                         LocalDateTime.now(), evento.dto().anfitriaoId())));
 
                 chat.setMensagens(new ArrayList<>(){{add(mensagemDireta);}});
@@ -80,7 +80,7 @@ class ChatService {
                 String txt = "Olá! Gostaria de saber mais sobre o anúncio.";
 
                 MensagemDireta mensagemDireta = msgService.mensagemAutomaticaMatchEvento(new ChatCriadoViaMatch(new
-                        MensagemAutomaticaDTO(txt, evento.dto().iniciador(), chat,
+                        MensagemAutomaticaMatchDTO(txt, evento.dto().iniciador(), chat,
                         LocalDateTime.now(), evento.dto().colegaId())));
 
                 chat.setMensagens(new ArrayList<>(){{add(mensagemDireta);}});

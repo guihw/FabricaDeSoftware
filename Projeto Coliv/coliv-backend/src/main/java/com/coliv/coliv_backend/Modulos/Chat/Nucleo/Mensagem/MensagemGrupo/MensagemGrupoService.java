@@ -1,14 +1,17 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemGrupo;
 
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Grupo.GrupoIDNaoEncontrado;
+import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemNaoEncontradaUsandoReferencias;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemRequestDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemResponseDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Grupo.Grupo;
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Grupo.GrupoRepository;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,6 +55,7 @@ public class MensagemGrupoService {
                 toList();
     }
 
+    @Transactional
     public MensagemResponseDTO criarMensagem(Long usuarioId, Long grupoId, MensagemRequestDTO dto) {
         Long max = msgRepository.findMaxSequence(grupoId);
 
@@ -60,9 +64,9 @@ public class MensagemGrupoService {
 
         mensagem = msgRepository.save(mensagem);
         Grupo grupo = grupoRepository.findById(grupoId).orElseThrow(() -> new GrupoIDNaoEncontrado(grupoId));
-        if (grupo.getMensagens().isEmpty()) {
+        if (grupo.getMensagensUsuario().isEmpty()) {
             MensagemGrupo m = mensagem;
-            grupo.setMensagens(new ArrayList<>(){{add(m);}});
+            grupo.setMensagensUsuario(new ArrayList<>(){{add(m);}});
         } else {
             grupo.addMensagem(mensagem);
         }
@@ -70,5 +74,34 @@ public class MensagemGrupoService {
 
         return new MensagemResponseDTO(mensagem.getSequencialId(), mensagem.getTexto(), mensagem.getTipoUsuario(),
                 mensagem.getCriadoEm(), mensagem.getArquivoId(), mensagem.getUsuarioId());
+    }
+
+    @Transactional
+    public MensagemResponseDTO editarMensagem (Long sequencialId, Long grupoId, Long usuarioId, MensagemRequestDTO dto) {
+        MensagemGrupo mensagem = msgRepository.findBySequencialIdAndGrupoIdAndUsuarioId(sequencialId, grupoId, usuarioId)
+                .orElseThrow(() -> new MensagemNaoEncontradaUsandoReferencias(sequencialId, grupoId, usuarioId));
+
+        if (dto.texto() != null && !dto.texto().isBlank()) {
+            mensagem.setTexto(dto.texto());
+        }
+
+        mensagem.setArquivoId(dto.arquivoId());
+        mensagem.setAtualizadoEm(LocalDateTime.now());
+
+        mensagem = msgRepository.save(mensagem);
+
+        return new MensagemResponseDTO(mensagem.getSequencialId(), mensagem.getTexto(), mensagem.getTipoUsuario(),
+                mensagem.getCriadoEm(), mensagem.getArquivoId(), mensagem.getUsuarioId());
+    }
+
+    @Transactional
+    public void excluirMensagem(Long sequencialId, Long grupoId, Long usuarioId) {
+        MensagemGrupo mensagem = msgRepository.findBySequencialIdAndGrupoIdAndUsuarioId(sequencialId, grupoId, usuarioId)
+                .orElseThrow(() -> new MensagemNaoEncontradaUsandoReferencias(sequencialId, grupoId, usuarioId));
+        Grupo grupo = grupoRepository.findById(grupoId).orElseThrow(() -> new GrupoIDNaoEncontrado(grupoId));
+        grupo.getMensagensUsuario().remove(mensagem);
+        grupoRepository.save(grupo);
+
+        msgRepository.deleteById(mensagem.getId());
     }
 }

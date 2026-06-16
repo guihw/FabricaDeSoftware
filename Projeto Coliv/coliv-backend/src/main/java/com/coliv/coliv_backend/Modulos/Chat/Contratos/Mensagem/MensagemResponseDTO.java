@@ -1,6 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem;
 
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch.MensagemDireta;
+import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta.MensagemDireta;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 
 import java.time.LocalDateTime;

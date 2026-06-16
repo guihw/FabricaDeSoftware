@@ -1,4 +1,4 @@
-package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemMatch;
+package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta;
 
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemNaoEncontradaUsandoReferencias;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemRequestDTO;
@@ -21,7 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/chat/mensagem")
 @CrossOrigin ("*")
-class MensagemController {
+class MensagemDiretaController {
 
     @Autowired
     private MensagemDiretaService msgService;
@@ -99,7 +99,7 @@ class MensagemController {
      * {@code texto} em um Chat.
      * <br>Se nenhuma {@code Mensagem} for encontrada, retorna uma lista vazia.
      */
-    @GetMapping("/buscarPorChat&Texto/{chatId}/{texto}")
+    @GetMapping("/buscarPorChatETexto/{chatId}/{texto}")
     public List<MensagemResponseDTO> buscarPorChatETexto(@PathVariable Long chatId, @PathVariable String texto) {
         return msgService.buscarPorChatETexto(chatId, texto);
     }
