@@ -102,7 +102,7 @@ export class Cadastro implements OnInit {
     if (this.perfil() === 'anfitriao') {
       this.cadastrarAnfitriao({ nome, cpf, email, senha, fotoPerfil: null });
     } else {
-      this.cadastrarColega({ nome, email, password: senha });
+      this.cadastrarColega({ nome, email, password: senha, cpf });
     }
   }
 
