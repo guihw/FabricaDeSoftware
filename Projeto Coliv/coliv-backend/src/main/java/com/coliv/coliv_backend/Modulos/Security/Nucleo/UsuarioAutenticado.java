@@ -31,12 +31,12 @@ public class UsuarioAutenticado implements UserDetails {
 
     @Override
     public @Nullable String getPassword() {
-        return "";
+        return senhaHash;
     }
 
     @Override
     public String getUsername() {
-        return "";
+        return email;
     }
 
     @Override
