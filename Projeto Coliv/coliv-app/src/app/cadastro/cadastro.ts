@@ -15,6 +15,7 @@ import { ApiError } from '../core/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../core/services/auth.service';
+import { environment } from '../../environments/environment.production';
 
 
 type PerfilTipo = 'colega' | 'anfitriao';
@@ -62,7 +63,7 @@ export class Cadastro implements OnInit {
     this.cpfValido = false;
     this.cpfErro = '';
 
-    this.http.post<any>('http://localhost:8080/validacao/cpf/validar', { cpf })
+    this.http.post<any>(`${environment.apiUrl}/validacao/cpf/validar`, { cpf })
       .subscribe({
         next: (res) => {
           this.cpfValido = res.valido;
