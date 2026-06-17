@@ -5,5 +5,4 @@ public record CreateColegaRequest(
         String email,
         String password,
         String cpf
-) {
-}
+) { }

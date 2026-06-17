@@ -14,6 +14,9 @@ import { AnfitriaoDTO, CreateColegaRequest } from '../core/models/usuario.model'
 import { ApiError } from '../core/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime } from 'rxjs/operators';
+import { AuthService } from '../core/services/auth.service';
+import { environment } from '../../environments/environment.production';
+
 
 type PerfilTipo = 'colega' | 'anfitriao';
 
@@ -37,7 +40,8 @@ export class Cadastro implements OnInit {
     private router: Router,
     private anfitriaoService: AnfitriaoService,
     private colegaService: ColegaService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -59,7 +63,7 @@ export class Cadastro implements OnInit {
     this.cpfValido = false;
     this.cpfErro = '';
 
-    this.http.post<any>('http://localhost:8080/validacao/cpf/validar', { cpf })
+    this.http.post<any>(`${environment.apiUrl}/validacao/cpf/validar`, { cpf })
       .subscribe({
         next: (res) => {
           this.cpfValido = res.valido;
@@ -99,38 +103,49 @@ export class Cadastro implements OnInit {
     if (this.perfil() === 'anfitriao') {
       this.cadastrarAnfitriao({ nome, cpf, email, senha, fotoPerfil: null });
     } else {
-      this.cadastrarColega({ nome, email, password: senha });
+      this.cadastrarColega({ nome, email, password: senha, cpf });
     }
   }
 
-  private cadastrarAnfitriao(dto: AnfitriaoDTO): void {
-    this.anfitriaoService.criar(dto).subscribe({
-      next: (anfitriao) => {
-        this.carregando.set(false);
-        // Armazena o ID para uso na tela de preferências
-        sessionStorage.setItem('coliv_user_id', String(anfitriao.id));
-        sessionStorage.setItem('coliv_user_tipo', 'anfitriao');
-        this.router.navigate(['/preferencias']);
-      },
-      error: (err: ApiError) => {
-        this.carregando.set(false);
-        this.erro.set(err.message);
-      },
-    });
-  }
+  private cadastrarAnfitriao(request: AnfitriaoDTO): void {
+  this.anfitriaoService.criar(request).subscribe({
+    next: () => {
+      this.authService.login({ email: request.email, senha: request.senha }).subscribe({
+        next: () => {
+          this.carregando.set(false);
+          this.router.navigate(['/preferencias']);
+        },
+        error: (err: ApiError) => {
+          this.carregando.set(false);
+          this.erro.set(err.message);
+        },
+      });
+    },
+    error: (err: ApiError) => {
+      this.carregando.set(false);
+      this.erro.set(err.message);
+    },
+  });
+}
 
   private cadastrarColega(request: CreateColegaRequest): void {
-    this.colegaService.criar(request).subscribe({
-      next: (colega) => {
-        this.carregando.set(false);
-        sessionStorage.setItem('coliv_user_id', String(colega.id));
-        sessionStorage.setItem('coliv_user_tipo', 'colega');
-        this.router.navigate(['/preferencias']);
-      },
-      error: (err: ApiError) => {
-        this.carregando.set(false);
-        this.erro.set(err.message);
-      },
-    });
-  }
+  this.colegaService.criar(request).subscribe({
+    next: () => {
+      this.authService.login({ email: request.email, senha: request.password }).subscribe({
+        next: () => {
+          this.carregando.set(false);
+          this.router.navigate(['/preferencias']);
+        },
+        error: (err: ApiError) => {
+          this.carregando.set(false);
+          this.erro.set(err.message);
+        },
+      });
+    },
+    error: (err: ApiError) => {
+      this.carregando.set(false);
+      this.erro.set(err.message);
+    },
+  });
+}
 }

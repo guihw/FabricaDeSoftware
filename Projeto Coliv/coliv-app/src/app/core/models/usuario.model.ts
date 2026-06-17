@@ -16,6 +16,7 @@ export interface CreateColegaRequest {
   nome: string;
   email: string;
   password: string;
+  cpf: string
 }
 
 // Espelha: ColegaResponse.java  (retorno da criação)

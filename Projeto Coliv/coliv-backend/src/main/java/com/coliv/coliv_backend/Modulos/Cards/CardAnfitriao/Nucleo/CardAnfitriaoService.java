@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-class CardAnfitriaoService {
+public class CardAnfitriaoService {
 
     @Autowired
     private CardAnfitriaoRepository car;
@@ -43,7 +43,7 @@ class CardAnfitriaoService {
         CardAnfitriao card = car.findByAnfitriaoId(id).
                 orElseThrow(() -> new CardAnfitriaoNaoEncontradoUsandoReferencia(id));
 
-        return new CardAnfitriaoResponseDTO(usuarioDTO.nome(), usuarioDTO.email(), imovelDTO.descricao(),
+        return new CardAnfitriaoResponseDTO(card.getAnfitriaoId(), usuarioDTO.nome(), usuarioDTO.email(), imovelDTO.descricao(),
                 imovelDTO.localizacao(), imovelDTO.quartos(), card.getClassificacao(),
                 card.getPrecoMensal(), card.getArquivos());
     }
@@ -62,7 +62,7 @@ class CardAnfitriaoService {
             UsuarioDTO usuarioDTO = usuarioMap.get(card.getAnfitriaoId());
             DadosImovelDTO imovelDTO = imovelMap.get(card.getAnfitriaoId());
 
-            return new CardAnfitriaoResponseDTO(usuarioDTO.nome(), usuarioDTO.email(), imovelDTO.descricao(),
+            return new CardAnfitriaoResponseDTO(card.getAnfitriaoId(), usuarioDTO.nome(), usuarioDTO.email(), imovelDTO.descricao(),
                     imovelDTO.localizacao(), imovelDTO.quartos(), card.getClassificacao(),
                     card.getPrecoMensal(), card.getArquivos());
         }).toList();

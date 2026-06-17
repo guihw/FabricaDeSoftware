@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 class AnfitriaoService implements IAnfitriao {
@@ -100,5 +101,11 @@ class AnfitriaoService implements IAnfitriao {
         List<Anfitriao> lista = anfitriaoRepository.findAll();
         return lista.stream().map(usuario ->
                 new UsuarioDTO (usuario.getId(), usuario.getNome(), usuario.getEmail())).toList();
+    }
+
+    @Override
+    public Optional<AnfitriaoCredenciaisDTO> buscarCredenciais(String email) {
+        return anfitriaoRepository.findByEmail(email)
+                .map(a -> new AnfitriaoCredenciaisDTO(a.getId(), a.getEmail(), a.getSenha()));
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ColegaService implements IColega {
@@ -60,6 +61,13 @@ public class ColegaService implements IColega {
     @Override
     public boolean verificarExistencia(Long id) {
         return colegaRepository.existsById(id);
+    }
+
+    @Override
+    public Optional<ColegaCredenciaisDTO> buscarCredenciais(String email) {
+        return colegaRepository.findByEmail(email)
+                .map(a -> new ColegaCredenciaisDTO(a.getId(), a.getEmail(), a.getSenha()));
+
     }
 
     @Transactional
