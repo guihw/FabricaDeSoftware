@@ -40,6 +40,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/ws-conectar/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**").permitAll()
+                        .requestMatchers("/swagger-ui/**").permitAll()
+                        .requestMatchers("/swagger-ui.html").permitAll()
 
                         // Cadastro e login são públicos
                         .requestMatchers(HttpMethod.POST, "/usuarios/anfitriao/novo", "/usuarios/colega/novo", "/auth/login").permitAll()
@@ -57,6 +60,10 @@ public class SecurityConfig {
                                 "/cards/colega/**").hasRole("COLEGA")
 
                         // Demais rotas exigem apenas estar autenticado (anfitrião ou colega)
+
+                        .requestMatchers("/matches/**").permitAll()
+                        .requestMatchers("/chat/**").permitAll()
+
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 

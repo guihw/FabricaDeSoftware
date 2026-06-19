@@ -61,8 +61,8 @@ public class GrupoService {
     @Transactional
     void conviteAceitoEvento(ConviteAceito evento) {
 
-        Grupo grupo = grupoRepository.findByAnfitriaoId(evento.dto().anfitraoId()).orElse(new Grupo.Builder().
-                anfitriaoId(evento.dto().anfitraoId()).
+        Grupo grupo = grupoRepository.findByAnfitriaoId(evento.dto().anfitriaoId()).orElse(new Grupo.Builder().
+                anfitriaoId(evento.dto().anfitriaoId()).
                 nomeGrupo("Grupo").
                 build());
 
@@ -73,7 +73,7 @@ public class GrupoService {
         if (grupo.getMembros() == null) {
             Grupo fg = grupo;
             grupo.setMembros(new ArrayList<>(){{
-                add(membroService.novoMembro(new NovoMembroDTO(evento.dto().anfitraoId(), TipoUsuario.ANFITRIAO), fg));
+                add(membroService.novoMembro(new NovoMembroDTO(evento.dto().anfitriaoId(), TipoUsuario.ANFITRIAO), fg));
                 add(membroService.novoMembro(new NovoMembroDTO(evento.dto().colegaId(), TipoUsuario.COLEGA), fg));
             }});
         } else {

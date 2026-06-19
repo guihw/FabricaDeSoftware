@@ -23,28 +23,28 @@ public class ConviteController {
         return conviteService.listarPorUsuario(usuarioId, tipoUsuario);
     }
 
-    @GetMapping("/buscarConviteRecente/{chatId}")
-    private ConviteResponseDTO buscarConviteRecente(@PathVariable Long chatId) {
-        return conviteService.buscarConviteRecente(chatId);
+    @GetMapping("/buscarConviteRecente/{matchId}")
+    private ConviteResponseDTO buscarConviteRecente(@PathVariable Long matchId) {
+        return conviteService.buscarConviteRecente(matchId);
     }
 
-    @PostMapping("/enviar/{chatId}")
-    private ConviteResponseDTO enviarConvite(@PathVariable Long chatId, @RequestBody ConviteRequestDTO dto) {
-        return conviteService.novoConvite(ConviteStatus.PENDENTE, dto, chatId);
+    @PostMapping("/enviar/{matchId}")
+    private ConviteResponseDTO enviarConvite(@PathVariable Long matchId, @RequestBody ConviteRequestDTO dto) {
+        return conviteService.novoConvite(ConviteStatus.PENDENTE, dto, matchId);
     }
 
-    @PatchMapping("/aceito/{chatId}")
-    private void  conviteAceito(@PathVariable Long chatId) {
-        conviteService.conviteAceito(chatId);
+    @PatchMapping("/aceito/{matchId}")
+    private void  conviteAceito(@PathVariable Long matchId) {
+        conviteService.conviteAceito(matchId);
     }
 
-    @PatchMapping("/recusado/{chatId}")
-    private void conviteRecusado(@PathVariable Long chatId) {
-        conviteService.conviteRecusado(chatId);
+    @PatchMapping("/recusado/{matchId}")
+    private void conviteRecusado(@PathVariable Long matchId) {
+        conviteService.conviteRecusado(matchId);
     }
 
-    @PatchMapping("cancelado/{chatId}")
-    private void conviteCancelado(@PathVariable Long chatId) {
-        conviteService.conviteCancelado(chatId);
+    @PatchMapping("cancelado/{matchId}")
+    private void conviteCancelado(@PathVariable Long matchId) {
+        conviteService.conviteCancelado(matchId);
     }
 }

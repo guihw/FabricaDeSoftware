@@ -12,9 +12,9 @@ public interface ConviteRepository extends JpaRepository<Convite, Long> {
 
     List<Convite> findByColegaId(Long colegaId);
 
-    Optional<Convite> findByChatId(Long chatId);
+    Optional<Convite> findByMatchId(Long matchId);
 
-    Optional<Convite> findTopByChatIdOrderByIdDesc(Long chatId);
+    Optional<Convite> findTopByMatchIdOrderByIdDesc(Long matchId);
 
-    boolean existsByChatIdAndConviteStatusIn(Long chatId, List<ConviteStatus> statuses);
+    boolean existsByMatchIdAndConviteStatusIn(Long matchId, List<ConviteStatus> statuses);
 }

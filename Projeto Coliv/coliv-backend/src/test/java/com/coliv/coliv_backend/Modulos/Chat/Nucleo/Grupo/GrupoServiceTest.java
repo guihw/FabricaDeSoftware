@@ -82,7 +82,7 @@ class GrupoServiceTest {
             grupo(grupo).
             build();
     ConviteAceito evento = new ConviteAceito(new ConviteAceitoDTO(id, cid, new ConviteInfoDTO(id, id,
-            BigDecimal.valueOf(299.99), "Condicoes", LocalDateTime.now())));
+            "Condicoes", LocalDateTime.now(), null)));
 
     @Test
     @DisplayName("Buscar Por Usuario Anfitriao ID Retorno Positivo")

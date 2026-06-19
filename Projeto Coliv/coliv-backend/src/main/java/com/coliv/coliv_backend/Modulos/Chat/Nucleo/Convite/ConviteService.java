@@ -1,10 +1,8 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Convite;
 
-import com.coliv.coliv_backend.Modulos.Chat.Contratos.Chat.ChatIDNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.*;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteStatus;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat.Chat;
-import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat.ChatRepository;
+import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.IMatchmaking;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +16,12 @@ import java.util.List;
 @Service
 public class ConviteService {
 
+    // Resolver lógica de múltiplos convites.
+
     @Autowired
     private ConviteRepository conviteRepository;
     @Autowired
-    private ChatRepository chatRepository;
+    private IMatchmaking matchmaking;
     @Autowired
     private ApplicationEventPublisher publisher;
 
@@ -30,30 +30,29 @@ public class ConviteService {
         if (tipoUsuario == TipoUsuario.ANFITRIAO) {
             return conviteRepository.findByAnfitriaoId(usuarioId).stream().map(convite -> new
                     ConviteResponseDTO(convite.getId(), convite.getConviteStatus(), convite.getTexto(),
-                    convite.getCriadoEm(), convite.getAnfitriaoId(), convite.getColegaId(), convite.getChat().getId(),
+                    convite.getCriadoEm(), convite.getMatchId(), convite.getAnfitriaoId(), convite.getColegaId(),
                     convite.getAtualizadoEm())).toList();
         } else {
             return conviteRepository.findByColegaId(usuarioId).stream().map(convite -> new
                     ConviteResponseDTO(convite.getId(), convite.getConviteStatus(), convite.getTexto(),
-                    convite.getCriadoEm(), convite.getAnfitriaoId(), convite.getColegaId(), convite.getChat().getId(),
+                    convite.getCriadoEm(), convite.getMatchId(), convite.getAnfitriaoId(), convite.getColegaId(),
                     convite.getAtualizadoEm())).toList();
         }
     }
 
-    public ConviteResponseDTO buscarConviteRecente(Long chatId) {
-        Convite convite = conviteRepository.findTopByChatIdOrderByIdDesc(chatId).orElseThrow(() -> new
-                ConviteNaoEncontradoUsandoReferencia(chatId));
+    public ConviteResponseDTO buscarConviteRecente(Long matchId) {
+        Convite convite = conviteRepository.findTopByMatchIdOrderByIdDesc(matchId).orElseThrow(() -> new
+                ConviteNaoEncontradoUsandoReferencia(matchId));
 
         return new ConviteResponseDTO(convite.getId(), convite.getConviteStatus(), convite.getTexto(),
-                convite.getCriadoEm(), convite.getAnfitriaoId(), convite.getColegaId(), convite.getChat().getId(),
+                convite.getCriadoEm(), convite.getMatchId(), convite.getAnfitriaoId(), convite.getColegaId(),
                 convite.getAtualizadoEm());
     }
 
     @Transactional
-    public ConviteResponseDTO novoConvite(ConviteStatus status, ConviteRequestDTO dto, Long chatId) {
-        Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ChatIDNaoEncontrado(chatId));
+    public ConviteResponseDTO novoConvite(ConviteStatus status, ConviteRequestDTO dto, Long matchId) {
 
-        if (conviteRepository.existsByChatIdAndConviteStatusIn(chatId, new ArrayList<>(){{
+        if (conviteRepository.existsByMatchIdAndConviteStatusIn(matchId, new ArrayList<>(){{
             add(ConviteStatus.PENDENTE);
             add(ConviteStatus.ACEITO);
         }}
@@ -65,24 +64,24 @@ public class ConviteService {
                 conviteStatus(status).
                 criadoEm(LocalDateTime.now()).
                 texto(dto.texto()).
-                chat(chat).
-                anfitriaoId(chat.getAnfitriaoId()).
-                colegaId(chat.getColegaId()).
+                matchId(matchId).
+                anfitriaoId(matchmaking.getUserId(matchId, TipoUsuario.ANFITRIAO)).
+                colegaId(matchmaking.getUserId(matchId, TipoUsuario.COLEGA)).
                 build());
 
-        publisher.publishEvent(new ConviteEnviado(new ConviteInfoDTO(convite.getId(), chatId, convite.getTexto(),
+        publisher.publishEvent(new ConviteEnviado(new ConviteInfoDTO(convite.getId(), matchId, convite.getTexto(),
                 convite.getCriadoEm(), convite.getAtualizadoEm())
         ));
 
         return new ConviteResponseDTO(convite.getId(), convite.getConviteStatus(), convite.getTexto(),
-                convite.getCriadoEm(), convite.getAnfitriaoId(), convite.getColegaId(), convite.getChat().getId(),
+                convite.getCriadoEm(), convite.getAnfitriaoId(), convite.getColegaId(), convite.getMatchId(),
                 convite.getAtualizadoEm());
     }
 
     @Transactional
-    public void conviteAceito(Long chatId) {
-        Convite convite = conviteRepository.findByChatId(chatId).orElseThrow(() -> new
-                ConviteNaoEncontradoUsandoReferencia(chatId));
+    public void conviteAceito(Long matchId) {
+        Convite convite = conviteRepository.findByMatchId(matchId).orElseThrow(() -> new
+                ConviteNaoEncontradoUsandoReferencia(matchId));
 
         if (convite.getConviteStatus() != ConviteStatus.PENDENTE) {
             throw new ConviteStatusException(convite.getConviteStatus());
@@ -93,15 +92,15 @@ public class ConviteService {
         conviteRepository.save(convite);
 
         publisher.publishEvent(new ConviteAceito(new ConviteAceitoDTO(convite.getAnfitriaoId(), convite.getColegaId(),
-                new ConviteInfoDTO(convite.getId(), chatId, convite.getTexto(), convite.getCriadoEm(),
+                new ConviteInfoDTO(convite.getId(), matchId, convite.getTexto(), convite.getCriadoEm(),
                         convite.getAtualizadoEm()
                 ))));
     }
 
     @Transactional
-    public void conviteRecusado(Long chatId) {
-        Convite convite = conviteRepository.findByChatId(chatId).orElseThrow(() -> new
-                ConviteNaoEncontradoUsandoReferencia(chatId));
+    public void conviteRecusado(Long matchId) {
+        Convite convite = conviteRepository.findByMatchId(matchId).orElseThrow(() -> new
+                ConviteNaoEncontradoUsandoReferencia(matchId));
 
         if (convite.getConviteStatus() != ConviteStatus.PENDENTE) {
             throw new ConviteStatusException(convite.getConviteStatus());
@@ -113,9 +112,9 @@ public class ConviteService {
     }
 
     @Transactional
-    public void conviteCancelado(Long chatId) {
-        Convite convite = conviteRepository.findByChatId(chatId).orElseThrow(() -> new
-                ConviteNaoEncontradoUsandoReferencia(chatId));
+    public void conviteCancelado(Long matchId) {
+        Convite convite = conviteRepository.findByMatchId(matchId).orElseThrow(() -> new
+                ConviteNaoEncontradoUsandoReferencia(matchId));
 
         if (convite.getConviteStatus() == ConviteStatus.ACEITO) {
             throw new ConviteStatusException(convite.getConviteStatus());

@@ -29,8 +29,8 @@ public class Convite {
     @Column(name = "convite_status")
     @Enumerated(EnumType.STRING)
     private ConviteStatus conviteStatus;
-//    @Column(name = "match_id") // Adicionar nullable = false pós Match class ser adicionada
-//    private Long matchId;
+    @Column(name = "match_id", nullable = false)
+    private Long matchId;
     @Column(name = "texto")
     private String texto;
     @Column(name = "anfitriao_id")
@@ -41,9 +41,6 @@ public class Convite {
     private LocalDateTime criadoEm;
     @Column(name = "data_atualizacao")
     private LocalDateTime atualizadoEm;
-    @OneToOne
-    @JoinColumn(name = "chat_id")
-    private Chat chat;
 
     public Convite() {
         this.criadoEm = LocalDateTime.now();
@@ -54,10 +51,9 @@ public class Convite {
         this.conviteStatus = builder.conviteStatus;
         this.texto = builder.texto;
         this.criadoEm = builder.criadoEm;
-        this.chat = builder.chat;
         this.anfitriaoId = builder.anfitriaoId;
         this.colegaId = builder.colegaId;
-//        this.matchId = builder.matchId;
+        this.matchId = builder.matchId;
         this.atualizadoEm = builder.atualizadoEm;
     }
 
@@ -93,21 +89,13 @@ public class Convite {
         this.criadoEm = criadoEm;
     }
 
-    public Chat getChat() {
-        return chat;
+    public Long getMatchId() {
+        return matchId;
     }
 
-    public void setChat(Chat chat) {
-        this.chat = chat;
+    public void setMatchId(Long matchId) {
+        this.matchId = matchId;
     }
-
-//    public Long getMatchId() {
-//        return matchId;
-//    }
-//
-//    public void setMatchId(Long matchId) {
-//        this.matchId = matchId;
-//    }
 
     public Long getAnfitriaoId() {
         return anfitriaoId;
@@ -138,8 +126,7 @@ public class Convite {
         private ConviteStatus conviteStatus;
         private String texto;
         private LocalDateTime criadoEm;
-        private Chat chat;
-//        private Long matchId;
+        private Long matchId;
         private Long anfitriaoId;
         private Long colegaId;
         private LocalDateTime atualizadoEm;
@@ -149,10 +136,10 @@ public class Convite {
             return this;
         }
 
-//        public Builder matchId(Long matchId) {
-//            this.matchId = matchId;
-//            return this;
-//        }
+        public Builder matchId(Long matchId) {
+            this.matchId = matchId;
+            return this;
+        }
 
         public Builder anfitriaoId(Long anfitriaoId) {
             this.anfitriaoId = anfitriaoId;
@@ -181,11 +168,6 @@ public class Convite {
 
         public Builder atualizadoEm(LocalDateTime atualizadoEm) {
             this.atualizadoEm = this.atualizadoEm;
-            return this;
-        }
-
-        public Builder chat(Chat chat) {
-            this.chat = chat;
             return this;
         }
 

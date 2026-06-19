@@ -19,8 +19,8 @@ public class WebSocketMensagemController {
     @Autowired
     private MensagemGrupoService msgGrupoService;
 
-    @MessageMapping("/chat/mensagem/nova/{usuarioId}/{chatId}")
-    @SendTo("/queue/chat/{chatId}")
+    @MessageMapping("/chat/mensagem/nova/{usuarioId}/{matchId}")
+    @SendTo("/queue/chat/{matchId}")
     private MensagemResponseDTO novaMensagemDireta(@DestinationVariable Long usuarioId, @DestinationVariable Long chatId,
                                              @Payload MensagemRequestDTO dto) {
         return msgDiretaService.criarMensagem(usuarioId, chatId, dto);

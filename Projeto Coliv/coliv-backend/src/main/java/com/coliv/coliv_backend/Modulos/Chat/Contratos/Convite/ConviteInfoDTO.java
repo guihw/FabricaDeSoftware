@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 public record ConviteInfoDTO(
         Long conviteId,
-        Long chatId,
+        Long matchId,
         String texto,
         LocalDateTime dataInicio,
         LocalDateTime atualizadoEm

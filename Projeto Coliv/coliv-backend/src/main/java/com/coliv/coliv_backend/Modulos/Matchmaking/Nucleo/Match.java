@@ -1,5 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Matchmaking.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,10 @@ public class Match {
 
     @Column(name = "anfitriao_id")
     private Long anfitriaoId;
+
+    @Column(name = "tipo_iniciador")
+    @Enumerated(EnumType.STRING)
+    private TipoUsuario iniciador;
 
     @Enumerated(EnumType.STRING)
     private StatusMatch status;
@@ -47,6 +52,14 @@ public class Match {
 
     public void setAnfitriaoId(Long anfitriaoId) {
         this.anfitriaoId = anfitriaoId;
+    }
+
+    public TipoUsuario getIniciador() {
+        return iniciador;
+    }
+
+    public void setIniciador(TipoUsuario iniciador) {
+        this.iniciador = iniciador;
     }
 
     public StatusMatch getStatus() {

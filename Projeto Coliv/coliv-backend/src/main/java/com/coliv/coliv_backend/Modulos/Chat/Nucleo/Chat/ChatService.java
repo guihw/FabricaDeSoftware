@@ -88,9 +88,4 @@ class ChatService {
             }
         }
     }
-
-    //Não esquecer de remover quando criar a classe de Match
-    public void matchEventTeste(MatchEventoDTO dto) {
-        publisher.publishEvent(new MatchEvento(dto));
-    }
 }

@@ -36,10 +36,4 @@ class ChatController {
     private void excluir(@PathVariable Long id) {
         chatService.excluir(id);
     }
-
-    //Não esquecer de remover quando criar a classe de Match
-    @PostMapping("/match/event/teste")
-    private void matchEventTeste(@RequestBody MatchEventoDTO dto) {
-        chatService.matchEventTeste(dto);
-    }
 }
