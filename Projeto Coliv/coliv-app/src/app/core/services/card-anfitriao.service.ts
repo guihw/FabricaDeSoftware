@@ -28,4 +28,11 @@ export class CardAnfitriaoService extends ApiService {
   getCardInfo(anfitriaoId: number): Observable<CardAnfitriaoResponseDTO> {
     return this.get<CardAnfitriaoResponseDTO>(`${this.PATH}/card/info/${anfitriaoId}`);
   }
+
+  editarPreco(anfitriaoId: number, precoMensal: number): Observable<{ precoMensal: string }> {
+    return this.put<{ precoMensal: string }>(
+      `${this.PATH}/editar/${anfitriaoId}`,
+      { precoMensal: String(precoMensal) }
+    );
+  }
 }
