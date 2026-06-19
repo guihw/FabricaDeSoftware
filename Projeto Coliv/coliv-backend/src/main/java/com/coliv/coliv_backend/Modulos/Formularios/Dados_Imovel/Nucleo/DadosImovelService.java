@@ -24,29 +24,31 @@ class DadosImovelService implements IDadosImovel {
     }
 
     public DadosImovelRequestDTO criarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
-        DadosImovel dadosImovel = new DadosImovel(dto.descricao(), dto.localizacao(), dto.quartos());
+        DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
+                .orElseGet(DadosImovel::new);
+
         dadosImovel.setAnfitriaoId(anfitriaoId);
+        dadosImovel.setDescricao(dto.descricao());
+        dadosImovel.setLocalizacao(dto.localizacao());
+        dadosImovel.setQuartos(dto.quartos());
 
         dir.save(dadosImovel);
-
         return dto;
     }
 
-
     public DadosImovelRequestDTO editarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
-        DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId).orElseThrow(() -> new
-                DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
+        DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
+                .orElseThrow(() -> new DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
 
-        if(dto.descricao() != null && !dto.descricao().isBlank()) {
+        if (dto.descricao() != null && !dto.descricao().isBlank()) {
             dadosImovel.setDescricao(dto.descricao());
         }
-        if(dto.localizacao() != null && !dto.localizacao().isBlank()) {
+        if (dto.localizacao() != null && !dto.localizacao().isBlank()) {
             dadosImovel.setLocalizacao(dto.localizacao());
         }
         dadosImovel.setQuartos(dto.quartos());
 
         dir.save(dadosImovel);
-
         return dto;
     }
 
@@ -55,36 +57,40 @@ class DadosImovelService implements IDadosImovel {
         dir.deleteById(id);
     }
 
-    @EventListener
-    public void eventoAnfitriaoCriado(UsuarioAnfitriaoCriado evento) {
-        DadosImovel dadosImovel = new DadosImovel();
-        dadosImovel.setAnfitriaoId(evento.anfitriaoId());
-
-        dir.save(dadosImovel);
-    }
-
-    @EventListener
-    public void eventoAnfitriaoExcluido(AnfitriaoExcluido evento) {
-        DadosImovel dadosImovel = dir.findByAnfitriaoId(evento.anfitriaoId()).orElseThrow(() -> new
-                DadosImovelNaoEncontradoUsandoReferencia(evento.anfitriaoId()));
-
-        dir.deleteById(dadosImovel.getId());
-    }
-
     @Override
     public DadosImovelDTO getDadosImovel(Long anfitriaoId) {
-        DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId).orElseThrow(() -> new
-                DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
+        DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
+                .orElseThrow(() -> new DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
 
-        return new DadosImovelDTO(dadosImovel.getAnfitriaoId(), dadosImovel.getDescricao(),
-                dadosImovel.getLocalizacao(), dadosImovel.getQuartos());
+        return new DadosImovelDTO(
+                dadosImovel.getAnfitriaoId(),
+                dadosImovel.getDescricao(),
+                dadosImovel.getLocalizacao(),
+                dadosImovel.getQuartos()
+        );
     }
 
     @Override
     public List<DadosImovelDTO> obterListaDeDados() {
-        List<DadosImovel> dados = dir.findAll();
-        return dados.stream().map(dado ->
-                new DadosImovelDTO(dado.getAnfitriaoId(), dado.getDescricao(),
-                        dado.getLocalizacao(), dado.getQuartos())).toList();
+        return dir.findAll().stream()
+                .map(d -> new DadosImovelDTO(d.getAnfitriaoId(), d.getDescricao(),
+                        d.getLocalizacao(), d.getQuartos()))
+                .toList();
+    }
+
+    @EventListener
+    public void eventoAnfitriaoCriado(UsuarioAnfitriaoCriado evento) {
+        if (dir.findByAnfitriaoId(evento.anfitriaoId()).isEmpty()) {
+            DadosImovel dadosImovel = new DadosImovel();
+            dadosImovel.setAnfitriaoId(evento.anfitriaoId());
+            dir.save(dadosImovel);
+        }
+    }
+
+    @EventListener
+    public void eventoAnfitriaoExcluido(AnfitriaoExcluido evento) {
+        DadosImovel dadosImovel = dir.findByAnfitriaoId(evento.anfitriaoId())
+                .orElseThrow(() -> new DadosImovelNaoEncontradoUsandoReferencia(evento.anfitriaoId()));
+        dir.deleteById(dadosImovel.getId());
     }
 }
