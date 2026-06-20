@@ -24,6 +24,20 @@ class MatchController {
         );
     }
 
+    // Usado quando é o ANFITRIÃO que toma a iniciativa (aceitar um colega no feed dele).
+    // Cria o match já com status ACEITO, pulando o PENDENTE.
+    @PostMapping("/{colegaId}/{anfitriaoId}/aceitar")
+    public MatchResponse criarAceito(
+            @PathVariable Long colegaId,
+            @PathVariable Long anfitriaoId
+    ) {
+
+        return service.criarAceito(
+                colegaId,
+                anfitriaoId
+        );
+    }
+
     @GetMapping("/{id}")
     public MatchResponse buscar(
             @PathVariable Long id
