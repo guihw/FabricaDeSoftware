@@ -1,0 +1,31 @@
+.swipe-out-right {
+  animation: swipeOutRight 0.35s ease-in forwards;
+  pointer-events: none;
+}
+
+.swipe-out-left {
+  animation: swipeOutLeft 0.35s ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes swipeOutRight {
+  0% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(120%) rotate(8deg);
+    opacity: 0;
+  }
+}
+
+@keyframes swipeOutLeft {
+  0% {
+    transform: translateX(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-120%) rotate(-8deg);
+    opacity: 0;
+  }
+}
