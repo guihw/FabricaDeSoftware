@@ -16,6 +16,12 @@ export class MatchService extends ApiService {
     return this.post<MatchResponse>(`/matches/${colegaId}/${anfitriaoId}`, {});
   }
 
+  // Usado quando o ANFITRIÃO aceita um colega recomendado no feed dele.
+  // O match já nasce com status ACEITO.
+  criarAceito(colegaId: number, anfitriaoId: number): Observable<MatchResponse> {
+    return this.post<MatchResponse>(`/matches/${colegaId}/${anfitriaoId}/aceitar`, {});
+  }
+
   buscar(id: number): Observable<MatchResponse> {
     return this.get<MatchResponse>(`/matches/${id}`);
   }
