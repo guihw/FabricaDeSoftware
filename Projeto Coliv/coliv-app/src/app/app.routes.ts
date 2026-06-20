@@ -10,6 +10,7 @@ import { Chat } from './chat/chat';
 import { authGuard } from './core/guards/auth-guard-guard';
 import { despesasGuard } from './core/guards/despesas-guard';
 import { anfitriaoGuard, colegaGuard } from './core/guards/role-guard-guard';
+import { anuncioGuard } from './core/guards/anuncio-guard-guard';
 import { Login } from './login/login';
 
 
@@ -20,7 +21,7 @@ export const routes: Routes = [
   { path: 'cadastro', component: Cadastro },
 
   { path: 'feedcolega', component: FeedColega, canActivate: [colegaGuard] },
-  { path: 'feedanfitriao', component: FeedAnfitriao, canActivate: [anfitriaoGuard] },
+  { path: 'feedanfitriao', component: FeedAnfitriao, canActivate: [anfitriaoGuard, anuncioGuard] },
   { path: 'criaranuncio', component: CriarAnuncio, canActivate: [anfitriaoGuard] },
   { path: 'preferencias', component: FormPreferencias, canActivate: [authGuard] },
   { path: 'despesas', component: Despesas, canActivate: [authGuard, despesasGuard] },
