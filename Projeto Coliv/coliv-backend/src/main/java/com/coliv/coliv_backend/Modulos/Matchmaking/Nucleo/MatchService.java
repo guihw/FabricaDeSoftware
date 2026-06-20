@@ -35,6 +35,29 @@ class MatchService {
         );
     }
 
+    // Quando o ANFITRIÃO aceita um colega recomendado, o match já nasce ACEITO.
+    public MatchResponse criarAceito(
+            Long colegaId,
+            Long anfitriaoId
+    ) {
+
+        Match match = new Match();
+
+        match.setColegaId(colegaId);
+        match.setAnfitriaoId(anfitriaoId);
+        match.setStatus(StatusMatch.ACEITO);
+        match.setCriadoEm(LocalDateTime.now());
+
+        match = repository.save(match);
+
+        return new MatchResponse(
+                match.getId(),
+                match.getColegaId(),
+                match.getAnfitriaoId(),
+                match.getStatus()
+        );
+    }
+
     public MatchResponse buscar(Long id) {
 
         Match match =

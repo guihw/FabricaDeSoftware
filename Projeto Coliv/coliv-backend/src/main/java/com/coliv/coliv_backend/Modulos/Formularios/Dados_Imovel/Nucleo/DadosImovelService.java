@@ -8,6 +8,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 class DadosImovelService implements IDadosImovel {
@@ -68,6 +69,17 @@ class DadosImovelService implements IDadosImovel {
                 dadosImovel.getLocalizacao(),
                 dadosImovel.getQuartos()
         );
+    }
+    public Optional<DadosImovelDTO> getDadosImovelSeCompleto(Long anfitriaoId) {
+        return dir.findByAnfitriaoId(anfitriaoId)
+                .filter(d -> d.getDescricao() != null && !d.getDescricao().isBlank()
+                        && d.getLocalizacao() != null && !d.getLocalizacao().isBlank())
+                .map(d -> new DadosImovelDTO(
+                        d.getAnfitriaoId(),
+                        d.getDescricao(),
+                        d.getLocalizacao(),
+                        d.getQuartos()
+                ));
     }
 
     @Override

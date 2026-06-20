@@ -17,6 +17,12 @@ export class DadosImovelService extends ApiService {
     return this.get<DadosImovel>(`${this.PATH}/buscar/${id}`);
   }
 
+  // GET /formularios/dados-imovel/anfitriao/{anfitriaoId}
+  // Retorna 204 (sem corpo) se o anúncio ainda não estiver completo.
+  buscarPorAnfitriaoIdSeCompleto(anfitriaoId: number): Observable<DadosImovelDTO> {
+    return this.get<DadosImovelDTO>(`${this.PATH}/anfitriao/${anfitriaoId}`);
+  }
+
   // POST /formularios/dados-imovel/{anfitriaoId}/novo-dados-imovel
   criar(anfitriaoId: number, dto: DadosImovelDTO): Observable<DadosImovel> {
     return this.post<DadosImovel>(
