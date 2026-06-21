@@ -63,7 +63,7 @@ public class SecurityConfig {
                         .requestMatchers("/formularios/preferencias-colega/**",
                                 "/recomendacoes/feed/colega",
                                 "/recomendacoes/feed/colega/**",
-                                "/cards/colega/**").hasAnyRole()
+                                "/cards/colega/**").hasRole("COLEGA")
 
                         // Demais rotas exigem apenas estar autenticado (anfitrião ou colega)
                         .anyRequest().authenticated())
