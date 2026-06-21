@@ -59,7 +59,11 @@ public class SecurityConfig {
                                 "/cards/anfitriao/**",
                                 "/recomendacoes/feed/anfitriao/**").hasRole("ANFITRIAO")
 
-                        
+                        // Exclusivo de colega
+                        .requestMatchers("/formularios/preferencias-colega/**",
+                                "/recomendacoes/feed/colega",
+                                "/recomendacoes/feed/colega/**",
+                                "/cards/colega/**").permitAll()
 
                         // Demais rotas exigem apenas estar autenticado (anfitrião ou colega)
                         .anyRequest().authenticated())
