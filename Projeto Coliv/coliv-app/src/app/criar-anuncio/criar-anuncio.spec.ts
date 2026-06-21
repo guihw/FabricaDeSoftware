@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { describe, it, expect, vi } from 'vitest';
 import { CriarAnuncio } from './criar-anuncio';
@@ -11,6 +12,7 @@ describe('CriarAnuncio', () => {
   let component: CriarAnuncio;
   let fixture: ComponentFixture<CriarAnuncio>;
   let dadosImovelSpy: { criar: ReturnType<typeof vi.fn> };
+  let routerSpy: { navigate: ReturnType<typeof vi.fn> };
 
   const imovelMock: DadosImovel = {
     id: 1, anfitriaoId: 5, descricao: 'Casa bonita', localizacao: 'SP', quartos: 2,
@@ -19,12 +21,17 @@ describe('CriarAnuncio', () => {
   beforeEach(async () => {
     dadosImovelSpy = { criar: vi.fn() };
     dadosImovelSpy.criar.mockReturnValue(of(imovelMock));
+    routerSpy = { navigate: vi.fn() };
 
     sessionStorage.setItem('coliv_user_id', '5');
 
     await TestBed.configureTestingModule({
       imports: [CriarAnuncio, CommonModule, ReactiveFormsModule],
-      providers: [{ provide: DadosImovelService, useValue: dadosImovelSpy }],
+      providers: [
+        provideRouter([]),
+        { provide: DadosImovelService, useValue: dadosImovelSpy },
+        { provide: Router, useValue: routerSpy },
+      ],
     }).compileComponents();
 
     fixture   = TestBed.createComponent(CriarAnuncio);
@@ -201,6 +208,11 @@ describe('CriarAnuncio', () => {
     component.publicado = true;
     component.voltarParaEdicao();
     expect(component.publicado).toBe(false);
+  });
+
+  it('irParaGerenciarAnuncios deve navegar para /gerenciaranuncios', () => {
+    component.irParaGerenciarAnuncios();
+    expect(routerSpy.navigate).toHaveBeenCalledWith(['/gerenciaranuncios']);
   });
 
 

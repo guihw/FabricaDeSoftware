@@ -9,6 +9,7 @@ import {
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
 import { ApiError } from '../core/services/api.service';
+import { Router } from '@angular/router';
 
 interface Amenidade {
   id: string;
@@ -68,7 +69,8 @@ export class CriarAnuncio implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private dadosImovelService: DadosImovelService
+    private dadosImovelService: DadosImovelService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
@@ -129,6 +131,10 @@ export class CriarAnuncio implements OnInit {
 
   voltarParaEdicao(): void {
     this.publicado = false;
+  }
+
+  irParaGerenciarAnuncios(): void {
+    this.router.navigate(['/gerenciaranuncios']);
   }
 
   voltar(): void {
