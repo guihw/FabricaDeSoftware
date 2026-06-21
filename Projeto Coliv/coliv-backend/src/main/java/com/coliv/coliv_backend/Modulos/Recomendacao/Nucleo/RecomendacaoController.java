@@ -16,20 +16,14 @@ public class RecomendacaoController {
     @Autowired
     private RecomendacaoService recomendacaoService;
 
-    @GetMapping("/feed/colega")
+    @GetMapping({"/feed/colega", "/feed/colega/", "/feed/colega/{colegaId}"})
     public FeedPageDTO<RecomendacaoCardAnfitriaoDTO> feedColega(
             @AuthenticationPrincipal UsuarioAutenticado usuario,
+            @PathVariable(required = false) Long colegaId,
             @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "10") int tamanho) {
-        return recomendacaoService.feedColega(usuario.getId(), pagina, tamanho);
-    }
-
-    @GetMapping("/feed/colega/{colegaId}")
-    public FeedPageDTO<RecomendacaoCardAnfitriaoDTO> feedColega(
-            @PathVariable Long colegaId,
-            @RequestParam(defaultValue = "0") int pagina,
-            @RequestParam(defaultValue = "10") int tamanho) {
-        return recomendacaoService.feedColega(colegaId, pagina, tamanho);
+        Long id = colegaId != null ? colegaId : usuario.getId();
+        return recomendacaoService.feedColega(id, pagina, tamanho);
     }
 
     @GetMapping("/feed/anfitriao/{anfitriaoId}")
