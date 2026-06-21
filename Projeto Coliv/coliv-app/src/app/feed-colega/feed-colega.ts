@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 import {
@@ -8,6 +8,8 @@ import {
   FeedPageDTO,
 } from '../core/services/recomendacao.service';
 import { MoradiaCardComponent } from './components/moradia-card-component/moradia-card-component';
+import { ApiError } from '../core/services/api.service';
+import { MatchService } from '../core/services/match.service';
 
 @Component({
   selector: 'app-feed-colega',
@@ -26,7 +28,11 @@ export class FeedColega implements OnInit {
 
   private colegaId: number | null = null;
 
-  constructor(private recomendacaoService: RecomendacaoService) {}
+  likeEmAndamento = signal<Set<number>>(new Set());
+
+  constructor(private recomendacaoService: RecomendacaoService,
+    private matchService: MatchService,
+    private router: Router,) {}
 
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
@@ -73,7 +79,38 @@ export class FeedColega implements OnInit {
     }
   }
 
-  /** Retorna label de cor de acordo com o score de compatibilidade */
+  onLike(rec: RecomendacaoCardAnfitriaoDTO): void {
+    if (!this.colegaId) return;
+ 
+    const anfitriaoId = rec.card.anfitriaoId;
+ 
+    // Evita múltiplos cliques enquanto a requisição está em andamento
+    if (this.likeEmAndamento().has(anfitriaoId)) return;
+    this.likeEmAndamento.update(s => new Set([...s, anfitriaoId]));
+    this.erro.set(null);
+ 
+    this.matchService.criar(this.colegaId, anfitriaoId).subscribe({
+      next: (match) => {
+        this.likeEmAndamento.update(s => {
+          const next = new Set(s);
+          next.delete(anfitriaoId);
+          return next;
+        });
+       
+        sessionStorage.setItem('coliv_chat_outro_id', String(anfitriaoId));
+        this.router.navigate(['/chat', match.id]);
+      },
+      error: (err: ApiError) => {
+        this.likeEmAndamento.update(s => {
+          const next = new Set(s);
+          next.delete(anfitriaoId);
+          return next;
+        });
+        this.erro.set(err.message ?? 'Não foi possível criar o match. Tente novamente.');
+      },
+    });
+  }
+ 
   corScore(score: number): string {
     if (score >= 80) return 'text-secondary bg-secondary-container';
     if (score >= 60) return 'text-on-primary-container bg-primary-container';

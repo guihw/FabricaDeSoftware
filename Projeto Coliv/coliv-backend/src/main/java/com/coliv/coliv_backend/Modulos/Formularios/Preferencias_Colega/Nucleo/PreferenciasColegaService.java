@@ -18,39 +18,16 @@ public class PreferenciasColegaService implements IPreferenciasColega {
     }
 
     public List<PreferenciasColegaResponse> listar() {
-
         return repository.findAll()
                 .stream()
-                .map(preferencias -> new PreferenciasColegaResponse(
-                        preferencias.getId(),
-                        preferencias.getPrecoMinimo(),
-                        preferencias.getPrecoMaximo(),
-                        preferencias.getLocalizacao(),
-                        preferencias.getHorarioDeSono(),
-                        preferencias.getNivelDeSociabilidade(),
-                        preferencias.getNivelDeLimpeza(),
-                        preferencias.getHabitoDeTrabalho(),
-                        preferencias.isAceitaAnimais()
-                ))
+                .map(this::mapToResponse)
                 .toList();
     }
 
     public PreferenciasColegaResponse buscarPorId(Long id) {
-
         PreferenciasColega preferencias = repository.findById(id)
                 .orElseThrow(() -> new PreferenciaColegaIDNaoEncontrado(id));
-
-        return new PreferenciasColegaResponse(
-                preferencias.getId(),
-                preferencias.getPrecoMinimo(),
-                preferencias.getPrecoMaximo(),
-                preferencias.getLocalizacao(),
-                preferencias.getHorarioDeSono(),
-                preferencias.getNivelDeSociabilidade(),
-                preferencias.getNivelDeLimpeza(),
-                preferencias.getHabitoDeTrabalho(),
-                preferencias.isAceitaAnimais()
-        );
+        return mapToResponse(preferencias);
     }
 
     @Transactional
@@ -60,31 +37,19 @@ public class PreferenciasColegaService implements IPreferenciasColega {
             throw new RuntimeException("Preço mínimo não pode ser maior que o máximo");
         }
 
-        PreferenciasColega preferencias = new PreferenciasColega.Builder()
-                .precoMinimo(dto.precoMinimo())
-                .precoMaximo(dto.precoMaximo())
-                .localizacao(dto.localizacao())
-                .horarioDeSono(dto.horarioDeSono())
-                .nivelDeSociabilidade(dto.nivelDeSociabilidade())
-                .nivelDeLimpeza(dto.nivelDeLimpeza())
-                .habitoDeTrabalho(dto.habitoDeTrabalho())
-                .aceitaAnimais(dto.aceitaAnimais())
-                .colegaId(colegaId)
-                .build();
+        PreferenciasColega preferencias = repository.findByColegaId(colegaId)
+                .orElseGet(() -> new PreferenciasColega.Builder().colegaId(colegaId).build());
 
-        PreferenciasColega saved = repository.save(preferencias);
+        preferencias.setPrecoMinimo(dto.precoMinimo());
+        preferencias.setPrecoMaximo(dto.precoMaximo());
+        preferencias.setLocalizacao(dto.localizacao());
+        preferencias.setHorarioDeSono(dto.horarioDeSono());
+        preferencias.setNivelDeSociabilidade(dto.nivelDeSociabilidade());
+        preferencias.setNivelDeLimpeza(dto.nivelDeLimpeza());
+        preferencias.setHabitoDeTrabalho(dto.habitoDeTrabalho());
+        preferencias.setAceitaAnimais(dto.aceitaAnimais());
 
-        return new PreferenciasColegaResponse(
-                saved.getId(),
-                saved.getPrecoMinimo(),
-                saved.getPrecoMaximo(),
-                saved.getLocalizacao(),
-                saved.getHorarioDeSono(),
-                saved.getNivelDeSociabilidade(),
-                saved.getNivelDeLimpeza(),
-                saved.getHabitoDeTrabalho(),
-                saved.isAceitaAnimais()
-        );
+        return mapToResponse(repository.save(preferencias));
     }
 
     @Transactional
@@ -93,97 +58,60 @@ public class PreferenciasColegaService implements IPreferenciasColega {
         PreferenciasColega original = repository.findById(id)
                 .orElseThrow(() -> new PreferenciaColegaIDNaoEncontrado(id));
 
-        if (dto.precoMinimo() != null) {
-            original.setPrecoMinimo(dto.precoMinimo());
-        }
-
-        if (dto.precoMaximo() != null) {
-            original.setPrecoMaximo(dto.precoMaximo());
-        }
-
-        if (dto.localizacao() != null && !dto.localizacao().isBlank()) {
-            original.setLocalizacao(dto.localizacao());
-        }
-
-        if (dto.horarioDeSono() != null) {
-            original.setHorarioDeSono(dto.horarioDeSono());
-        }
-
-        if (dto.nivelDeSociabilidade() != null) {
-            original.setNivelDeSociabilidade(dto.nivelDeSociabilidade());
-        }
-
-        if (dto.nivelDeLimpeza() != null) {
-            original.setNivelDeLimpeza(dto.nivelDeLimpeza());
-        }
-
-        if (dto.habitoDeTrabalho() != null) {
-            original.setHabitoDeTrabalho(dto.habitoDeTrabalho());
-        }
-
+        if (dto.precoMinimo() != null)  original.setPrecoMinimo(dto.precoMinimo());
+        if (dto.precoMaximo() != null)  original.setPrecoMaximo(dto.precoMaximo());
+        if (dto.localizacao() != null && !dto.localizacao().isBlank()) original.setLocalizacao(dto.localizacao());
+        if (dto.horarioDeSono() != null) original.setHorarioDeSono(dto.horarioDeSono());
+        if (dto.nivelDeSociabilidade() != null) original.setNivelDeSociabilidade(dto.nivelDeSociabilidade());
+        if (dto.nivelDeLimpeza() != null) original.setNivelDeLimpeza(dto.nivelDeLimpeza());
+        if (dto.habitoDeTrabalho() != null) original.setHabitoDeTrabalho(dto.habitoDeTrabalho());
         original.setAceitaAnimais(dto.aceitaAnimais());
 
-        PreferenciasColega updated = repository.save(original);
-
-        return new PreferenciasColegaResponse(
-                updated.getId(),
-                updated.getPrecoMinimo(),
-                updated.getPrecoMaximo(),
-                updated.getLocalizacao(),
-                updated.getHorarioDeSono(),
-                updated.getNivelDeSociabilidade(),
-                updated.getNivelDeLimpeza(),
-                updated.getHabitoDeTrabalho(),
-                updated.isAceitaAnimais()
-        );
+        return mapToResponse(repository.save(original));
     }
 
     @Transactional
     public void excluir(Long id) {
-
-        repository.findById(id)
-                .orElseThrow(() -> new PreferenciaColegaIDNaoEncontrado(id));
-
+        repository.findById(id).orElseThrow(() -> new PreferenciaColegaIDNaoEncontrado(id));
         repository.deleteById(id);
     }
 
     @Override
     public PreferenciasColegaResponse getPreferenciasColega(Long colegaId) {
-
         PreferenciasColega preferencias = repository.findByColegaId(colegaId)
-                .orElseThrow(() ->
-                        new PreferenciaColegaNaoEncontradaUsandoReferencia(colegaId));
-
-        return new PreferenciasColegaResponse(
-                preferencias.getId(),
-                preferencias.getPrecoMinimo(),
-                preferencias.getPrecoMaximo(),
-                preferencias.getLocalizacao(),
-                preferencias.getHorarioDeSono(),
-                preferencias.getNivelDeSociabilidade(),
-                preferencias.getNivelDeLimpeza(),
-                preferencias.getHabitoDeTrabalho(),
-                preferencias.isAceitaAnimais()
-        );
+                .orElseThrow(() -> new PreferenciaColegaNaoEncontradaUsandoReferencia(colegaId));
+        return mapToResponse(preferencias);
     }
 
     @EventListener
-    public void eventoColegaCriado(UsuarioColegaCriado evento) {
-
-        PreferenciasColega preferencias = new PreferenciasColega.Builder()
-                .colegaId(evento.colegaId())
-                .build();
-
-        repository.save(preferencias);
+    public void eventoColegaCriado(com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.UsuarioColegaCriado evento) {
+        // Só cria se ainda não existir (idempotente)
+        if (repository.findByColegaId(evento.colegaId()).isEmpty()) {
+            PreferenciasColega preferencias = new PreferenciasColega.Builder()
+                    .colegaId(evento.colegaId())
+                    .build();
+            repository.save(preferencias);
+        }
     }
 
     @EventListener
     public void eventoColegaExcluido(ColegaExcluido evento) {
-
         PreferenciasColega preferencias = repository.findByColegaId(evento.colegaId())
-                .orElseThrow(() ->
-                        new PreferenciaColegaNaoEncontradaUsandoReferencia(evento.colegaId()));
-
+                .orElseThrow(() -> new PreferenciaColegaNaoEncontradaUsandoReferencia(evento.colegaId()));
         repository.deleteById(preferencias.getId());
+    }
+
+    private PreferenciasColegaResponse mapToResponse(PreferenciasColega p) {
+        return new PreferenciasColegaResponse(
+                p.getId(),
+                p.getPrecoMinimo(),
+                p.getPrecoMaximo(),
+                p.getLocalizacao(),
+                p.getHorarioDeSono(),
+                p.getNivelDeSociabilidade(),
+                p.getNivelDeLimpeza(),
+                p.getHabitoDeTrabalho(),
+                p.isAceitaAnimais()
+        );
     }
 }

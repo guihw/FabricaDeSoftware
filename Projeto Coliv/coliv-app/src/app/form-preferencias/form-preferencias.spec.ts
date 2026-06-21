@@ -197,14 +197,14 @@ describe('FormPreferencias', () => {
     expect(anfitriaoService.criar).toHaveBeenCalledWith(5, expect.any(Object));
   }));
 
-  it('deve navegar para /feedanfitriao após salvar anfitrião com sucesso', fakeAsync(() => {
+  it('deve navegar para /criaranuncio após salvar anfitrião com sucesso', fakeAsync(() => {
     anfitriaoService.criar.mockReturnValue(of(prefAnfitriaoMock));
     setupSession('anfitriao', 5);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP' });
     component.salvar();
     tick(800);
-    expect(router.navigate).toHaveBeenCalledWith(['/feedanfitriao']);
+    expect(router.navigate).toHaveBeenCalledWith(['/criaranuncio']);
   }));
 
   it('deve definir sucesso como true após salvar anfitrião', fakeAsync(() => {

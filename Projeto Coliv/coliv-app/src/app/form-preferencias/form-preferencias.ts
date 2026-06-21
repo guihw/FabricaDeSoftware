@@ -163,7 +163,9 @@ export class FormPreferencias implements OnInit {
       next: () => {
         this.carregando.set(false);
         this.sucesso.set(true);
-        setTimeout(() => this.router.navigate(['/feedanfitriao']), 800);
+        // Anfitrião ainda não tem anúncio publicado nesse ponto do fluxo,
+        // então segue direto para a criação do anúncio em vez do feed.
+        setTimeout(() => this.router.navigate(['/criaranuncio']), 800);
       },
       error: (err: ApiError) => {
         this.carregando.set(false);
