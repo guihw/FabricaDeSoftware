@@ -23,6 +23,11 @@ public class RecomendacaoController {
             @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "10") int tamanho) {
         Long id = colegaId != null ? colegaId : usuario.getId();
+
+        System.out.println("Usuario autenticado: " + usuario.getUsername());
+        System.out.println("Id token: " + usuario.getId());
+        System.out.println("Tipo: " + usuario.getTipo());
+        System.out.println("Id URL: " + colegaId);
         return recomendacaoService.feedColega(id, pagina, tamanho);
     }
 
