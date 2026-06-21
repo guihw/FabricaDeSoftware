@@ -27,13 +27,13 @@ class AnfitriaoService implements IAnfitriao {
 
     public List<UsuarioDTO> listar() {
         return anfitriaoRepository.findAll().stream().
-                map(usuarios -> new UsuarioDTO(usuarios.getId(), usuarios.getNome(), usuarios.getCpf())).
+                map(usuarios -> new UsuarioDTO(usuarios.getId(), usuarios.getNome(), usuarios.getEmail())).
                 toList();
     }
 
     public UsuarioDTO buscarPorId(Long id) {
         return anfitriaoRepository.findById(id).
-                map(usuario -> new UsuarioDTO(id, usuario.getNome(), usuario.getCpf())).
+                map(usuario -> new UsuarioDTO(id, usuario.getNome(), usuario.getEmail())).
                 orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
     }
 
@@ -93,6 +93,11 @@ class AnfitriaoService implements IAnfitriao {
         return anfitriaoRepository.findById(id).
                 map(usuario -> new UsuarioDTO(id , usuario.getNome(), usuario.getEmail())).
                 orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
+    }
+
+    @Override
+    public boolean verificarExistencia(Long id) {
+        return anfitriaoRepository.existsById(id);
     }
 
     @Override

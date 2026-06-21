@@ -8,6 +8,8 @@ import java.util.Optional;
 public interface IAnfitriao {
 
     public UsuarioDTO obterUsuario(Long id);
+
+    public boolean verificarExistencia(Long id);
     
     public List<UsuarioDTO> obterListaDeUsuarios();
     Optional<AnfitriaoCredenciaisDTO> buscarCredenciais(String email);

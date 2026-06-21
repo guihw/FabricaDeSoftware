@@ -64,10 +64,16 @@ public class ColegaService implements IColega {
     }
 
     @Override
+    public boolean verificarExistencia(Long id) {
+        return colegaRepository.existsById(id);
+    }
+
+    @Override
     public Optional<ColegaCredenciaisDTO> buscarCredenciais(String email) {
         String emailLower = email != null ? email.toLowerCase() : "";
         return colegaRepository.findByEmail(emailLower)
                 .map(a -> new ColegaCredenciaisDTO(a.getId(), a.getEmail(), a.getSenha()));
+
     }
 
     @Transactional

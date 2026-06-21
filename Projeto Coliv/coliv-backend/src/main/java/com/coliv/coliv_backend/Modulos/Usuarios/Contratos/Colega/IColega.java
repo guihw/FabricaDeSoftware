@@ -5,5 +5,8 @@ import java.util.Optional;
 public interface IColega {
 
     ColegaResponse getColega(Long id);
+
+    boolean verificarExistencia(Long id);
+
     Optional<ColegaCredenciaisDTO> buscarCredenciais(String email);
 }

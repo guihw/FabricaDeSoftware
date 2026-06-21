@@ -1,5 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Matchmaking.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchDTO;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,16 +13,10 @@ class MatchController {
     @Autowired
     private MatchService service;
 
-    @PostMapping("/{colegaId}/{anfitriaoId}")
-    public MatchResponse criar(
-            @PathVariable Long colegaId,
-            @PathVariable Long anfitriaoId
-    ) {
+    @PostMapping("/novo")
+    public MatchResponse criar(@RequestBody MatchDTO dto) {
 
-        return service.criar(
-                colegaId,
-                anfitriaoId
-        );
+        return service.criar(dto);
     }
 
     // Usado quando é o ANFITRIÃO que toma a iniciativa (aceitar um colega no feed dele).
@@ -44,6 +39,11 @@ class MatchController {
     ) {
 
         return service.buscar(id);
+    }
+
+    @PatchMapping("/aceitar/{id}")
+    public void aceitar(@PathVariable Long id) {
+        service.aceitar(id);
     }
 
     @DeleteMapping("/{id}")
