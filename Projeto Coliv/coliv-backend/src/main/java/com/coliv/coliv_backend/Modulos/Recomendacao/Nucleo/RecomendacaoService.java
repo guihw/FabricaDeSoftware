@@ -7,10 +7,13 @@ import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos
 import com.coliv.coliv_backend.Modulos.Recomendacao.Contratos.FeedPageDTO;
 import com.coliv.coliv_backend.Modulos.Recomendacao.Contratos.RecomendacaoCardAnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Recomendacao.Contratos.RecomendacaoColegaDTO;
+import com.coliv.coliv_backend.Modulos.Security.Nucleo.UsuarioAutenticado;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao;
 import com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega.Colega;
 import com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega.ColegaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
@@ -47,6 +50,12 @@ public class RecomendacaoService {
                 .sorted(Comparator.comparingInt(
                         RecomendacaoCardAnfitriaoDTO::score).reversed())
                 .toList();
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        UsuarioAutenticado usuario = (UsuarioAutenticado) authentication.getPrincipal();
+
+        System.out.println("Tipo do usuário: [" + usuario.getTipo() + "]");
+        System.out.println("Authorities: " + usuario.getAuthorities());
 
         return paginar(rankeados, pagina, tamanhoPagina);
     }
