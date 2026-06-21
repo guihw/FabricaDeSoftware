@@ -60,6 +60,8 @@ class MatchService implements IMatchmaking {
                 match.getAnfitriaoId(),
                 match.getStatus()
         );
+    }
+
     @Transactional
     public void aceitar(Long id) {
 
