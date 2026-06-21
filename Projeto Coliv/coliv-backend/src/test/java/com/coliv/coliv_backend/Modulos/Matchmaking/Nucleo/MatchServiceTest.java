@@ -1,7 +1,9 @@
 package com.coliv.coliv_backend.Modulos.Matchmaking.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchDTO;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchIdNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchResponse;
+import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,7 +38,7 @@ class MatchServiceTest {
                 .thenReturn(match);
 
         MatchResponse response =
-                service.criar(1L, 2L);
+                service.criar(new MatchDTO(TipoUsuario.COLEGA, 1L, 2L));
 
         assertNotNull(response);
         assertEquals(1L, response.colegaId());
