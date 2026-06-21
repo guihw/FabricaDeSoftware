@@ -17,13 +17,14 @@ public class AutenticacaoUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        var anfitriao = iAnfitriao.buscarCredenciais(email);
+        String emailLower = email != null ? email.toLowerCase() : "";
+        var anfitriao = iAnfitriao.buscarCredenciais(emailLower);
         if (anfitriao.isPresent()) {
             var a = anfitriao.get();
             return new UsuarioAutenticado(a.id(), a.email(), a.senhaHash(), "ANFITRIAO");
         }
 
-        var colega = iColega.buscarCredenciais(email);
+        var colega = iColega.buscarCredenciais(emailLower);
         if (colega.isPresent()) {
             var c = colega.get();
             return new UsuarioAutenticado(c.id(), c.email(), c.senhaHash(), "COLEGA");

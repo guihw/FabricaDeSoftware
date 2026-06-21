@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Usuarios.Nucleo.Colega;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.*;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.UsuarioIDNaoEncontrado;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,9 @@ public class ColegaService implements IColega {
     private final ColegaRepository colegaRepository;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher publisher;
+
+    @Autowired
+    private com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao iAnfitriao;
 
     public ColegaService(
             ColegaRepository colegaRepository,
@@ -60,7 +64,8 @@ public class ColegaService implements IColega {
 
     @Override
     public Optional<ColegaCredenciaisDTO> buscarCredenciais(String email) {
-        return colegaRepository.findByEmail(email)
+        String emailLower = email != null ? email.toLowerCase() : "";
+        return colegaRepository.findByEmail(emailLower)
                 .map(a -> new ColegaCredenciaisDTO(a.getId(), a.getEmail(), a.getSenha()));
     }
 
@@ -83,8 +88,9 @@ public class ColegaService implements IColega {
             throw new RuntimeException("CPF está faltando");
         }
 
+        String emailLower = request.email() != null ? request.email().toLowerCase() : "";
         boolean colegaAlreadyExists =
-                colegaRepository.existsByEmail(request.email());
+                colegaRepository.existsByEmail(emailLower) || iAnfitriao.buscarCredenciais(emailLower).isPresent();
 
         if (colegaAlreadyExists) {
             throw new RuntimeException("Email já registrado");

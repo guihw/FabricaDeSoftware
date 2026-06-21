@@ -21,6 +21,8 @@ class AnfitriaoService implements IAnfitriao {
     private ApplicationEventPublisher publisher;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.IColega iColega;
 
     public List<UsuarioDTO> listar() {
         return anfitriaoRepository.findAll().stream().
@@ -36,11 +38,12 @@ class AnfitriaoService implements IAnfitriao {
 
     @Transactional
     public AnfitriaoPostDTO criarAnfitriao(AnfitriaoPostDTO anfitriaoPostDTO) {
+        String emailLower = anfitriaoPostDTO.email() != null ? anfitriaoPostDTO.email().toLowerCase() : "";
         Anfitriao usuario = new Anfitriao(anfitriaoPostDTO.nome(), anfitriaoPostDTO.cpf(),
-                                          anfitriaoPostDTO.email(), anfitriaoPostDTO.senha());
+                                          emailLower, anfitriaoPostDTO.senha());
 
-        if (anfitriaoRepository.existsByEmail(anfitriaoPostDTO.email())) {
-            throw new EmailDeUsuarioExistente(anfitriaoPostDTO.email());
+        if (anfitriaoRepository.existsByEmail(emailLower) || iColega.buscarCredenciais(emailLower).isPresent()) {
+            throw new EmailDeUsuarioExistente(emailLower);
         }
 
         if (anfitriaoRepository.existsByCpf(anfitriaoPostDTO.cpf())) {
@@ -64,7 +67,7 @@ class AnfitriaoService implements IAnfitriao {
             original.setCpf(anfitriao.cpf());
         }
         if (anfitriao.email() != null && !anfitriao.email().isBlank()) {
-            original.setEmail(anfitriao.email());
+            original.setEmail(anfitriao.email().toLowerCase());
         }
         if (anfitriao.senha() != null && !anfitriao.senha().isBlank()) {
             original.setSenha(passwordEncoder.encode(anfitriao.senha()));
