@@ -34,7 +34,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (jwtService.tokenValido(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
             Claims claims = jwtService.extrairClaims(token);
             String email = claims.getSubject();
-            Long id = claims.get("id", Long.class);
+            Object idObj = claims.get("id");
+            Long id = idObj instanceof Number ? ((Number) idObj).longValue() : null;
             String tipo = claims.get("tipo", String.class);
 
             UsuarioAutenticado usuario = new UsuarioAutenticado(id, email, "", tipo);
