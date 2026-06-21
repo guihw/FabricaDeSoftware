@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Recomendacao.Nucleo;
 import com.coliv.coliv_backend.Modulos.Recomendacao.Contratos.FeedPageDTO;
 import com.coliv.coliv_backend.Modulos.Recomendacao.Contratos.RecomendacaoCardAnfitriaoDTO;
 import com.coliv.coliv_backend.Modulos.Recomendacao.Contratos.RecomendacaoColegaDTO;
+import com.coliv.coliv_backend.Modulos.Security.Nucleo.UsuarioAutenticado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
