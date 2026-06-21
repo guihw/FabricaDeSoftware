@@ -52,4 +52,20 @@ class DespesaController {
 
         service.excluir(id);
     }
+
+    @PatchMapping("/{id}/pagar/{usuarioId}")
+    public Despesa marcarComoPago(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId
+    ) {
+        return service.marcarComoPago(id, usuarioId);
+    }
+
+    @PatchMapping("/{id}/desmarcar/{usuarioId}")
+    public Despesa desmarcarComoPago(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId
+    ) {
+        return service.desmarcarComoPago(id, usuarioId);
+    }
 }
