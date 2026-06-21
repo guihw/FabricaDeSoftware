@@ -16,7 +16,7 @@ public class RecomendacaoController {
     @Autowired
     private RecomendacaoService recomendacaoService;
 
-    @GetMapping({"/feed/colega", "/feed/colega/", "/feed/colega/{colegaId}"})
+    @GetMapping("/feed/colega/{colegaId}")
     public FeedPageDTO<RecomendacaoCardAnfitriaoDTO> feedColega(
             @AuthenticationPrincipal UsuarioAutenticado usuario,
             @PathVariable(required = false) Long colegaId,
