@@ -19,6 +19,7 @@ public class ColegaService implements IColega {
     private final ApplicationEventPublisher publisher;
 
     @Autowired
+    @org.springframework.context.annotation.Lazy
     private com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao iAnfitriao;
 
     public ColegaService(

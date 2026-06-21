@@ -22,6 +22,7 @@ class AnfitriaoService implements IAnfitriao {
     @Autowired
     private PasswordEncoder passwordEncoder;
     @Autowired
+    @org.springframework.context.annotation.Lazy
     private com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.IColega iColega;
 
     public List<UsuarioDTO> listar() {
