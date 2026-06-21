@@ -16,8 +16,6 @@ import java.util.List;
 @Service
 public class ConviteService {
 
-    // Resolver lógica de múltiplos convites.
-
     @Autowired
     private ConviteRepository conviteRepository;
     @Autowired
@@ -51,12 +49,9 @@ public class ConviteService {
 
     @Transactional
     public ConviteResponseDTO novoConvite(ConviteStatus status, ConviteRequestDTO dto, Long matchId) {
+        List<ConviteStatus> statuses = List.of(ConviteStatus.PENDENTE, ConviteStatus.ACEITO);
 
-        if (conviteRepository.existsByMatchIdAndConviteStatusIn(matchId, new ArrayList<>(){{
-            add(ConviteStatus.PENDENTE);
-            add(ConviteStatus.ACEITO);
-        }}
-        )) {
+        if (conviteRepository.existsByMatchIdAndConviteStatusIn(matchId, statuses)) {
             throw new ConviteExistente();
         }
 
@@ -80,7 +75,7 @@ public class ConviteService {
 
     @Transactional
     public void conviteAceito(Long matchId) {
-        Convite convite = conviteRepository.findByMatchId(matchId).orElseThrow(() -> new
+        Convite convite = conviteRepository.findTopByMatchIdOrderByIdDesc(matchId).orElseThrow(() -> new
                 ConviteNaoEncontradoUsandoReferencia(matchId));
 
         if (convite.getConviteStatus() != ConviteStatus.PENDENTE) {
@@ -99,7 +94,7 @@ public class ConviteService {
 
     @Transactional
     public void conviteRecusado(Long matchId) {
-        Convite convite = conviteRepository.findByMatchId(matchId).orElseThrow(() -> new
+        Convite convite = conviteRepository.findTopByMatchIdOrderByIdDesc(matchId).orElseThrow(() -> new
                 ConviteNaoEncontradoUsandoReferencia(matchId));
 
         if (convite.getConviteStatus() != ConviteStatus.PENDENTE) {
@@ -113,7 +108,7 @@ public class ConviteService {
 
     @Transactional
     public void conviteCancelado(Long matchId) {
-        Convite convite = conviteRepository.findByMatchId(matchId).orElseThrow(() -> new
+        Convite convite = conviteRepository.findTopByMatchIdOrderByIdDesc(matchId).orElseThrow(() -> new
                 ConviteNaoEncontradoUsandoReferencia(matchId));
 
         if (convite.getConviteStatus() == ConviteStatus.ACEITO) {

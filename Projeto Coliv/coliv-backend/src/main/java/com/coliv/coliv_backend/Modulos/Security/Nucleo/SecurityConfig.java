@@ -63,6 +63,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/matches/**").permitAll()
                         .requestMatchers("/chat/**").permitAll()
+                        .requestMatchers("/chat/convite/**").permitAll()
+                        .requestMatchers("/error").permitAll()
 
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
