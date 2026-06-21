@@ -61,6 +61,7 @@ public class SecurityConfig {
 
                         // Exclusivo de colega
                         .requestMatchers("/formularios/preferencias-colega/**",
+                                "/recomendacoes/feed/colega",
                                 "/recomendacoes/feed/colega/**",
                                 "/cards/colega/**").hasRole("COLEGA")
 
