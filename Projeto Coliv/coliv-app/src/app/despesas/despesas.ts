@@ -12,7 +12,7 @@ import { ApiError } from '../core/services/api.service';
 import { Despesa, DespesaDTO, DivisaoDTO, DespesaView, TipoDespesa, Divisao } from '../core/models/despesas.model';
 
 import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
-import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
+import { TopNavbarComponent }    from '../shared/components/top-navbar-component/top-navbar-component';
 
 @Component({
   selector: 'app-despesas',
@@ -24,33 +24,34 @@ export class Despesas implements OnInit {
   private despesaService = inject(DespesaService);
   private divisaoService = inject(DivisaoService);
   private conviteService = inject(ConviteService);
-  private authService = inject(AuthService);
+  private authService    = inject(AuthService);
 
   form = new FormGroup({
-    nome: new FormControl('', Validators.required),
-    valor: new FormControl(0, [Validators.required, Validators.min(1)]),
+    nome:           new FormControl('', Validators.required),
+    valor:          new FormControl(0, [Validators.required, Validators.min(1)]),
     dataVencimento: new FormControl(this.hojeISO(), Validators.required),
-    categoria: new FormControl(''),
-    tipodeDespesa: new FormControl<TipoDespesa>('coletiva', { nonNullable: true, validators: Validators.required }),
+    categoria:      new FormControl(''),
+    tipodeDespesa:  new FormControl<TipoDespesa>('coletiva', {
+      nonNullable: true,
+      validators: Validators.required,
+    }),
     descricao: new FormControl(''),
   });
 
-  isOpen = false;
-  modoEdicao = false;
-  carregando = signal(true);
-  erro = signal<string | null>(null);
-  salvando = signal(false);
+  isOpen      = false;
+  modoEdicao  = false;
+  carregando  = signal(true);
+  erro        = signal<string | null>(null);
+  salvando    = signal(false);
 
-  usuarioId = 0;
-  isAnfitriao = false;
-
-  /** ids de todos os moradores da casa (anfitrião + colegas com convite ACEITO) */
+  usuarioId    = 0;
+  isAnfitriao  = false;
   membrosDaCasa: number[] = [];
 
-  despesas = signal<DespesaView[]>([]);
+  despesas         = signal<DespesaView[]>([]);
   despesaSelecionada: DespesaView = this.despesaVazia();
 
-  @ViewChild('dialogRef', { static: false }) dialog!: ElementRef<HTMLDialogElement>;
+  @ViewChild('dialogRef',   { static: false }) dialog!: ElementRef<HTMLDialogElement>;
   @ViewChild('confirmDialog', { static: false }) confirmDialog!: ElementRef<HTMLDialogElement>;
 
   soma = computed(() =>
@@ -59,8 +60,8 @@ export class Despesas implements OnInit {
 
   totalPago = computed(() =>
     this.despesas().reduce((acc, d) => {
-      const minhaDivisao = d.divisoes.find((dv) => dv.usuarioId === this.usuarioId);
-      const valorParte = minhaDivisao ? minhaDivisao.valor : 0;
+      const minhaDivisao = d.divisoes.find(dv => dv.usuarioId === this.usuarioId);
+      const valorParte   = minhaDivisao ? minhaDivisao.valor : 0;
       return d.pago.includes(this.usuarioId) ? acc + valorParte : acc;
     }, 0)
   );
@@ -68,7 +69,7 @@ export class Despesas implements OnInit {
   totalPendente = computed(() => this.soma() - this.totalPago());
 
   ngOnInit(): void {
-    this.usuarioId = this.authService.getUserId() ?? 0;
+    this.usuarioId   = this.authService.getUserId() ?? 0;
     this.isAnfitriao = this.authService.getUserType() === 'anfitriao';
 
     this.carregarMembrosDaCasa()
@@ -76,36 +77,27 @@ export class Despesas implements OnInit {
       .subscribe();
   }
 
-  // ── Carregamento ──────────────────────────────────────────
+  // ── Carregamento ──────────────────────────────────────────────
 
-  /** Descobre quem são os moradores da casa via convites ACEITOS */
   private carregarMembrosDaCasa() {
     if (this.isAnfitriao) {
       return this.conviteService.listarDoAnfitriao(this.usuarioId).pipe(
-        map((convites) => {
-          const colegas = convites
-            .filter((c) => c.status === 'ACEITO')
-            .map((c) => c.colegaId);
+        map(convites => {
+          const colegas = convites.filter(c => c.status === 'ACEITO').map(c => c.colegaId);
           this.membrosDaCasa = [this.usuarioId, ...colegas];
         }),
-        catchError(() => {
-          this.membrosDaCasa = [this.usuarioId];
-          return of(null);
-        })
+        catchError(() => { this.membrosDaCasa = [this.usuarioId]; return of(null); })
       );
     }
 
     return this.conviteService.listarParaColega(this.usuarioId).pipe(
-      map((convites) => {
-        const aceito = convites.find((c) => c.status === 'ACEITO');
+      map(convites => {
+        const aceito = convites.find(c => c.status === 'ACEITO');
         this.membrosDaCasa = aceito
           ? [aceito.anfitriaoId, this.usuarioId]
           : [this.usuarioId];
       }),
-      catchError(() => {
-        this.membrosDaCasa = [this.usuarioId];
-        return of(null);
-      })
+      catchError(() => { this.membrosDaCasa = [this.usuarioId]; return of(null); })
     );
   }
 
@@ -114,22 +106,21 @@ export class Despesas implements OnInit {
     this.erro.set(null);
 
     return this.despesaService.listar().pipe(
-      switchMap((despesas) => {
+      switchMap(despesas => {
         if (despesas.length === 0) return of([] as DespesaView[]);
 
-        const comDivisoes = despesas.map((despesa) =>
+        const comDivisoes = despesas.map(despesa =>
           this.divisaoService.listarPorDespesa(despesa.id).pipe(
-            map((divisoes) => this.toView(despesa, divisoes)),
+            map(divisoes => this.toView(despesa, divisoes)),
             catchError(() => of(this.toView(despesa, [])))
           )
         );
 
         return forkJoin(comDivisoes);
       }),
-      map((views) => {
-        // Mostra só despesas em que o usuário tem uma divisão (faz parte da casa)
-        const filtradas = views.filter((v) =>
-          v.divisoes.some((dv) => dv.usuarioId === this.usuarioId)
+      map(views => {
+        const filtradas = views.filter(v =>
+          v.divisoes.some(dv => dv.usuarioId === this.usuarioId)
         );
         this.despesas.set(filtradas);
         this.carregando.set(false);
@@ -147,30 +138,22 @@ export class Despesas implements OnInit {
     return {
       id: despesa.id,
       nome: despesa.descricao,
-      valor: divisoes.length > 1
-        ? divisoes.reduce((acc, d) => acc + d.valor, 0)
-        : despesa.valor,
+      valor: divisoes.length > 1 ? divisoes.reduce((acc, d) => acc + d.valor, 0) : despesa.valor,
       dataVencimento: despesa.dataVencimento,
-      categoria: '',
-      tipodeDespesa: divisoes.length > 1 ? 'coletiva' : 'individual',
+      categoria:      '',
+      tipodeDespesa:  divisoes.length > 1 ? 'coletiva' : 'individual',
       divisoes,
       pago: despesa.pago ?? [],
     };
   }
 
-  // ── Modal Nova/Editar ────────────────────────────────────
+  // ── Modal Nova/Editar ─────────────────────────────────────────
 
-  openDialog(): void {
-    this.dialog.nativeElement.showModal();
-  }
+  openDialog(): void  { this.dialog.nativeElement.showModal(); }
 
   closeDialog(): void {
     this.dialog.nativeElement.close();
-    this.form.reset({
-      tipodeDespesa: 'coletiva',
-      dataVencimento: this.hojeISO(),
-      valor: 0,
-    });
+    this.form.reset({ tipodeDespesa: 'coletiva', dataVencimento: this.hojeISO(), valor: 0 });
     this.modoEdicao = false;
   }
 
@@ -202,14 +185,14 @@ export class Despesas implements OnInit {
 
     if (this.modoEdicao) {
       this.despesaService.editar(this.despesaSelecionada.id, dto).subscribe({
-        next: () => this.finalizarSalvamento(),
+        next:  () => this.finalizarSalvamento(),
         error: (err: ApiError) => this.erroAoSalvar(err),
       });
       return;
     }
 
     this.despesaService.criar(dto).subscribe({
-      next: (despesaCriada) => this.criarDivisoes(despesaCriada, tipodeDespesa, Number(valor)),
+      next:  despesaCriada => this.criarDivisoes(despesaCriada, tipodeDespesa, Number(valor)),
       error: (err: ApiError) => this.erroAoSalvar(err),
     });
   }
@@ -221,15 +204,15 @@ export class Despesas implements OnInit {
 
     const valorPorPessoa = Number((valorTotal / moradores.length).toFixed(2));
 
-    const dtos: DivisaoDTO[] = moradores.map((usuarioId) => ({
+    const dtos: DivisaoDTO[] = moradores.map(usuarioId => ({
       despesaId: despesa.id,
       usuarioId,
       arquivoId: null,
-      valor: valorPorPessoa,
+      valor:     valorPorPessoa,
     }));
 
     this.divisaoService.criarVarias(dtos).subscribe({
-      next: () => this.finalizarSalvamento(),
+      next:  () => this.finalizarSalvamento(),
       error: (err: ApiError) => this.erroAoSalvar(err),
     });
   }
@@ -245,25 +228,23 @@ export class Despesas implements OnInit {
     this.erro.set(err.message ?? 'Erro ao salvar despesa.');
   }
 
-  // ── Painel lateral ───────────────────────────────────────
+  // ── Painel lateral ────────────────────────────────────────────
 
   openPanel(despesa: DespesaView): void {
-    this.isOpen = !this.isOpen;
+    this.isOpen             = !this.isOpen;
     this.despesaSelecionada = despesa;
   }
 
-  closePanel(): void {
-    this.isOpen = false;
-  }
+  closePanel(): void { this.isOpen = false; }
 
-  // ── Pagar / desmarcar ────────────────────────────────────
+  // ── Pagar / desmarcar ─────────────────────────────────────────
 
   euJaPaguei(despesa: DespesaView): boolean {
     return despesa.pago.includes(this.usuarioId);
   }
 
   minhaParte(despesa: DespesaView): number {
-    const divisao = despesa.divisoes.find((d) => d.usuarioId === this.usuarioId);
+    const divisao = despesa.divisoes.find(d => d.usuarioId === this.usuarioId);
     return divisao ? divisao.valor : despesa.valor;
   }
 
@@ -273,25 +254,23 @@ export class Despesas implements OnInit {
       : this.despesaService.marcarComoPago(despesa.id, this.usuarioId);
 
     acao.subscribe({
-      next: (atualizada) => {
-        despesa.pago = atualizada.pago ?? [];
+      next: atualizada => {
+        despesa.pago            = atualizada.pago ?? [];
         this.despesaSelecionada = { ...despesa };
-        this.despesas.update((lista) => [...lista]);
+        this.despesas.update(lista => [...lista]);
       },
       error: (err: ApiError) => this.erro.set(err.message ?? 'Erro ao atualizar pagamento.'),
     });
   }
 
-  // ── Exclusão ──────────────────────────────────────────────
+  // ── Exclusão ──────────────────────────────────────────────────
 
   abrirConfirmDialog(despesa: DespesaView): void {
     this.despesaSelecionada = despesa;
     this.confirmDialog.nativeElement.showModal();
   }
 
-  fecharConfirmDialog(): void {
-    this.confirmDialog.nativeElement.close();
-  }
+  fecharConfirmDialog(): void { this.confirmDialog.nativeElement.close(); }
 
   excluirDespesa(): void {
     this.despesaService.excluir(this.despesaSelecionada.id).subscribe({
@@ -307,7 +286,7 @@ export class Despesas implements OnInit {
     });
   }
 
-  // ── Helpers ──────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────
 
   private hojeISO(): string {
     return new Date().toISOString().substring(0, 10);
