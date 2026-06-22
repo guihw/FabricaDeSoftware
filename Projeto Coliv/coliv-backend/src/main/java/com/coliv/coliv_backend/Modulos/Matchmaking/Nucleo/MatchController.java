@@ -15,29 +15,21 @@ class MatchController {
 
     @PostMapping("/novo")
     public MatchResponse criar(@RequestBody MatchDTO dto) {
-
         return service.criar(dto);
     }
 
-    // Usado quando é o ANFITRIÃO que toma a iniciativa (aceitar um colega no feed dele).
-    // Cria o match já com status ACEITO, pulando o PENDENTE.
+    // Usado quando o ANFITRIÃO aceita um colega recomendado no feed.
+    // O match já nasce com status ACEITO.
     @PostMapping("/{colegaId}/{anfitriaoId}/aceitar")
     public MatchResponse criarAceito(
             @PathVariable Long colegaId,
             @PathVariable Long anfitriaoId
     ) {
-
-        return service.criarAceito(
-                colegaId,
-                anfitriaoId
-        );
+        return service.criarAceito(colegaId, anfitriaoId);
     }
 
     @GetMapping("/{id}")
-    public MatchResponse buscar(
-            @PathVariable Long id
-    ) {
-
+    public MatchResponse buscar(@PathVariable Long id) {
         return service.buscar(id);
     }
 
@@ -47,10 +39,7 @@ class MatchController {
     }
 
     @DeleteMapping("/{id}")
-    public void cancelar(
-            @PathVariable Long id
-    ) {
-
+    public void cancelar(@PathVariable Long id) {
         service.cancelar(id);
     }
 }
