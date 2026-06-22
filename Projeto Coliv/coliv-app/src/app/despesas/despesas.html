@@ -129,17 +129,25 @@
       <span class="material-symbols-outlined text-secondary text-4xl">account_balance_wallet</span>
     </div>
 
-    <div class="bg-primary text-on-primary p-5 rounded-2xl space-y-2">
-      <span class="material-symbols-outlined text-secondary-fixed opacity-80">check_circle</span>
-      <p class="text-[10px] uppercase tracking-widest font-bold opacity-60">Pago</p>
-      <p class="text-xl font-black">R$ 672,50</p> <!-- MUDAR QUANDO FOR INTEGRAR COM O BACKEND -->
-    </div>
+<div class="flex justify-between py-3 border-b border-outline-variant/20">
+  <p class="text-on-surface-variant font-medium">Sua parte</p>
+  <p class="font-black text-primary">R$ {{ minhaParte(despesaSelecionada) | number:'1.2-2' }}</p>
+</div>
 
-    <div class="bg-surface-container-low p-5 rounded-2xl space-y-2">
-      <span class="material-symbols-outlined text-primary">pending</span>
-      <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Pendente</p>
-      <p class="text-xl font-black text-primary">R$ 882,50</p> <!-- MUDAR QUANDO FOR INTEGRAR COM O BACKEND -->
-    </div>
+<button (click)="togglePago(despesaSelecionada)"
+  class="w-full py-3 rounded-2xl font-bold text-sm transition-transform active:scale-[0.98]"
+  [class.bg-secondary-container]="euJaPaguei(despesaSelecionada)"
+  [class.text-on-secondary-container]="euJaPaguei(despesaSelecionada)"
+  [class.bg-surface-container-high]="!euJaPaguei(despesaSelecionada)"
+  [class.text-on-surface-variant]="!euJaPaguei(despesaSelecionada)">
+  {{ euJaPaguei(despesaSelecionada) ? '✓ Você já pagou' : 'Marcar como pago' }}
+</button>
+
+<div class="bg-surface-container-low p-5 rounded-2xl space-y-2">
+  <span class="material-symbols-outlined text-primary">pending</span>
+  <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Pendente (sua parte)</p>
+  <p class="text-xl font-black text-primary">R$ {{ totalPendente() | number:'1.2-2' }}</p>
+</div>
   </section>
 
   <!-- EXPENSE LIST -->
@@ -154,7 +162,11 @@
     </div>
 
     <div class="space-y-2">
-      <div *ngFor="let gasto of gastos"
+      <div *ngIf="carregando()" class="bg-surface-container-low rounded-xl h-48 animate-pulse"></div>
+      <div *ngIf="!carregando() && erro()" class="p-4 bg-error-container text-on-error-container rounded-xl text-sm">
+        {{ erro() }}
+      </div>
+      <div *ngFor="let gasto of despesas()"
         (click)="openPanel(gasto)"
         class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between cursor-pointer active:bg-surface-container transition-colors">
         <div class="flex items-center gap-4">
