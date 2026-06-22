@@ -9,7 +9,7 @@ import { DivisaoService } from '../core/services/divisao.service';
 import { ConviteService } from '../core/services/convite.service';
 import { AuthService } from '../core/services/auth.service';
 import { ApiError } from '../core/services/api.service';
-import { Despesa, DespesaDTO, DivisaoDTO, DespesaView, TipoDespesa, Divisao } from '../core/models/despesa.model';
+import { Despesa, DespesaDTO, DivisaoDTO, DespesaView, TipoDespesa, Divisao } from '../core/models/despesas.model';
 
 import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';

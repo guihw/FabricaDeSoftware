@@ -166,9 +166,7 @@
       <div *ngIf="!carregando() && erro()" class="p-4 bg-error-container text-on-error-container rounded-xl text-sm">
         {{ erro() }}
       </div>
-
-<div *ngFor="let gasto of despesas()" ...> <!-- trocar gastos por despesas() -->
-      <div *ngFor="let gasto of gastos"
+      <div *ngFor="let gasto of despesas()"
         (click)="openPanel(gasto)"
         class="bg-surface-container-lowest p-4 rounded-xl flex items-center justify-between cursor-pointer active:bg-surface-container transition-colors">
         <div class="flex items-center gap-4">
