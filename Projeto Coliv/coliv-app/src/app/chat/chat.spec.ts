@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, provideRouter } from '@angular/router';
+import { Location } from '@angular/common';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 import { Chat } from './chat';
@@ -10,6 +11,7 @@ describe('Chat', () => {
   let component: Chat;
   let fixture: ComponentFixture<Chat>;
   let conviteServiceSpy: { buscarPorMatch: ReturnType<typeof vi.fn> };
+  let locationSpy: { back: ReturnType<typeof vi.fn> };
 
   const activatedRouteMock = {
     snapshot: { paramMap: { get: (key: string) => (key === 'matchId' ? '10' : null) } },
@@ -22,15 +24,16 @@ describe('Chat', () => {
   };
 
   beforeEach(async () => {
-    conviteServiceSpy = { buscarPorMatch: vi.fn() };
-    conviteServiceSpy.buscarPorMatch.mockReturnValue(of(null));
+    conviteServiceSpy = { buscarPorMatch: vi.fn().mockReturnValue(of(null)) };
+    locationSpy       = { back: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [Chat, CommonModule],
       providers: [
         provideRouter([]),
-        { provide: ActivatedRoute,  useValue: activatedRouteMock },
-        { provide: ConviteService,  useValue: conviteServiceSpy  },
+        { provide: ActivatedRoute, useValue: activatedRouteMock },
+        { provide: ConviteService, useValue: conviteServiceSpy  },
+        { provide: Location,       useValue: locationSpy        },
       ],
     }).compileComponents();
 
@@ -81,6 +84,32 @@ describe('Chat', () => {
     fixture.detectChanges();
     expect(component.colegaId).toBe(3);
   });
+
+  // ── nomeOutro (NOVO) ──────────────────────────────────────────
+
+  it('deve ler nomeOutro do sessionStorage', () => {
+    sessionStorage.setItem('coliv_chat_outro_nome', 'Ricardo Silveira');
+    fixture.detectChanges();
+    expect(component.nomeOutro).toBe('Ricardo Silveira');
+  });
+
+  it('deve usar "Usuário" como fallback quando nomeOutro não está no sessionStorage', () => {
+    fixture.detectChanges();
+    expect(component.nomeOutro).toBe('Usuário');
+  });
+
+  // ── voltar (NOVO) ─────────────────────────────────────────────
+
+  it('deve chamar location.back() ao chamar voltar() com histórico', () => {
+    Object.defineProperty(window, 'history', {
+      value: { length: 3 }, writable: true,
+    });
+    fixture.detectChanges();
+    component.voltar();
+    expect(locationSpy.back).toHaveBeenCalled();
+  });
+
+  // ── onConviteAtualizado ────────────────────────────────────────
 
   it('não deve definir notificação para convite null', () => {
     fixture.detectChanges();
