@@ -15,6 +15,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,38 +35,31 @@ public class CardAnfitriaoService {
         return car.findById(id).orElseThrow(() -> new CardAnfitriaoIDNaoEncontrado(id));
     }
 
-    public CardAnfitriaoResponseDTO getCardCompleteInfo(Long id) {
-        UsuarioDTO usuarioDTO = iAnfitriao.obterUsuario(id);
-        DadosImovelDTO imovelDTO = iDadosImovel.getDadosImovel(id);
-        CardAnfitriao card = car.findByAnfitriaoId(id)
-                .orElseThrow(() -> new CardAnfitriaoNaoEncontradoUsandoReferencia(id));
+    public CardAnfitriaoResponseDTO getCardCompleteInfo(Long anfitriaoId) {
+        UsuarioDTO    usuarioDTO = iAnfitriao.obterUsuario(anfitriaoId);
+        DadosImovelDTO imovelDTO = iDadosImovel.getDadosImovel(anfitriaoId);
+        CardAnfitriao  card      = car.findByAnfitriaoId(anfitriaoId)
+                .orElseThrow(() -> new CardAnfitriaoNaoEncontradoUsandoReferencia(anfitriaoId));
 
-        return new CardAnfitriaoResponseDTO(
-                card.getAnfitriaoId(), usuarioDTO.nome(), usuarioDTO.email(),
-                imovelDTO.descricao(), imovelDTO.localizacao(), imovelDTO.quartos(),
-                card.getClassificacao(), card.getPrecoMensal(), card.getArquivos()
-        );
+        return toResponseDTO(card, usuarioDTO, imovelDTO);
     }
 
+
     public List<CardAnfitriaoResponseDTO> getCardCompleteInfoList() {
-        List<UsuarioDTO> usuarios = iAnfitriao.obterListaDeUsuarios();
+        List<UsuarioDTO>    usuarios = iAnfitriao.obterListaDeUsuarios();
         List<DadosImovelDTO> imoveis = iDadosImovel.obterListaDeDados();
-        List<CardAnfitriao> cards = car.findAll();
+        List<CardAnfitriao>  cards   = car.findAll();
 
-        // merge (a, b) -> a: em caso de anfitriaoId duplicado, fica o primeiro
-        Map<Long, UsuarioDTO> usuarioMap = usuarios.stream()
+        Map<Long, UsuarioDTO>    usuarioMap = usuarios.stream()
                 .collect(Collectors.toMap(UsuarioDTO::id, u -> u, (a, b) -> a));
-
         Map<Long, DadosImovelDTO> imovelMap = imoveis.stream()
                 .filter(d -> d.anfitriaoId() != null)
                 .collect(Collectors.toMap(DadosImovelDTO::anfitriaoId, d -> d, (a, b) -> a));
 
         return cards.stream()
-                // descarta cards sem anfitriaoId ou sem dados ainda preenchidos
                 .filter(c -> c.getAnfitriaoId() != null
                         && usuarioMap.containsKey(c.getAnfitriaoId())
                         && imovelMap.containsKey(c.getAnfitriaoId()))
-                // deduplica por anfitriaoId mantendo o primeiro card encontrado
                 .collect(Collectors.toMap(
                         CardAnfitriao::getAnfitriaoId,
                         c -> c,
@@ -73,24 +67,20 @@ public class CardAnfitriaoService {
                 ))
                 .values()
                 .stream()
-                .map(card -> {
-                    UsuarioDTO u = usuarioMap.get(card.getAnfitriaoId());
-                    DadosImovelDTO d = imovelMap.get(card.getAnfitriaoId());
-                    return new CardAnfitriaoResponseDTO(
-                            card.getAnfitriaoId(), u.nome(), u.email(),
-                            d.descricao(), d.localizacao(), d.quartos(),
-                            card.getClassificacao(), card.getPrecoMensal(), card.getArquivos()
-                    );
-                })
+                .map(card -> toResponseDTO(
+                        card,
+                        usuarioMap.get(card.getAnfitriaoId()),
+                        imovelMap.get(card.getAnfitriaoId())
+                ))
                 .toList();
     }
 
+    //CRUD do card
     public CardAnfitriaoRequestDTO criarCardAnfitriao(Long anfitriaoId, CardAnfitriaoRequestDTO dto) {
         CardAnfitriao cardAnfitriao = car.findByAnfitriaoId(anfitriaoId)
                 .orElseGet(CardAnfitriao::new);
 
         cardAnfitriao.setAnfitriaoId(anfitriaoId);
-        cardAnfitriao.setPrecoMensal(new BigDecimal(dto.precoMensal()));
         car.save(cardAnfitriao);
         return dto;
     }
@@ -98,8 +88,6 @@ public class CardAnfitriaoService {
     public CardAnfitriaoRequestDTO editarCardAnfitriao(Long anfitriaoId, CardAnfitriaoRequestDTO dto) {
         CardAnfitriao cardAnfitriao = car.findByAnfitriaoId(anfitriaoId)
                 .orElseThrow(() -> new CardAnfitriaoNaoEncontradoUsandoReferencia(anfitriaoId));
-
-        cardAnfitriao.setPrecoMensal(new BigDecimal(dto.precoMensal()));
         car.save(cardAnfitriao);
         return dto;
     }
@@ -123,5 +111,27 @@ public class CardAnfitriaoService {
         CardAnfitriao cardAnfitriao = car.findByAnfitriaoId(evento.anfitriaoId())
                 .orElseThrow(() -> new CardAnfitriaoNaoEncontradoUsandoReferencia(evento.anfitriaoId()));
         car.deleteById(cardAnfitriao.getId());
+    }
+
+    // ── Helper de montagem ────────────────────────────────────────
+
+    private CardAnfitriaoResponseDTO toResponseDTO(
+            CardAnfitriao card,
+            UsuarioDTO usuario,
+            DadosImovelDTO imovel
+    ) {
+        return new CardAnfitriaoResponseDTO(
+                card.getAnfitriaoId(),
+                usuario.nome(),
+                usuario.email(),
+                imovel.descricao(),
+                imovel.localizacao(),
+                imovel.quartos(),
+                card.getClassificacao(),
+                imovel.precoMensal() != null ? imovel.precoMensal() : BigDecimal.ZERO,
+                card.getArquivos(),
+                imovel.tipoVaga(),
+                imovel.comodidades() != null ? imovel.comodidades() : new ArrayList<>()
+        );
     }
 }

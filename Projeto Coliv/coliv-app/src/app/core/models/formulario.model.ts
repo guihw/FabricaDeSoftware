@@ -11,20 +11,22 @@ export interface PreferenciasAnfitriaoDTO {
   perfilColegaDesejado: string;
 }
 
-// Espelha: DadosImovelDTO.java
 export interface DadosImovelDTO {
   descricao: string;
   localizacao: string;
   quartos: number;
+  precoMensal: number;
+  tipoVaga: string;
+  comodidades: string[];
 }
 
-// Resposta completa de DadosImovel (entidade)
+
 export interface DadosImovel extends DadosImovelDTO {
   id: number;
   anfitriaoId: number;
 }
 
-// Resposta completa de PreferenciasAnfitriao (entidade)
+
 export interface PreferenciasAnfitriao extends PreferenciasAnfitriaoDTO {
   id: number;
   anfitriaoId: number;
