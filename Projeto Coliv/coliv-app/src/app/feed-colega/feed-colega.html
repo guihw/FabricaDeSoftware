@@ -49,12 +49,13 @@
 
   <!-- Grid de recomendações -->
   <div *ngIf="!carregando() && !erro() && recomendacoes().length > 0"
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    <app-moradia-card-component
-  *ngFor="let rec of recomendacoes()"
-  [recomendacao]="rec">
-</app-moradia-card-component>
-  </div>
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+  <app-moradia-card-component
+    *ngFor="let rec of recomendacoes()"
+    [recomendacao]="rec"
+    (like)="onLike($event)">
+  </app-moradia-card-component>
+</div>
 
   <!-- Paginação -->
   <div *ngIf="!carregando() && !erro() && recomendacoes().length > 0"

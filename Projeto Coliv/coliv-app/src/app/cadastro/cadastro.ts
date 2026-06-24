@@ -15,7 +15,7 @@ import { ApiError } from '../core/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../core/services/auth.service';
-import { environment } from '../../environments/environment.production';
+import { environment } from '../../environments/environment';
 
 
 type PerfilTipo = 'colega' | 'anfitriao';

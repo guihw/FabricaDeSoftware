@@ -1,5 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Security.Nucleo;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -18,8 +19,6 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtService jwtService;
-    @Autowired
-    private AutenticacaoUserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -33,12 +32,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = header.substring(7);
 
         if (jwtService.tokenValido(token) && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails usuario = userDetailsService.loadUserByUsername(jwtService.extrairEmail(token));
+            Claims claims = jwtService.extrairClaims(token);
+            String email = claims.getSubject();
+            Object idObj = claims.get("id");
+            Long id = idObj instanceof Number ? ((Number) idObj).longValue() : null;
+            String tipo = claims.get("tipo", String.class);
+
+            UsuarioAutenticado usuario = new UsuarioAutenticado(id, email, "", tipo);
 
             var auth = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
             auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
+
+        System.out.println("SECRET: " + jwtService);
+        System.out.println("Token válido? " + jwtService.tokenValido(token));
 
         filterChain.doFilter(request, response);
     }

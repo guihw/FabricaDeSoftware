@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 import {
@@ -8,25 +8,43 @@ import {
   FeedPageDTO,
 } from '../core/services/recomendacao.service';
 import { MoradiaCardComponent } from './components/moradia-card-component/moradia-card-component';
+import { MoradiaDetailModalComponent } from './components/moradia-detail-modal/moradia-detail-modal';
+import { ApiError } from '../core/services/api.service';
+import { MatchService } from '../core/services/match.service';
 
 @Component({
   selector: 'app-feed-colega',
   standalone: true,
-  imports: [RouterOutlet, TopNavbarComponent, CommonModule, MoradiaCardComponent],
+  imports: [
+    RouterOutlet,
+    TopNavbarComponent,
+    CommonModule,
+    MoradiaCardComponent,
+    MoradiaDetailModalComponent,  
+  ],
   templateUrl: './feed-colega.html',
   styleUrl: './feed-colega.css',
 })
 export class FeedColega implements OnInit {
 
   recomendacoes = signal<RecomendacaoCardAnfitriaoDTO[]>([]);
-  carregando    = signal(true);
-  erro          = signal<string | null>(null);
-  pagina        = signal(0);
-  temProxima    = signal(false);
+  carregando = signal(true);
+  erro = signal<string | null>(null);
+  pagina = signal(0);
+  temProxima = signal(false);
+
+  // ── Estado do modal de detalhe ────────────────────────────────
+  modalAberto = false;
+  recomendacaoSelecionada: RecomendacaoCardAnfitriaoDTO | null = null;
 
   private colegaId: number | null = null;
+  likeEmAndamento = signal<Set<number>>(new Set());
 
-  constructor(private recomendacaoService: RecomendacaoService) {}
+  constructor(
+    private recomendacaoService: RecomendacaoService,
+    private matchService: MatchService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
@@ -62,18 +80,55 @@ export class FeedColega implements OnInit {
   }
 
   proximaPagina(): void {
-    if (this.temProxima()) {
-      this.carregarPagina(this.pagina() + 1);
-    }
+    if (this.temProxima()) this.carregarPagina(this.pagina() + 1);
   }
 
   paginaAnterior(): void {
-    if (this.pagina() > 0) {
-      this.carregarPagina(this.pagina() - 1);
-    }
+    if (this.pagina() > 0) this.carregarPagina(this.pagina() - 1);
   }
 
-  /** Retorna label de cor de acordo com o score de compatibilidade */
+  // ── Modal ─────────────────────────────────────────────────────
+
+  abrirDetalhe(rec: RecomendacaoCardAnfitriaoDTO): void {
+    this.recomendacaoSelecionada = rec;
+    this.modalAberto = true;
+  }
+
+  fecharDetalhe(): void {
+    this.modalAberto = false;
+    // pequeno delay para a animação terminar antes de limpar
+    setTimeout(() => (this.recomendacaoSelecionada = null), 250);
+  }
+
+  // ── Like (pode vir do card ou do modal) ───────────────────────
+
+  onLike(rec: RecomendacaoCardAnfitriaoDTO): void {
+    if (!this.colegaId) return;
+
+    const anfitriaoId = rec.card.anfitriaoId;
+
+    if (this.likeEmAndamento().has(anfitriaoId)) return;
+    this.likeEmAndamento.update(s => new Set([...s, anfitriaoId]));
+    this.erro.set(null);
+
+    this.matchService.criar(this.colegaId, anfitriaoId).subscribe({
+      next: (match) => {
+        this.likeEmAndamento.update(s => {
+          const next = new Set(s); next.delete(anfitriaoId); return next;
+        });
+        sessionStorage.setItem('coliv_chat_outro_id',   String(anfitriaoId));
+        sessionStorage.setItem('coliv_chat_outro_nome', rec.card.nome);
+        this.router.navigate(['/chat', match.id]);
+      },
+      error: (err: ApiError) => {
+        this.likeEmAndamento.update(s => {
+          const next = new Set(s); next.delete(anfitriaoId); return next;
+        });
+        this.erro.set(err.message ?? 'Não foi possível criar o match. Tente novamente.');
+      },
+    });
+  }
+
   corScore(score: number): string {
     if (score >= 80) return 'text-secondary bg-secondary-container';
     if (score >= 60) return 'text-on-primary-container bg-primary-container';

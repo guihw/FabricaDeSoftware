@@ -1,6 +1,8 @@
 package com.coliv.coliv_backend.Modulos.Financeiro.Nucleo;
 
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoDTO;
+import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoResponse;
+import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.IFinanceiro;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +15,9 @@ class DivisaoController {
 
     @Autowired
     private DivisaoService service;
+
+     @Autowired
+    private IFinanceiro financeiro;
 
     @PostMapping("/criar")
     public Divisao criar(
@@ -51,5 +56,10 @@ class DivisaoController {
     ) {
 
         service.excluir(id);
+    }
+
+    @GetMapping("/despesa/{despesaId}")
+    public List<DivisaoResponse> listarPorDespesa(@PathVariable Long despesaId) {
+        return financeiro.getDivisoes(despesaId);
     }
 }

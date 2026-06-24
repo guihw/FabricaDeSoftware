@@ -1,32 +1,51 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ColegasCardComponent } from './components/colegas-card-component/colegas-card-component';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 import {
   RecomendacaoService,
   RecomendacaoColegaDTO,
   FeedPageDTO,
 } from '../core/services/recomendacao.service';
+import { ColegasCardComponent } from './components/colegas-card-component/colegas-card-component';
+import { ColegaDetailModalComponent } from './components/colega-detail-modal/colega-detail-modal';
+import { ApiError } from '../core/services/api.service';
+import { MatchService } from '../core/services/match.service';
 
 @Component({
   selector: 'app-feed-anfitriao',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, ColegasCardComponent, TopNavbarComponent],
+  imports: [
+    CommonModule,
+    RouterLink,
+    RouterOutlet,
+    TopNavbarComponent,
+    ColegasCardComponent,
+    ColegaDetailModalComponent, 
+  ],
   templateUrl: './feed-anfitriao.html',
   styleUrl: './feed-anfitriao.css',
 })
 export class FeedAnfitriao implements OnInit {
 
-  recomendacoes = signal<RecomendacaoColegaDTO[]>([]);
-  carregando    = signal(true);
-  erro          = signal<string | null>(null);
-  pagina        = signal(0);
-  temProxima    = signal(false);
+  recomendacoes    = signal<RecomendacaoColegaDTO[]>([]);
+  carregando       = signal(true);
+  erro             = signal<string | null>(null);
+  pagina           = signal(0);
+  temProxima       = signal(false);
+  acaoEmAndamento  = signal<Set<number>>(new Set());
+
+  // ── Estado do modal ───────────────────────────────────────────
+  modalAberto              = false;
+  recomendacaoSelecionada: RecomendacaoColegaDTO | null = null;
 
   private anfitriaoId: number | null = null;
 
-  constructor(private recomendacaoService: RecomendacaoService) {}
+  constructor(
+    private recomendacaoService: RecomendacaoService,
+    private matchService: MatchService,
+    private router: Router,
+  ) {}
 
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
@@ -54,7 +73,7 @@ export class FeedAnfitriao implements OnInit {
         this.temProxima.set(feed.temProxima);
         this.carregando.set(false);
       },
-      error: (err) => {
+      error: (err: ApiError) => {
         this.erro.set(err.message);
         this.carregando.set(false);
       },
@@ -62,24 +81,52 @@ export class FeedAnfitriao implements OnInit {
   }
 
   proximaPagina(): void {
-    if (this.temProxima()) {
-      this.carregarPagina(this.pagina() + 1);
-    }
+    if (this.temProxima()) this.carregarPagina(this.pagina() + 1);
   }
 
   paginaAnterior(): void {
-    if (this.pagina() > 0) {
-      this.carregarPagina(this.pagina() - 1);
-    }
+    if (this.pagina() > 0) this.carregarPagina(this.pagina() - 1);
   }
 
+  // ── Modal ─────────────────────────────────────────────────────
+
+  abrirDetalhe(rec: RecomendacaoColegaDTO): void {
+    this.recomendacaoSelecionada = rec;
+    this.modalAberto = true;
+  }
+
+  fecharDetalhe(): void {
+    this.modalAberto = false;
+    setTimeout(() => (this.recomendacaoSelecionada = null), 250);
+  }
+
+  // ── Ações (podem vir do card ou do modal) ─────────────────────
+
   onAceitar(rec: RecomendacaoColegaDTO): void {
-    // TODO: implementar lógica de aceite quando o módulo de matches for criado
-    console.log('Aceitar colega:', rec.colegaId, rec.nome);
+    if (!this.anfitriaoId) return;
+
+    const colegaId = rec.colegaId;
+    if (this.acaoEmAndamento().has(colegaId)) return;
+
+    this.acaoEmAndamento.update(s => new Set([...s, colegaId]));
+    this.erro.set(null);
+
+    this.matchService.criarAceito(colegaId, this.anfitriaoId).subscribe({
+      next: (match) => {
+        this.acaoEmAndamento.update(s => { const n = new Set(s); n.delete(colegaId); return n; });
+        this.recomendacoes.update(lista => lista.filter(r => r.colegaId !== colegaId));
+        sessionStorage.setItem('coliv_chat_outro_id',   String(colegaId));
+        sessionStorage.setItem('coliv_chat_outro_nome', rec.nome);
+        this.router.navigate(['/chat', match.id]);
+      },
+      error: (err: ApiError) => {
+        this.acaoEmAndamento.update(s => { const n = new Set(s); n.delete(colegaId); return n; });
+        this.erro.set(err.message ?? 'Não foi possível criar o match. Tente novamente.');
+      },
+    });
   }
 
   onRecusar(rec: RecomendacaoColegaDTO): void {
-    // Remove localmente do feed até a próxima carga
-    this.recomendacoes.update(list => list.filter(r => r.colegaId !== rec.colegaId));
+    this.recomendacoes.update(lista => lista.filter(r => r.colegaId !== rec.colegaId));
   }
 }

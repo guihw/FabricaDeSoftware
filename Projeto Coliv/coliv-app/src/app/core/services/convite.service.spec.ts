@@ -5,12 +5,12 @@ import {
 } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 
-import { ConviteService, ConviteResponse, ConviteRequestDTO } from './convite.service';
+import { ConviteService, ConviteResponse } from './convite.service';
 
 describe('ConviteService', () => {
   let service: ConviteService;
   let httpMock: HttpTestingController;
-  const BASE = 'http://localhost:8080/convites';
+  const BASE = 'http://localhost:8080';
 
   const conviteMock: ConviteResponse = {
     id: 1,
@@ -20,14 +20,29 @@ describe('ConviteService', () => {
     status: 'PENDENTE',
     criadoEm: '2025-06-01T10:00:00Z',
     respondidoEm: null,
-    mensagem: 'Olá, temos interesse!',
+    mensagem: 'Olá!',
+  };
+
+  const rawBackend = {
+    id: 1,
+    matchId: 10,
+    anfitriaoId: 5,
+    colegaId: 3,
+    conviteStatus: 'PENDENTE',   
+    texto: 'Olá!',              
+    criadoEm: '2025-06-01T10:00:00Z',
+    dataAtualizacao: null,
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [provideHttpClient(), provideHttpClientTesting(), ConviteService],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ConviteService,
+      ],
     });
-    service = TestBed.inject(ConviteService);
+    service  = TestBed.inject(ConviteService);
     httpMock = TestBed.inject(HttpTestingController);
   });
 
@@ -35,115 +50,122 @@ describe('ConviteService', () => {
 
   // ── enviar ────────────────────────────────────────────────────
 
-  it('deve enviar convite via POST para /convites/enviar/:anfitriaoId', () => {
-    const dto: ConviteRequestDTO = { matchId: 10, colegaId: 3, mensagem: 'Olá!' };
+  it('deve enviar convite via POST para /chat/convite/enviar/:matchId', () => {
     let resultado: ConviteResponse | undefined;
 
-    service.enviar(5, dto).subscribe(r => (resultado = r));
+    service.enviar(5, { matchId: 10, colegaId: 3, mensagem: 'Olá!' })
+           .subscribe(r => (resultado = r));
 
-    const req = httpMock.expectOne(`${BASE}/enviar/5`);
+    const req = httpMock.expectOne(`${BASE}/chat/convite/enviar/10`);
     expect(req.request.method).toBe('POST');
-    expect(req.request.body).toEqual(dto);
-    req.flush(conviteMock);
+    expect(req.request.body).toEqual({ texto: 'Olá!' });
+    req.flush(rawBackend);
 
-    expect(resultado).toEqual(conviteMock);
+    expect(resultado?.matchId).toBe(10);
+    expect(resultado?.status).toBe('PENDENTE');   // normalizado pelo service
+    expect(resultado?.mensagem).toBe('Olá!');     // normalizado de "texto"
   });
 
-  // ── aceitar ───────────────────────────────────────────────────
 
-  it('deve aceitar convite via PATCH para /convites/:id/aceitar', () => {
-    const aceito = { ...conviteMock, status: 'ACEITO' as const };
-    let resultado: ConviteResponse | undefined;
+  it('deve aceitar via PATCH para /chat/convite/aceito/:matchId e buscar estado atualizado', () => {
+    service.aceitar(10).subscribe();
 
-    service.aceitar(1).subscribe(r => (resultado = r));
+    // 1ª chamada: PATCH aceito
+    const patch = httpMock.expectOne(`${BASE}/chat/convite/aceito/10`);
+    expect(patch.request.method).toBe('PATCH');
+    patch.flush(null); // backend retorna void
 
-    const req = httpMock.expectOne(`${BASE}/1/aceitar`);
-    expect(req.request.method).toBe('PATCH');
-    req.flush(aceito);
-
-    expect(resultado?.status).toBe('ACEITO');
+    // 2ª chamada: GET buscarConviteRecente para montar a resposta
+    const get = httpMock.expectOne(`${BASE}/chat/convite/buscarConviteRecente/10`);
+    expect(get.request.method).toBe('GET');
+    get.flush({ ...rawBackend, conviteStatus: 'ACEITO' });
   });
 
-  // ── recusar ───────────────────────────────────────────────────
+  it('deve recusar via PATCH para /chat/convite/recusado/:matchId', () => {
+    service.recusar(10).subscribe();
 
-  it('deve recusar convite via PATCH para /convites/:id/recusar', () => {
-    const recusado = { ...conviteMock, status: 'RECUSADO' as const };
-    let resultado: ConviteResponse | undefined;
+    const patch = httpMock.expectOne(`${BASE}/chat/convite/recusado/10`);
+    expect(patch.request.method).toBe('PATCH');
+    patch.flush(null);
 
-    service.recusar(1).subscribe(r => (resultado = r));
-
-    const req = httpMock.expectOne(`${BASE}/1/recusar`);
-    expect(req.request.method).toBe('PATCH');
-    req.flush(recusado);
-
-    expect(resultado?.status).toBe('RECUSADO');
+    const get = httpMock.expectOne(`${BASE}/chat/convite/buscarConviteRecente/10`);
+    get.flush({ ...rawBackend, conviteStatus: 'RECUSADO' });
   });
 
-  // ── cancelar ──────────────────────────────────────────────────
+  it('deve cancelar via PATCH para /chat/convite/cancelado/:matchId', () => {
+    service.cancelar(10).subscribe();
 
-  it('deve cancelar convite via PATCH para /convites/:id/cancelar', () => {
-    const cancelado = { ...conviteMock, status: 'CANCELADO' as const };
-    let resultado: ConviteResponse | undefined;
+    const patch = httpMock.expectOne(`${BASE}/chat/convite/cancelado/10`);
+    expect(patch.request.method).toBe('PATCH');
+    patch.flush(null);
 
-    service.cancelar(1).subscribe(r => (resultado = r));
-
-    const req = httpMock.expectOne(`${BASE}/1/cancelar`);
-    expect(req.request.method).toBe('PATCH');
-    req.flush(cancelado);
-
-    expect(resultado?.status).toBe('CANCELADO');
+    const get = httpMock.expectOne(`${BASE}/chat/convite/buscarConviteRecente/10`);
+    get.flush({ ...rawBackend, conviteStatus: 'CANCELADO' });
   });
 
-  // ── listarParaColega ──────────────────────────────────────────
-
-  it('deve listar convites do colega via GET /convites/colega/:colegaId', () => {
+  it('deve listar convites do colega via GET /chat/convite/listarPorUsuario/:id/COLEGA', () => {
     let resultado: ConviteResponse[] | undefined;
 
     service.listarParaColega(3).subscribe(r => (resultado = r));
 
-    const req = httpMock.expectOne(`${BASE}/colega/3`);
+    const req = httpMock.expectOne(`${BASE}/chat/convite/listarPorUsuario/3/COLEGA`);
     expect(req.request.method).toBe('GET');
-    req.flush([conviteMock]);
+    req.flush([rawBackend]);
 
     expect(resultado?.length).toBe(1);
+    expect(resultado?.[0].status).toBe('PENDENTE');   // normalizado
     expect(resultado?.[0].colegaId).toBe(3);
   });
 
-  // ── listarDoAnfitriao ─────────────────────────────────────────
-
-  it('deve listar convites do anfitrião via GET /convites/anfitriao/:anfitriaoId', () => {
+  it('deve listar convites do anfitrião via GET /chat/convite/listarPorUsuario/:id/ANFITRIAO', () => {
     let resultado: ConviteResponse[] | undefined;
 
     service.listarDoAnfitriao(5).subscribe(r => (resultado = r));
 
-    const req = httpMock.expectOne(`${BASE}/anfitriao/5`);
+    const req = httpMock.expectOne(`${BASE}/chat/convite/listarPorUsuario/5/ANFITRIAO`);
     expect(req.request.method).toBe('GET');
-    req.flush([conviteMock]);
+    req.flush([rawBackend]);
 
     expect(resultado?.[0].anfitriaoId).toBe(5);
+    expect(resultado?.[0].status).toBe('PENDENTE');
   });
 
-  // ── buscarPorMatch ────────────────────────────────────────────
 
-  it('deve buscar convite por matchId via GET /convites/match/:matchId', () => {
+  it('deve buscar convite via GET /chat/convite/buscarConviteRecente/:matchId', () => {
     let resultado: ConviteResponse | null | undefined;
 
     service.buscarPorMatch(10).subscribe(r => (resultado = r));
 
-    const req = httpMock.expectOne(`${BASE}/match/10`);
+    const req = httpMock.expectOne(`${BASE}/chat/convite/buscarConviteRecente/10`);
     expect(req.request.method).toBe('GET');
-    req.flush(conviteMock);
+    req.flush(rawBackend);
 
     expect(resultado?.matchId).toBe(10);
+    expect(resultado?.status).toBe('PENDENTE');
   });
 
-  it('deve retornar null quando não há convite para o match', () => {
+  it('deve retornar null quando não há convite para o match (404)', () => {
     let resultado: ConviteResponse | null | undefined;
 
     service.buscarPorMatch(99).subscribe(r => (resultado = r));
 
-    httpMock.expectOne(`${BASE}/match/99`).flush(null);
+    httpMock.expectOne(`${BASE}/chat/convite/buscarConviteRecente/99`)
+    .flush(null, { status: 404, statusText: 'Not Found' });
 
     expect(resultado).toBeNull();
+  });
+
+  it('deve normalizar conviteStatus → status e texto → mensagem', () => {
+    let resultado: ConviteResponse | undefined;
+
+    service.buscarPorMatch(10).subscribe(r => (resultado = r ?? undefined));
+
+    httpMock.expectOne(`${BASE}/chat/convite/buscarConviteRecente/10`)
+    .flush(rawBackend);
+
+    expect(resultado?.status).toBe('PENDENTE');     
+    expect(resultado?.mensagem).toBe('Olá!');    
+    expect((resultado as any)?.conviteStatus).toBeUndefined();
+    expect((resultado as any)?.texto).toBeUndefined();
   });
 });

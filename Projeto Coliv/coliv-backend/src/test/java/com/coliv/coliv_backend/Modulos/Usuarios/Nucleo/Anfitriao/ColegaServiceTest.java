@@ -25,12 +25,16 @@ class ColegaServiceTest {
     @Mock
     private ApplicationEventPublisher publisher;
 
+    @Mock
+    private com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao iAnfitriao;
+
     @InjectMocks
     private ColegaService colegaService;
 
     @BeforeEach
     void setup() {
         MockitoAnnotations.openMocks(this);
+        org.springframework.test.util.ReflectionTestUtils.setField(colegaService, "iAnfitriao", iAnfitriao);
     }
 
     @Test

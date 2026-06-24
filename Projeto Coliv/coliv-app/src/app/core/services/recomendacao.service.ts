@@ -3,9 +3,6 @@ import { Observable } from 'rxjs';
 import { ApiService } from './api.service';
 import { CardAnfitriaoResponseDTO } from './card-anfitriao.service';
 
-// ── DTOs espelhando o backend ─────────────────────────────────
-
-// Espelha: FeedPageDTO.java
 export interface FeedPageDTO<T> {
   itens: T[];
   pagina: number;
@@ -16,7 +13,7 @@ export interface FeedPageDTO<T> {
 
 // Espelha: RecomendacaoCardAnfitriaoDTO.java
 export interface RecomendacaoCardAnfitriaoDTO {
-  card: CardAnfitriaoResponseDTO;
+  card: CardAnfitriaoResponseDTO;   // já inclui tipoVaga e comodidades
   score: number;
   resumoCompatibilidade: string;
 }
@@ -34,29 +31,13 @@ export interface RecomendacaoColegaDTO {
 export class RecomendacaoService extends ApiService {
   private readonly PATH = '/recomendacoes';
 
-  /**
-   * Feed de moradias recomendadas para um colega.
-   * GET /recomendacoes/feed/colega/{colegaId}?pagina=0&tamanho=10
-   */
-  feedColega(
-    colegaId: number,
-    pagina = 0,
-    tamanho = 10
-  ): Observable<FeedPageDTO<RecomendacaoCardAnfitriaoDTO>> {
+  feedColega(colegaId: number, pagina = 0, tamanho = 10): Observable<FeedPageDTO<RecomendacaoCardAnfitriaoDTO>> {
     return this.get<FeedPageDTO<RecomendacaoCardAnfitriaoDTO>>(
       `${this.PATH}/feed/colega/${colegaId}?pagina=${pagina}&tamanho=${tamanho}`
     );
   }
 
-  /**
-   * Feed de colegas recomendados para um anfitrião.
-   * GET /recomendacoes/feed/anfitriao/{anfitriaoId}?pagina=0&tamanho=10
-   */
-  feedAnfitriao(
-    anfitriaoId: number,
-    pagina = 0,
-    tamanho = 10
-  ): Observable<FeedPageDTO<RecomendacaoColegaDTO>> {
+  feedAnfitriao(anfitriaoId: number, pagina = 0, tamanho = 10): Observable<FeedPageDTO<RecomendacaoColegaDTO>> {
     return this.get<FeedPageDTO<RecomendacaoColegaDTO>>(
       `${this.PATH}/feed/anfitriao/${anfitriaoId}?pagina=${pagina}&tamanho=${tamanho}`
     );

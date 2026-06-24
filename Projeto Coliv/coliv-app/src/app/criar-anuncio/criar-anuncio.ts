@@ -9,6 +9,7 @@ import {
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
 import { ApiError } from '../core/services/api.service';
+import { Router } from '@angular/router';
 
 interface Amenidade {
   id: string;
@@ -34,7 +35,7 @@ export class CriarAnuncio implements OnInit {
   form!: FormGroup;
 
   fotos: FotoSlot[] = [
-    { id: 0, arquivo: null, preview: null, principal: true },
+    { id: 0, arquivo: null, preview: null, principal: true  },
     { id: 1, arquivo: null, preview: null, principal: false },
     { id: 2, arquivo: null, preview: null, principal: false },
   ];
@@ -43,16 +44,16 @@ export class CriarAnuncio implements OnInit {
   dragOver: number | null = null;
 
   amenidades: Amenidade[] = [
-    { id: 'wifi',       label: 'Wi-Fi 5G',       icon: 'wifi',                  selecionada: true },
-    { id: 'academia',   label: 'Academia',        icon: 'fitness_center',        selecionada: true },
-    { id: 'pet',        label: 'Pet Friendly',    icon: 'pets',                  selecionada: true },
-    { id: 'silencioso', label: 'Silencioso',      icon: 'volume_off',            selecionada: false },
-    { id: 'coworking',  label: 'Coworking',       icon: 'work',                  selecionada: false },
-    { id: 'piscina',    label: 'Piscina',         icon: 'pool',                  selecionada: false },
-    { id: 'lavanderia', label: 'Lavanderia',      icon: 'local_laundry_service', selecionada: false },
-    { id: 'limpeza',    label: 'Limpeza Semanal', icon: 'cleaning_services',     selecionada: false },
-    { id: 'cafe',       label: 'Café Gourmet',    icon: 'coffee',                selecionada: false },
-    { id: 'rooftop',    label: 'Rooftop',         icon: 'deck',                  selecionada: false },
+    { id: 'wifi',       label: 'Wi-Fi 5G',        icon: 'wifi',                   selecionada: true  },
+    { id: 'academia',   label: 'Academia',         icon: 'fitness_center',        selecionada: true  },
+    { id: 'pet',        label: 'Pet Friendly',     icon: 'pets',                  selecionada: true  },
+    { id: 'silencioso', label: 'Silencioso',       icon: 'volume_off',            selecionada: false },
+    { id: 'coworking',  label: 'Coworking',        icon: 'work',                  selecionada: false },
+    { id: 'piscina',    label: 'Piscina',          icon: 'pool',                  selecionada: false },
+    { id: 'lavanderia', label: 'Lavanderia',       icon: 'local_laundry_service', selecionada: false },
+    { id: 'limpeza',    label: 'Limpeza Semanal',  icon: 'cleaning_services',     selecionada: false },
+    { id: 'cafe',       label: 'Café Gourmet',     icon: 'coffee',                selecionada: false },
+    { id: 'rooftop',    label: 'Rooftop',          icon: 'deck',                  selecionada: false },
   ];
 
   tiposVaga = [
@@ -68,20 +69,22 @@ export class CriarAnuncio implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    private dadosImovelService: DadosImovelService
+    private dadosImovelService: DadosImovelService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      manifesto:  ['', [Validators.required, Validators.minLength(50)]],
-      preco:      [null, [Validators.required, Validators.min(1)]],
-      tipoVaga:   ['Quarto Privativo', Validators.required],
-      bairro:     ['', Validators.required],
+      manifesto: ['', [Validators.required, Validators.minLength(50)]],
+      preco: [null, [Validators.required, Validators.min(1)]],
+      tipoVaga: ['Quarto Privativo', Validators.required],
+      bairro: ['', Validators.required],
+      quartos: [1, [Validators.required, Validators.min(1)]],
     });
   }
 
   get fotosPreenchidas(): number {
-    return this.fotos.filter((f) => f.arquivo !== null).length;
+    return this.fotos.filter(f => f.arquivo !== null).length;
   }
 
   get prontoParaPublicar(): boolean {
@@ -89,7 +92,7 @@ export class CriarAnuncio implements OnInit {
   }
 
   get amenidadesSelecionadas(): string[] {
-    return this.amenidades.filter((a) => a.selecionada).map((a) => a.id);
+    return this.amenidades.filter(a => a.selecionada).map(a => a.id);
   }
 
   publicar(): void {
@@ -107,12 +110,13 @@ export class CriarAnuncio implements OnInit {
     this.publicando = true;
     this.erroPublicacao = null;
 
-    // O backend recebe: descricao, localizacao, quartos
-    // Mapeamos os campos do formulário para o DTO
     const dto: DadosImovelDTO = {
-      descricao:   this.form.value.manifesto,
+      descricao: this.form.value.manifesto,
       localizacao: this.form.value.bairro,
-      quartos:     1, // TODO: adicionar campo de quartos ao formulário
+      quartos: this.form.value.quartos,
+      precoMensal: Number(this.form.value.preco),
+      tipoVaga: this.form.value.tipoVaga,
+      comodidades: this.amenidadesSelecionadas,
     };
 
     this.dadosImovelService.criar(anfitriaoId, dto).subscribe({
@@ -127,33 +131,25 @@ export class CriarAnuncio implements OnInit {
     });
   }
 
-  voltarParaEdicao(): void {
-    this.publicado = false;
+  voltarParaEdicao(): void { this.publicado = false; }
+  irParaGerenciarAnuncios(): void { this.router.navigate(['/gerenciaranuncios']); }
+  voltar(): void{ 
+    window.history.back(); 
   }
 
-  voltar(): void {
-    window.history.back();
-  }
-
-  // ── Fotos ─────────────────────────────────────────────────
+  // ── Fotos ─────────────────────────────────────────────────────
 
   triggerUpload(index: number): void {
-    const input = document.getElementById(`upload-${index}`) as HTMLInputElement;
-    input?.click();
+    (document.getElementById(`upload-${index}`) as HTMLInputElement)?.click();
   }
 
   onFileSelected(event: Event, index: number): void {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
+    const file = (event.target as HTMLInputElement).files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
 
     const reader = new FileReader();
-    reader.onload = (e) => {
-      this.fotos[index] = {
-        ...this.fotos[index],
-        arquivo: file,
-        preview: e.target?.result as string,
-      };
+    reader.onload = e => {
+      this.fotos[index] = { ...this.fotos[index], arquivo: file, preview: e.target?.result as string };
     };
     reader.readAsDataURL(file);
   }
@@ -163,45 +159,32 @@ export class CriarAnuncio implements OnInit {
     this.fotos[index] = { ...this.fotos[index], arquivo: null, preview: null };
   }
 
-  onDragStart(index: number): void {
-    this.dragIndex = index;
-  }
-
-  onDragOver(event: DragEvent, index: number): void {
-    event.preventDefault();
-    this.dragOver = index;
-  }
+  onDragStart(index: number): void { this.dragIndex = index; }
+  onDragOver(event: DragEvent, index: number): void { event.preventDefault(); this.dragOver = index; }
+  onDragEnd(): void { this.dragIndex = null; this.dragOver = null; }
 
   onDrop(targetIndex: number): void {
     if (this.dragIndex === null || this.dragIndex === targetIndex) {
-      this.dragIndex = null;
-      this.dragOver = null;
-      return;
+      this.dragIndex = null; this.dragOver = null; return;
     }
     const temp = { ...this.fotos[this.dragIndex] };
     this.fotos[this.dragIndex] = { ...this.fotos[targetIndex] };
     this.fotos[targetIndex] = temp;
-    this.dragIndex = null;
-    this.dragOver = null;
+    this.dragIndex = null; this.dragOver = null;
   }
 
-  onDragEnd(): void {
-    this.dragIndex = null;
-    this.dragOver = null;
-  }
-
-  // ── Amenidades ───────────────────────────────────────────
+  // ── Amenidades ────────────────────────────────────────────────
 
   toggleAmenidade(id: string): void {
-    const item = this.amenidades.find((a) => a.id === id);
+    const item = this.amenidades.find(a => a.id === id);
     if (item) item.selecionada = !item.selecionada;
   }
 
-  // ── Helpers ──────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────
 
   campoInvalido(campo: string): boolean {
-    const control = this.form.get(campo);
-    return !!(control?.invalid && control?.touched);
+    const c = this.form.get(campo);
+    return !!(c?.invalid && c?.touched);
   }
 
   iconFill(selecionada: boolean): string {

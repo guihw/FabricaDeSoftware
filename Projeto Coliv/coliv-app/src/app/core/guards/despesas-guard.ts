@@ -10,9 +10,10 @@ export const despesasGuard: CanActivateFn = (_route, _state) => {
   const tipo = sessionStorage.getItem('coliv_user_tipo');
   const id   = Number(sessionStorage.getItem('coliv_user_id'));
 
+  // Anfitrião sempre tem acesso às despesas
   if (tipo === 'anfitriao') return true;
 
-
+  // Colega só acessa se tiver pelo menos um convite ACEITO
   return service.listarParaColega(id).pipe(
     map((convites) => {
       const temAcesso = convites.some((c) => c.status === 'ACEITO');

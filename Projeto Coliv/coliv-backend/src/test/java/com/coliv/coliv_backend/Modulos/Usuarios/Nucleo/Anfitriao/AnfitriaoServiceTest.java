@@ -34,6 +34,8 @@ class AnfitriaoServiceTest {
     private ApplicationEventPublisher publisher;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Colega.IColega iColega;
 
     @InjectMocks
     private AnfitriaoService anfitriaoService;
