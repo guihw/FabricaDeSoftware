@@ -4,6 +4,7 @@ import com.coliv.coliv_backend.Modulos.Arquivos.Contratos.ArquivoDTO;
 import com.coliv.coliv_backend.Modulos.Arquivos.Contratos.ArquivoRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -29,6 +30,14 @@ class ArquivoController {
             @RequestBody ArquivoRequestDTO dto
     ) {
         return service.criar(dto);
+    }
+    @PostMapping("/upload")
+    public List<ArquivoDTO> upload(
+            @RequestParam("arquivos")
+            MultipartFile[] arquivos
+    ) {
+
+        return service.upload(arquivos);
     }
 
     @PutMapping("/{id}")
