@@ -1,0 +1,165 @@
+<!-- Overlay do modal -->
+<div *ngIf="aberto && card"
+     class="modal-backdrop fixed inset-0 z-50 flex items-end justify-center"
+     style="background: rgba(3,22,54,0.45); backdrop-filter: blur(4px);"
+     (click)="fecharModal()">
+
+  <!-- Sheet — clique interno não fecha -->
+  <div class="modal-sheet w-full max-w-lg bg-surface rounded-t-[2rem] overflow-hidden flex flex-col"
+       style="max-height: 92dvh;"
+       (click)="stopPropagation($event)">
+
+    <!-- Drag handle -->
+    <div class="drag-handle flex-shrink-0"></div>
+
+    <!-- Conteúdo rolável -->
+    <div class="overflow-y-auto flex-grow pb-28">
+
+      <!-- Cabeçalho com score e botão fechar -->
+      <div class="flex items-center justify-between px-5 pt-3 pb-2">
+        <span class="px-3 py-1 rounded-full text-xs font-extrabold" [ngClass]="corScore">
+          {{ score }}% Match — {{ resumo }}
+        </span>
+        <button (click)="fecharModal()"
+          class="w-8 h-8 flex items-center justify-center rounded-full
+                 bg-surface-container-high text-on-surface-variant
+                 hover:bg-surface-container-highest transition-colors active:scale-90">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Galeria de fotos — placeholder elegante enquanto upload não está disponível -->
+      <div class="galeria-scroll flex w-full h-[220px] mx-0 mb-5">
+        <!-- Placeholder principal -->
+        <div class="flex-none w-full h-full snap-center
+                    bg-gradient-to-br from-primary-container to-surface-container-high
+                    flex flex-col items-center justify-center gap-2">
+          <span class="material-symbols-outlined text-5xl text-primary opacity-20">apartment</span>
+          <span class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+            Fotos em breve
+          </span>
+        </div>
+      </div>
+
+      <!-- Título e localização -->
+      <div class="px-5 mb-5">
+        <h2 class="font-['Plus_Jakarta_Sans'] font-extrabold text-2xl text-primary
+                   tracking-tight leading-tight mb-1">
+          {{ titulo }}
+        </h2>
+        <div class="flex items-center gap-1 text-on-surface-variant text-sm">
+          <span class="material-symbols-outlined text-base">location_on</span>
+          <span class="font-medium">{{ card?.localizacao || 'Localização não informada' }}</span>
+        </div>
+
+        <!-- Preço + quartos -->
+        <div class="flex items-center gap-4 mt-3">
+          <div class="bg-primary text-on-primary px-4 py-2 rounded-xl font-headline
+                      font-extrabold text-lg shadow-lg shadow-primary/20">
+            {{ precoFormatado }}
+            <span class="text-xs font-normal opacity-80">/mês</span>
+          </div>
+          <div *ngIf="card?.quartos" class="flex items-center gap-1 text-sm text-on-surface-variant">
+            <span class="material-symbols-outlined text-base">bed</span>
+            <span class="font-semibold">
+              {{ card?.quartos }} {{ card?.quartos === 1 ? 'quarto' : 'quartos' }}
+            </span>
+          </div>
+          <div *ngIf="card?.classificacao" class="flex items-center gap-0.5">
+            <ng-container *ngFor="let n of [1,2,3,4,5]">
+              <span class="material-symbols-outlined text-sm"
+                [class.text-secondary]="estrelas(n)"
+                [class.text-outline-variant]="!estrelas(n)"
+                [class.star-filled]="estrelas(n)">star</span>
+            </ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="h-px bg-outline-variant/20 mx-5 mb-5"></div>
+
+      <!-- Comodidades -->
+      <div *ngIf="comodidadesDetalhadas.length > 0" class="px-5 mb-5">
+        <h3 class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">
+          Comodidades
+        </h3>
+        <div class="grid grid-cols-2 gap-2">
+          <div *ngFor="let c of comodidadesDetalhadas"
+            class="bg-surface-container-low p-3 rounded-xl flex items-center gap-3
+                   border border-outline-variant/10">
+            <span class="material-symbols-outlined text-primary text-xl">{{ c.icon }}</span>
+            <span class="text-sm font-semibold text-on-surface">{{ c.label }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sobre o imóvel -->
+      <div *ngIf="card?.descricao" class="px-5 mb-5">
+        <h3 class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">
+          Sobre este espaço
+        </h3>
+        <p class="text-on-surface-variant text-sm leading-relaxed"
+           [class.line-clamp-4]="!descricaoExpandida">
+          {{ card?.descricao }}
+        </p>
+        <button *ngIf="!descricaoExpandida"
+          (click)="toggleDescricao()"
+          class="mt-2 text-primary font-bold text-sm underline decoration-2
+                 underline-offset-4 hover:opacity-80 transition-opacity">
+          Ler mais
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="h-px bg-outline-variant/20 mx-5 mb-5"></div>
+
+      <!-- Anfitrião -->
+      <div class="px-5 mb-2">
+        <h3 class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">
+          Anfitrião
+        </h3>
+        <div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/10
+                    flex items-center gap-4">
+          <!-- Avatar com inicial -->
+          <div class="w-12 h-12 rounded-xl bg-primary-container flex items-center justify-center
+                      font-headline font-extrabold text-lg text-on-primary-container flex-shrink-0">
+            {{ inicialAnfitriao }}
+          </div>
+          <div class="flex-grow min-w-0">
+            <p class="font-bold text-primary truncate">{{ card?.nome }}</p>
+            <div class="flex items-center gap-1 mt-0.5">
+              <span class="material-symbols-outlined text-secondary text-sm"
+                    style="font-variation-settings: 'FILL' 1;">verified</span>
+              <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                Anfitrião Verificado
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- fim do scroll -->
+
+    <!-- Barra de ação fixada na base -->
+    <div class="flex-shrink-0 absolute bottom-0 left-0 right-0
+                bg-surface/95 backdrop-blur-xl border-t border-outline-variant/10
+                px-5 py-4 flex items-center gap-3">
+      <button (click)="fecharModal()"
+        class="w-14 h-14 rounded-2xl bg-surface-container-high text-outline
+               flex items-center justify-center active:scale-90 transition-transform">
+        <span class="material-symbols-outlined text-2xl">close</span>
+      </button>
+      <button (click)="onInteresse()"
+        class="flex-1 h-14 rounded-2xl font-bold text-xs uppercase tracking-widest
+               bg-gradient-to-br from-primary to-primary-container text-white
+               flex items-center justify-center gap-2 shadow-xl shadow-primary/20
+               active:scale-[0.98] transition-transform">
+        <span class="material-symbols-outlined"
+              style="font-variation-settings: 'FILL' 1;">favorite</span>
+        Tenho Interesse
+      </button>
+    </div>
+
+  </div><!-- fim do sheet -->
+</div>
