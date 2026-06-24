@@ -1,71 +1,72 @@
-<article class="bg-surface-container-lowest rounded-xl overflow-hidden group transition-all duration-300 flex flex-col">
+<article class="bg-surface-container-lowest rounded-xl overflow-hidden group
+               transition-all duration-300 flex flex-col h-full">
 
-  <!-- Imagem / placeholder -->
-  <div class="relative h-[280px] overflow-hidden rounded-xl m-2 bg-surface-container-high flex-shrink-0">
+  <!-- Imagem / placeholder — altura fixa para uniformidade -->
+  <div class="relative h-[220px] overflow-hidden rounded-xl m-2 bg-surface-container-high flex-shrink-0">
 
-    <!-- Placeholder quando não há arquivos -->
     <div *ngIf="!card.arquivos || card.arquivos.length === 0"
       class="w-full h-full flex flex-col items-center justify-center gap-2 text-on-surface-variant">
       <span class="material-symbols-outlined text-4xl opacity-40">apartment</span>
       <span class="text-xs font-bold uppercase tracking-widest opacity-40">Sem fotos</span>
     </div>
 
-    <!-- Quando há arquivos, exibe ícone representativo (upload de imagem real é etapa futura) -->
     <div *ngIf="card.arquivos && card.arquivos.length > 0"
-      class="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-container to-surface-container-high">
+      class="w-full h-full flex items-center justify-center
+             bg-gradient-to-br from-primary-container to-surface-container-high">
       <span class="material-symbols-outlined text-6xl text-primary opacity-30">home</span>
     </div>
 
     <!-- Badge de score -->
-    <div class="absolute top-4 right-4 px-3 py-1.5 rounded-lg font-extrabold text-sm shadow-lg"
+    <div class="absolute top-3 right-3 px-2.5 py-1 rounded-lg font-extrabold text-xs shadow-lg"
       [ngClass]="corScore">
       {{ score }}% Match
     </div>
 
     <!-- Preço -->
-    <div class="absolute bottom-4 left-4 bg-primary text-on-primary px-4 py-2 rounded-lg font-headline font-bold text-lg shadow-xl">
+    <div class="absolute bottom-3 left-3 bg-primary text-on-primary
+                px-3 py-1.5 rounded-lg font-headline font-bold text-base shadow-xl">
       {{ precoFormatado }}<span class="text-xs font-normal opacity-80">/mês</span>
     </div>
   </div>
 
-  <!-- Corpo -->
-  <div class="px-6 py-5 flex flex-col gap-4 flex-grow">
+  <!-- Corpo — flex-grow garante altura uniforme entre cards -->
+  <div class="px-5 py-4 flex flex-col gap-3 flex-grow">
 
-    <!-- Nome + localização -->
+    <!-- CORREÇÃO: título = tipoVaga + localização, não nome do anfitrião -->
     <div>
-      <h3 class="font-headline font-bold text-xl text-on-surface mb-1 line-clamp-1">
-        {{ card.nome }}
+      <h3 class="font-headline font-bold text-base text-on-surface leading-tight line-clamp-2">
+        {{ titulo }}
       </h3>
-      <div class="flex items-center text-on-surface-variant gap-1.5">
-        <span class="material-symbols-outlined text-sm">location_on</span>
-        <span class="text-sm font-semibold tracking-tight line-clamp-1">
-          {{ card.localizacao || 'Localização não informada' }}
+      <div class="flex items-center text-on-surface-variant gap-1 mt-1">
+        <span class="material-symbols-outlined text-sm">bed</span>
+        <span class="text-xs font-semibold">
+          {{ card.quartos }} {{ card.quartos === 1 ? 'quarto' : 'quartos' }}
         </span>
       </div>
     </div>
 
-    <!-- Descrição -->
+    <!-- Descrição — truncada para manter altura uniforme -->
     <p *ngIf="card.descricao"
-      class="text-on-surface-variant text-sm line-clamp-2 leading-relaxed">
+      class="text-on-surface-variant text-xs line-clamp-2 leading-relaxed flex-shrink-0">
       {{ card.descricao }}
     </p>
 
-    <!-- Chips de detalhes -->
-    <div class="flex flex-wrap gap-2">
-      <span *ngIf="card.quartos > 0"
-        class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
-        <span class="material-symbols-outlined text-sm">bed</span>
-        {{ card.quartos }} {{ card.quartos === 1 ? 'quarto' : 'quartos' }}
+    <!-- CORREÇÃO: badges de comodidades em vez do e-mail do anfitrião -->
+    <div class="flex flex-wrap gap-1.5 min-h-[24px]">
+      <span *ngFor="let badge of badgesComodidades"
+        class="bg-surface-container-high text-on-surface-variant
+               px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide">
+        {{ badge }}
       </span>
-
-      <span class="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-bold tracking-wide flex items-center gap-1">
-        <span class="material-symbols-outlined text-sm">person</span>
-        {{ card.email }}
+      <!-- Placeholder quando não há comodidades cadastradas -->
+      <span *ngIf="badgesComodidades.length === 0"
+        class="text-[11px] text-outline-variant italic">
+        Sem comodidades informadas
       </span>
     </div>
 
     <!-- Estrelas de classificação -->
-    <div *ngIf="card.classificacao" class="flex items-center gap-1">
+    <div *ngIf="card.classificacao" class="flex items-center gap-0.5">
       <ng-container *ngFor="let n of [1,2,3,4,5]">
         <span class="material-symbols-outlined text-sm"
           [style.font-variation-settings]="estrelas(n) ? '\'FILL\' 1' : '\'FILL\' 0'"
@@ -77,19 +78,22 @@
       <span class="text-xs text-on-surface-variant ml-1">{{ card.classificacao | number:'1.1-1' }}</span>
     </div>
 
-    <!-- Resumo de compatibilidade -->
+    <!-- Resumo de compatibilidade — empurrado para o fim pelo mt-auto -->
     <div class="mt-auto pt-2 border-t border-outline-variant/20 flex items-center gap-2">
-      <span class="material-symbols-outlined text-sm text-secondary"
-        style="font-variation-settings: 'FILL' 1">psychology</span>
-      <span class="text-xs text-on-surface-variant font-medium italic">{{ resumo }}</span>
+      <span class="material-symbols-outlined text-sm text-secondary flex-shrink-0"
+        style="font-variation-settings: 'FILL' 1;">psychology</span>
+      <span class="text-xs text-on-surface-variant font-medium italic line-clamp-1">{{ resumo }}</span>
     </div>
 
     <!-- Botão de like -->
     <button (click)="onLike()"
-      class="w-full text-on-primary font-label text-sm font-bold tracking-[0.05em] py-3.5 rounded-xl uppercase active:scale-[0.98] transition-transform bg-gradient-to-br from-primary to-primary-container flex items-center justify-center gap-2">
+      class="w-full text-on-primary font-label text-sm font-bold tracking-[0.05em]
+             py-3 rounded-xl uppercase active:scale-[0.98] transition-transform
+             bg-gradient-to-br from-primary to-primary-container
+             flex items-center justify-center gap-2 flex-shrink-0">
       Tenho Interesse
       <span class="material-symbols-outlined text-base"
-        style="font-variation-settings: 'FILL' 1">favorite</span>
+        style="font-variation-settings: 'FILL' 1;">favorite</span>
     </button>
 
   </div>
