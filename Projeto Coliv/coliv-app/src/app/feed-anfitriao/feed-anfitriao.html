@@ -1,8 +1,7 @@
 <app-top-navbar-component>
   <div class="flex items-center gap-6">
     <nav class="hidden md:flex items-center gap-8">
-      <a routerLink="/"          class="text-slate-400 font-bold hover:opacity-80 transition-opacity">Início</a>
-      <a routerLink="/chat"      class="text-slate-400 font-bold hover:opacity-80 transition-opacity">Chat</a>
+      <a routerLink="/" class="text-slate-400 font-bold hover:opacity-80 transition-opacity">Início</a>
       <a routerLink="/feedanfitriao" class="text-[#1A2B4C] font-bold">Feed</a>
       <a routerLink="/criaranuncio"  class="text-slate-400 font-bold hover:opacity-80 transition-opacity">Anúncio</a>
     </nav>
@@ -21,12 +20,8 @@
         <span class="material-symbols-outlined text-7xl text-primary opacity-20">home</span>
       </div>
       <div class="p-8 flex-1 flex flex-col justify-center">
-        <h2 class="text-3xl font-extrabold text-primary mb-2 leading-tight tracking-tight">
-          Seu Imóvel
-        </h2>
-        <p class="text-on-surface-variant mb-6 text-sm">
-          Veja os colegas compatíveis com o seu perfil de anfitrião.
-        </p>
+        <h2 class="text-3xl font-extrabold text-primary mb-2 leading-tight tracking-tight">Seu Imóvel</h2>
+        <p class="text-on-surface-variant mb-6 text-sm">Veja os colegas compatíveis com o seu perfil de anfitrião.</p>
         <div class="flex gap-4 items-center">
           <div class="bg-surface-container-low px-4 py-2 rounded-xl">
             <p class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Compatíveis</p>
@@ -40,11 +35,10 @@
       </div>
     </div>
 
-    <!-- CTA -->
     <div class="md:col-span-4 bg-primary-container rounded-xl p-8 flex flex-col justify-between relative overflow-hidden">
       <div class="relative z-10">
         <h3 class="text-white text-xl font-bold mb-2">Publicar Anúncio</h3>
-        <p class="text-on-primary-container text-sm mb-6">Adicione fotos e detalhes do seu imóvel para atrair mais candidatos.</p>
+        <p class="text-on-primary-container text-sm mb-6">Adicione fotos e detalhes para atrair mais candidatos.</p>
         <a routerLink="/criaranuncio"
           class="bg-secondary-container text-on-secondary-container w-full py-3 rounded-xl font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all block text-center">
           Criar / Editar Anúncio
@@ -63,14 +57,12 @@
       </div>
     </div>
 
-    <!-- Estado: carregando -->
+    <!-- Carregando -->
     <div *ngIf="carregando()" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <div *ngFor="let i of [1,2,3]"
-        class="bg-surface-container-low rounded-xl h-[460px] animate-pulse">
-      </div>
+      <div *ngFor="let i of [1,2,3]" class="bg-surface-container-low rounded-xl h-[460px] animate-pulse"></div>
     </div>
 
-    <!-- Estado: erro -->
+    <!-- Erro -->
     <div *ngIf="!carregando() && erro()"
       class="flex flex-col items-center justify-center gap-4 py-24 text-center">
       <span class="material-symbols-outlined text-5xl text-error opacity-60">error_outline</span>
@@ -81,13 +73,13 @@
       </button>
     </div>
 
-    <!-- Estado: sem resultados -->
+    <!-- Sem resultados -->
     <div *ngIf="!carregando() && !erro() && recomendacoes().length === 0"
       class="flex flex-col items-center justify-center gap-4 py-24 text-center">
       <span class="material-symbols-outlined text-5xl text-outline opacity-60">person_search</span>
       <p class="font-headline font-bold text-xl text-on-surface">Nenhum colega compatível ainda</p>
       <p class="text-on-surface-variant text-sm max-w-sm">
-        Complete as preferências do seu imóvel para que o algoritmo possa encontrar os melhores matches.
+        Complete as preferências do seu imóvel para que o algoritmo encontre os melhores matches.
       </p>
       <a routerLink="/preferencias"
         class="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm active:scale-95 transition-all">
@@ -102,40 +94,31 @@
         *ngFor="let rec of recomendacoes()"
         [recomendacao]="rec"
         (aceitar)="onAceitar($event)"
-        (recusar)="onRecusar($event)">
+        (recusar)="onRecusar($event)"
+        (verDetalhes)="abrirDetalhe($event)">
       </app-colegas-card-component>
     </div>
 
     <!-- Paginação -->
     <div *ngIf="!carregando() && !erro() && recomendacoes().length > 0"
       class="flex items-center justify-center gap-4 mt-12">
-
       <button (click)="paginaAnterior()" [disabled]="pagina() === 0"
         class="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all active:scale-95"
-        [class.bg-primary]="pagina() > 0"
-        [class.text-white]="pagina() > 0"
-        [class.bg-surface-container-high]="pagina() === 0"
-        [class.text-outline]="pagina() === 0"
+        [class.bg-primary]="pagina() > 0" [class.text-white]="pagina() > 0"
+        [class.bg-surface-container-high]="pagina() === 0" [class.text-outline]="pagina() === 0"
         [class.cursor-not-allowed]="pagina() === 0">
         <span class="material-symbols-outlined text-base">arrow_back</span>
         Anterior
       </button>
-
-      <span class="text-sm text-on-surface-variant font-medium px-4">
-        Página {{ pagina() + 1 }}
-      </span>
-
+      <span class="text-sm text-on-surface-variant font-medium px-4">Página {{ pagina() + 1 }}</span>
       <button (click)="proximaPagina()" [disabled]="!temProxima()"
         class="flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-sm transition-all active:scale-95"
-        [class.bg-primary]="temProxima()"
-        [class.text-white]="temProxima()"
-        [class.bg-surface-container-high]="!temProxima()"
-        [class.text-outline]="!temProxima()"
+        [class.bg-primary]="temProxima()" [class.text-white]="temProxima()"
+        [class.bg-surface-container-high]="!temProxima()" [class.text-outline]="!temProxima()"
         [class.cursor-not-allowed]="!temProxima()">
         Próxima
         <span class="material-symbols-outlined text-base">arrow_forward</span>
       </button>
-
     </div>
   </section>
 
@@ -164,3 +147,12 @@
 </nav>
 
 <router-outlet></router-outlet>
+
+<!-- Modal de detalhe do colega -->
+<app-colega-detail-modal
+  [recomendacao]="recomendacaoSelecionada"
+  [aberto]="modalAberto"
+  (fechar)="fecharDetalhe()"
+  (aceitar)="onAceitar($event)"
+  (recusar)="onRecusar($event)">
+</app-colega-detail-modal>

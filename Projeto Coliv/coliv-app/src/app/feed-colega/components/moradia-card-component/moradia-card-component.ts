@@ -24,9 +24,21 @@ const COMODIDADE_LABEL: Record<string, string> = {
 })
 export class MoradiaCardComponent {
   @Input({ required: true }) recomendacao!: RecomendacaoCardAnfitriaoDTO;
+
+  /** Dispara quando o usuário quer dar like (botão "Tenho Interesse") */
   @Output() like = new EventEmitter<RecomendacaoCardAnfitriaoDTO>();
 
-  onLike(): void { this.like.emit(this.recomendacao); }
+  /** Dispara quando o usuário clica no card para ver detalhes */
+  @Output() verDetalhes = new EventEmitter<RecomendacaoCardAnfitriaoDTO>();
+
+  onLike(event: MouseEvent): void {
+    event.stopPropagation(); 
+    this.like.emit(this.recomendacao);
+  }
+
+  onCardClick(): void {
+    this.verDetalhes.emit(this.recomendacao);
+  }
 
   get card()   { return this.recomendacao.card; }
   get score()  { return this.recomendacao.score; }
@@ -39,10 +51,9 @@ export class MoradiaCardComponent {
   }
 
   get badgesComodidades(): string[] {
-    const prioridade = ['pet', 'wifi', 'coworking', 'academia', 'piscina', 'silencioso', 'lavanderia', 'limpeza', 'cafe', 'rooftop'];
-    const lista = this.card.comodidades ?? [];
+    const prioridade = ['pet','wifi','coworking','academia','piscina','silencioso','lavanderia','limpeza','cafe','rooftop'];
     return prioridade
-      .filter(id => lista.includes(id))
+      .filter(id => (this.card.comodidades ?? []).includes(id))
       .slice(0, 3)
       .map(id => COMODIDADE_LABEL[id] ?? id);
   }
@@ -57,9 +68,7 @@ export class MoradiaCardComponent {
     const v = this.card.precoMensal;
     if (!v || Number(v) === 0) return 'A consultar';
     return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-      minimumFractionDigits: 0,
+      style: 'currency', currency: 'BRL', minimumFractionDigits: 0,
     }).format(Number(v));
   }
 
