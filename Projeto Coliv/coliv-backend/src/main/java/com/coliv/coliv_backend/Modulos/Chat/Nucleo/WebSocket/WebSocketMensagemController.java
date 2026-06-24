@@ -1,7 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.WebSocket;
 
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemRequestDTO;
-import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemResponseDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.WebSocket.WebSocketMensagemDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemDireta.MensagemDiretaService;
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Mensagem.MensagemGrupo.MensagemGrupoService;
@@ -21,8 +20,8 @@ public class WebSocketMensagemController {
     private MensagemGrupoService msgGrupoService;
 
     @MessageMapping("/chat/mensagem/nova/{usuarioId}/{chatId}")
-    @SendTo("/queue/chat/{chatId}")
-    private WebSocketMensagemDTO novaMensagemDireta(@DestinationVariable Long usuarioId, @DestinationVariable Long chatId,
+    @SendTo("/topic/chat/{chatId}")
+    public WebSocketMensagemDTO novaMensagemDireta(@DestinationVariable Long usuarioId, @DestinationVariable Long chatId,
                                                     @Payload MensagemRequestDTO dto) {
 
         return new WebSocketMensagemDTO("NOVA_MENSAGEM", msgDiretaService.criarMensagem(usuarioId, chatId, dto));
@@ -30,15 +29,15 @@ public class WebSocketMensagemController {
 
     @MessageMapping("/chat/grupo/mensagem/nova/{usuarioId}/{grupoId}")
     @SendTo("/topic/chat/grupo/{grupoId}")
-    private WebSocketMensagemDTO novaMensagemGrupo(@DestinationVariable Long usuarioId, @DestinationVariable Long grupoId,
+    public WebSocketMensagemDTO novaMensagemGrupo(@DestinationVariable Long usuarioId, @DestinationVariable Long grupoId,
                                              @Payload MensagemRequestDTO dto) {
 
         return new WebSocketMensagemDTO("NOVA_MENSAGEM", msgGrupoService.criarMensagem(usuarioId, grupoId, dto));
     }
 
     @MessageMapping("/chat/mensagem/editar/{sequencialId}/{chatId}/{usuarioId}")
-    @SendTo("queue/chat/{chatId}")
-    private WebSocketMensagemDTO editarMensagemDireta(
+    @SendTo("/topic/chat/{chatId}")
+    public WebSocketMensagemDTO editarMensagemDireta(
             @DestinationVariable Long sequencialId,
             @DestinationVariable Long chatId,
             @DestinationVariable Long usuarioId,
@@ -48,9 +47,9 @@ public class WebSocketMensagemController {
                 chatId, usuarioId, dto));
     }
 
-    @MessageMapping("/chat/grupo/mensagem/editar/{sequencialId}/{chatId}/{usuarioId}")
-    @SendTo("queue/chat/grupo/{grupoId}")
-    private WebSocketMensagemDTO editarMensagemGrupo(
+    @MessageMapping("/chat/grupo/mensagem/editar/{sequencialId}/{grupoId}/{usuarioId}")
+    @SendTo("/topic/chat/grupo/{grupoId}")
+    public WebSocketMensagemDTO editarMensagemGrupo(
             @DestinationVariable Long sequencialId,
             @DestinationVariable Long grupoId,
             @DestinationVariable Long usuarioId,
