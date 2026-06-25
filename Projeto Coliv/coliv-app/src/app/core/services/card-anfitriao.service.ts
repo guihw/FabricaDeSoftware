@@ -12,7 +12,7 @@ export interface CardAnfitriaoResponseDTO {
   quartos: number;
   classificacao: number | null;
   precoMensal: number;
-  arquivos: number[];
+  arquivos: string[];
   tipoVaga: string | null;
   comodidades: string[];
 }
@@ -34,5 +34,9 @@ export class CardAnfitriaoService extends ApiService {
       `${this.PATH}/editar/${anfitriaoId}`,
       { precoMensal: String(precoMensal) }
     );
+  }
+
+  atualizarArquivos(anfitriaoId: number, arquivoIds: number[]): Observable<void> {
+    return this.put<void>(`${this.PATH}/${anfitriaoId}/arquivos`, arquivoIds);
   }
 }

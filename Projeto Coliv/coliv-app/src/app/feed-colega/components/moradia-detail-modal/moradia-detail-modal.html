@@ -28,17 +28,23 @@
         </button>
       </div>
 
-      <!-- Galeria de fotos — placeholder elegante enquanto upload não está disponível -->
-      <div class="galeria-scroll flex w-full h-[220px] mx-0 mb-5">
-        <!-- Placeholder principal -->
-        <div class="flex-none w-full h-full snap-center
-                    bg-gradient-to-br from-primary-container to-surface-container-high
-                    flex flex-col items-center justify-center gap-2">
-          <span class="material-symbols-outlined text-5xl text-primary opacity-20">apartment</span>
-          <span class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/60">
-            Fotos em breve
-          </span>
-        </div>
+      <div class="galeria-scroll flex w-full h-[220px] mx-0 mb-5 overflow-x-auto snap-x snap-mandatory scroll-smooth">
+        <ng-container *ngIf="card?.arquivos && card!.arquivos.length > 0; else semFotos">
+          <img *ngFor="let url of card!.arquivos"
+            [src]="url"
+            alt="Foto do imóvel"
+            class="flex-none w-full h-full object-cover snap-center" />
+        </ng-container>
+        <ng-template #semFotos>
+          <div class="flex-none w-full h-full snap-center
+                      bg-gradient-to-br from-primary-container to-surface-container-high
+                      flex flex-col items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-5xl text-primary opacity-20">apartment</span>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant/60">
+              Sem fotos
+            </span>
+          </div>
+        </ng-template>
       </div>
 
       <!-- Título e localização -->

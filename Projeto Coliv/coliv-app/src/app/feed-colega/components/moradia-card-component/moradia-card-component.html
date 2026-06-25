@@ -14,11 +14,10 @@
       <span class="text-xs font-bold uppercase tracking-widest opacity-40">Sem fotos</span>
     </div>
 
-    <div *ngIf="card.arquivos && card.arquivos.length > 0"
-      class="w-full h-full flex items-center justify-center
-             bg-gradient-to-br from-primary-container to-surface-container-high">
-      <span class="material-symbols-outlined text-6xl text-primary opacity-30">home</span>
-    </div>
+    <img *ngIf="card.arquivos && card.arquivos.length > 0"
+      [src]="card.arquivos[0]"
+      alt="Foto do imóvel"
+      class="w-full h-full object-cover" />
 
     <!-- Score badge -->
     <div class="absolute top-3 right-3 px-2.5 py-1 rounded-lg font-extrabold text-xs shadow-lg"

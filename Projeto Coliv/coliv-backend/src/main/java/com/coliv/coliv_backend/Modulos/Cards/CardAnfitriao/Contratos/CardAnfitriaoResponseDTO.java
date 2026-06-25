@@ -12,7 +12,7 @@ public record CardAnfitriaoResponseDTO(
         int quartos,
         Double classificacao,
         BigDecimal precoMensal,
-        List<Long> arquivos,
+        List<String> arquivos,
 
         String tipoVaga,
         List<String> comodidades

@@ -6,9 +6,13 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
+import { forkJoin } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
 import { ApiError } from '../core/services/api.service';
+import { ArquivoService } from '../core/services/arquivo.service';
+import { CardAnfitriaoService } from '../core/services/card-anfitriao.service';
 import { Router } from '@angular/router';
 
 interface Amenidade {
@@ -70,6 +74,8 @@ export class CriarAnuncio implements OnInit {
   constructor(
     private fb: FormBuilder,
     private dadosImovelService: DadosImovelService,
+    private arquivoService: ArquivoService,
+    private cardAnfitriaoService: CardAnfitriaoService,
     private router: Router
   ) {}
 
@@ -119,7 +125,16 @@ export class CriarAnuncio implements OnInit {
       comodidades: this.amenidadesSelecionadas,
     };
 
-    this.dadosImovelService.criar(anfitriaoId, dto).subscribe({
+    const arquivos = this.fotos.filter(f => f.arquivo !== null).map(f => f.arquivo!);
+
+    forkJoin([
+      this.dadosImovelService.criar(anfitriaoId, dto),
+      this.arquivoService.upload(arquivos),
+    ]).pipe(
+      switchMap(([_, arquivoDTOs]) =>
+        this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
+      )
+    ).subscribe({
       next: () => {
         this.publicando = false;
         this.publicado = true;
