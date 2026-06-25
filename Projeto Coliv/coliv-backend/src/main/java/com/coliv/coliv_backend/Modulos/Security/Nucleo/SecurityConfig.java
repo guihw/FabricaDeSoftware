@@ -25,7 +25,6 @@ import java.util.List;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
-
     @Bean
     public AuthenticationManager authenticationManager(
             AutenticacaoUserDetailsService authenticationUserDetailsService,
@@ -40,7 +39,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
-                // 1. ATIVA O FILTRO DE CORS USANDO AS CONFIGURAÇÕES DO BEAN ABAIXO
+                // 1. ADICIONADO: Ativa o CORS vinculando ao Bean de configuração abaixo
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -66,6 +65,7 @@ public class SecurityConfig {
                         .requestMatchers("/recomendacoes/feed/colega/**").hasRole("COLEGA")
 
                         // Demais rotas exigem apenas estar autenticado (anfitrião ou colega)
+
                         .requestMatchers("/matches/**").permitAll()
                         .requestMatchers("/chat/**").permitAll()
                         .requestMatchers("/chat/convite/**").permitAll()
@@ -77,17 +77,17 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 2. DEFINE AS REGRAS DE CORS PERMITINDO SEU FRONTEND E MOBILE LOCAL
+    // 2. ADICIONADO: Configuração explícita de origens aceitas (Local + Vercel)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Permite o Angular (4200), o app Android local e o Capacitor mobile
         configuration.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "http://localhost",
-                "capacitor://localhost",
-                "http://10.0.2.2:8080" // IP do emulador para o computador local
+                "https://fabrica-de-software-eight.vercel.app", // Produção Vercel
+                "http://localhost:4200",                        // Frontend Angular Local
+                "http://localhost",                             // Mobile Local
+                "capacitor://localhost",                        // Capacitor Mobile
+                "http://10.0.2.2:8080"                          // Emulador Android
         ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
