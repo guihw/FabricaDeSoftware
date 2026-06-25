@@ -1,5 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Arquivos.Contratos.IArquivos;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoRequestDTO;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoIDNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoNaoEncontradoUsandoReferencia;
@@ -26,6 +27,7 @@ public class CardAnfitriaoService {
     @Autowired private CardAnfitriaoRepository car;
     @Autowired private IAnfitriao iAnfitriao;
     @Autowired private IDadosImovel iDadosImovel;
+    @Autowired private IArquivos iArquivos;
 
     public List<CardAnfitriao> listar() {
         return car.findAll();
@@ -92,6 +94,13 @@ public class CardAnfitriaoService {
         return dto;
     }
 
+    public void atualizarArquivos(Long anfitriaoId, List<Long> arquivos) {
+        CardAnfitriao card = car.findByAnfitriaoId(anfitriaoId)
+                .orElseThrow(() -> new CardAnfitriaoNaoEncontradoUsandoReferencia(anfitriaoId));
+        card.setArquivos(arquivos);
+        car.save(card);
+    }
+
     public void excluir(Long id) {
         car.findById(id).orElseThrow(() -> new CardAnfitriaoIDNaoEncontrado(id));
         car.deleteById(id);
@@ -113,13 +122,16 @@ public class CardAnfitriaoService {
         car.deleteById(cardAnfitriao.getId());
     }
 
-    // ── Helper de montagem ────────────────────────────────────────
-
     private CardAnfitriaoResponseDTO toResponseDTO(
             CardAnfitriao card,
             UsuarioDTO usuario,
             DadosImovelDTO imovel
     ) {
+        List<Long> ids = card.getArquivos() != null ? card.getArquivos() : new ArrayList<>();
+        List<String> urls = ids.isEmpty()
+                ? new ArrayList<>()
+                : iArquivos.getArquivos(ids).stream().map(a -> a.url()).toList();
+
         return new CardAnfitriaoResponseDTO(
                 card.getAnfitriaoId(),
                 usuario.nome(),
@@ -129,7 +141,7 @@ public class CardAnfitriaoService {
                 imovel.quartos(),
                 card.getClassificacao(),
                 imovel.precoMensal() != null ? imovel.precoMensal() : BigDecimal.ZERO,
-                card.getArquivos(),
+                urls,
                 imovel.tipoVaga(),
                 imovel.comodidades() != null ? imovel.comodidades() : new ArrayList<>()
         );

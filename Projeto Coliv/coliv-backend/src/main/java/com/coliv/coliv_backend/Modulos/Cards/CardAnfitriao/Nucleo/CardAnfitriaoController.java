@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Nucleo;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoRequestDTO;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -43,6 +44,14 @@ class CardAnfitriaoController {
     @PutMapping("/editar/{anfitriaoId}")
     public CardAnfitriaoRequestDTO editarCardAnfitriao(@PathVariable Long anfitriaoId, @RequestBody CardAnfitriaoRequestDTO dto) {
         return cas.editarCardAnfitriao(anfitriaoId, dto);
+    }
+
+    @PutMapping("/{anfitriaoId}/arquivos")
+    public ResponseEntity<Void> atualizarArquivos(
+            @PathVariable Long anfitriaoId,
+            @RequestBody List<Long> arquivos) {
+        cas.atualizarArquivos(anfitriaoId, arquivos);
+        return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/excluir/{id}")
