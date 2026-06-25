@@ -15,11 +15,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
     @Bean
     public AuthenticationManager authenticationManager(
             AutenticacaoUserDetailsService authenticationUserDetailsService,
@@ -34,6 +40,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
+                // 1. ATIVA O FILTRO DE CORS USANDO AS CONFIGURAÇÕES DO BEAN ABAIXO
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
@@ -58,7 +66,6 @@ public class SecurityConfig {
                         .requestMatchers("/recomendacoes/feed/colega/**").hasRole("COLEGA")
 
                         // Demais rotas exigem apenas estar autenticado (anfitrião ou colega)
-
                         .requestMatchers("/matches/**").permitAll()
                         .requestMatchers("/chat/**").permitAll()
                         .requestMatchers("/chat/convite/**").permitAll()
@@ -68,6 +75,28 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    // 2. DEFINE AS REGRAS DE CORS PERMITINDO SEU FRONTEND E MOBILE LOCAL
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        // Permite o Angular (4200), o app Android local e o Capacitor mobile
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:4200",
+                "http://localhost",
+                "capacitor://localhost",
+                "http://10.0.2.2:8080" // IP do emulador para o computador local
+        ));
+
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
