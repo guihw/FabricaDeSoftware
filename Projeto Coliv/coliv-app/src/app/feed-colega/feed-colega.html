@@ -53,7 +53,8 @@
   <app-moradia-card-component
     *ngFor="let rec of recomendacoes()"
     [recomendacao]="rec"
-    (like)="onLike($event)">
+    (like)="onLike($event)"
+    (verDetalhes)="abrirDetalhe($event)">
   </app-moradia-card-component>
 </div>
 
@@ -114,3 +115,11 @@
 </nav>
 
 <router-outlet></router-outlet>
+
+<!-- Modal de detalhe da moradia -->
+<app-moradia-detail-modal
+  [recomendacao]="recomendacaoSelecionada"
+  [aberto]="modalAberto"
+  (fechar)="fecharDetalhe()"
+  (interesse)="onLike($event)">
+</app-moradia-detail-modal>
