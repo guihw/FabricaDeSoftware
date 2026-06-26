@@ -4,17 +4,15 @@ import com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteRequestDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteResponseDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteStatus;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * <p><b>Controller responsável pela entidade {@link Convite}.</b></p>
- * <p>Fornece endpoints para a busca, criação e alteração de {@code Convites}.</p>
- *
- * @author Miguel Lima
- */
+@Tag(name = "Convites de Chat", description = "Convites para iniciar um chat entre colega e anfitrião após o match. Endpoints públicos.")
 @RestController
 @RequestMapping("/chat/convite")
 @CrossOrigin("*")
@@ -23,85 +21,46 @@ public class ConviteController {
     @Autowired
     private ConviteService conviteService;
 
-    /**
-     * <p>Busca <b>Convites</b> com base no Identificador do Usuário.</p>
-     *
-     * @param usuarioId Identificador do Usuário.
-     * @param tipoUsuario Tipo de Usuário.
-     * @return {@code List<}{@link ConviteResponseDTO}{@code >} Contendo todos os <b>Convites</b> relacionados ao Usuário.
-     * Retorna uma lista vazia se não existir <b>Convites</b> relacionados ao Usuário.
-     */
+    @Operation(summary = "Listar convites por usuário")
+    @SecurityRequirements
     @GetMapping("/listarPorUsuario/{usuarioId}/{tipoUsuario}")
-    private List<ConviteResponseDTO> listarPorUsuario(@PathVariable Long usuarioId,
-                                                      @PathVariable TipoUsuario tipoUsuario) {
+    public List<ConviteResponseDTO> listarPorUsuario(@PathVariable Long usuarioId,
+                                                     @PathVariable TipoUsuario tipoUsuario) {
         return conviteService.listarPorUsuario(usuarioId, tipoUsuario);
     }
 
-    /**
-     * <p>Busca o <b>Convite</b> mais recente utilizando o Identificador de um {@code Match}.</p>
-     *
-     * @param matchId Identificador de uma entidade <b>Match</b>.
-     * @return {@link ConviteResponseDTO} Contendo as informações do <b>Convite</b>.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteNaoEncontradoUsandoReferencia Se não for
-     * encontrado um <b>Convite</b> relacionado a referência.
-     */
+    @Operation(summary = "Buscar convite mais recente por match")
+    @SecurityRequirements
     @GetMapping("/buscarConviteRecente/{matchId}")
-    private ConviteResponseDTO buscarConviteRecente(@PathVariable Long matchId) {
+    public ConviteResponseDTO buscarConviteRecente(@PathVariable Long matchId) {
         return conviteService.buscarConviteRecente(matchId);
     }
 
-    /**
-     * <p>Adiciona um novo {@code Convite} ao Sistema.</p>
-     * @param matchId Identificador de uma entidade <b>Match</b>.
-     * @param dto DTO que traz informações do novo <b>Convite</b>.
-     * @return {@link ConviteResponseDTO} Contendo as informações do <b>Convite</b>.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteExistente Caso exista outro
-     * <b>Convite</b> no Sistema que possua status {@code PENDENTE}<b>/</b>{@code ACEITO}.
-     */
+    @Operation(summary = "Enviar convite de chat", description = "Cria um convite com status PENDENTE para o match informado")
+    @SecurityRequirements
     @PostMapping("/enviar/{matchId}")
-    private ConviteResponseDTO enviarConvite(@PathVariable Long matchId, @RequestBody ConviteRequestDTO dto) {
+    public ConviteResponseDTO enviarConvite(@PathVariable Long matchId, @RequestBody ConviteRequestDTO dto) {
         return conviteService.novoConvite(ConviteStatus.PENDENTE, dto, matchId);
     }
 
-    /**
-     * <p>Atualiza o status de um <b>Convite</b> para {@code ACEITO}.</p>
-     *
-     * @param matchId Identificador de uma entidade <b>Match</b>.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteNaoEncontradoUsandoReferencia Se não for
-     * encontrado um <b>Convite</b> relacionado a referência.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteStatusException Se o status do
-     * <b>Convite</b> for diferente de {@code PENDENTE}.
-     */
+    @Operation(summary = "Aceitar convite", description = "Atualiza o status do convite para ACEITO. Exige que o status atual seja PENDENTE.")
+    @SecurityRequirements
     @PatchMapping("/aceito/{matchId}")
-    private void  conviteAceito(@PathVariable Long matchId) {
+    public void conviteAceito(@PathVariable Long matchId) {
         conviteService.conviteAceito(matchId);
     }
 
-    /**
-     * <p>Atualiza o status de um <b>Convite</b> para {@code RECUSADO}.</p>
-     *
-     * @param matchId Identificador de uma entidade <b>Match</b>.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteNaoEncontradoUsandoReferencia Se não for
-     * encontrado um <b>Convite</b> relacionado a referência.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteStatusException Se o status do
-     * <b>Convite</b> for diferente de {@code PENDENTE}.
-     */
+    @Operation(summary = "Recusar convite", description = "Atualiza o status do convite para RECUSADO. Exige que o status atual seja PENDENTE.")
+    @SecurityRequirements
     @PatchMapping("/recusado/{matchId}")
-    private void conviteRecusado(@PathVariable Long matchId) {
+    public void conviteRecusado(@PathVariable Long matchId) {
         conviteService.conviteRecusado(matchId);
     }
 
-    /**
-     * <p>Atualiza o status de um <b>Convite</b> para {@code CANCELADO}.</p>
-     *
-     * @param matchId Identificador de uma entidade <b>Match</b>.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteNaoEncontradoUsandoReferencia Se não for
-     * encontrado um <b>Convite</b> relacionado a referência.
-     * @throws com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteStatusException Se o status do
-     * <b>Convite</b> for {@code ACEITO}.
-     */
+    @Operation(summary = "Cancelar convite", description = "Atualiza o status do convite para CANCELADO. Não permitido se o status for ACEITO.")
+    @SecurityRequirements
     @PatchMapping("cancelado/{matchId}")
-    private void conviteCancelado(@PathVariable Long matchId) {
+    public void conviteCancelado(@PathVariable Long matchId) {
         conviteService.conviteCancelado(matchId);
     }
 }
