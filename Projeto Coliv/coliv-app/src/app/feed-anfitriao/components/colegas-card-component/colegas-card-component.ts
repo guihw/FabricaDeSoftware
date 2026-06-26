@@ -32,6 +32,8 @@ export class ColegasCardComponent {
       .join('');
   }
 
+  get verificado(): boolean { return this.recomendacao.antecedentesVerificados !== false; }
+
   get corScore(): string {
     if (this.score >= 80) return 'bg-secondary-container text-on-secondary-container';
     if (this.score >= 60) return 'bg-primary-container text-on-primary-container';
