@@ -47,7 +47,11 @@ export class Cadastro implements OnInit {
   ngOnInit(): void {
     this.cadastroForm = this.fb.group({
       nome: ['', [Validators.required, Validators.minLength(3)]],
-      cpf: ['', [Validators.required, Validators.pattern(/^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/)]],
+      // Alterado para rodar a validação apenas ao perder o foco (blur)
+      cpf: ['', {
+        validators: [Validators.required, Validators.pattern(/^\d{3}\.\d{3}\.\d{3}-\d{2}$|^\d{11}$/)],
+        updateOn: 'blur'
+      }],
       email: ['', [Validators.required, Validators.email]],
       senha: ['', [Validators.required, Validators.minLength(8)]],
     });
@@ -60,10 +64,19 @@ export class Cadastro implements OnInit {
   }
 
   validarCpf(cpf: string): void {
+    // Cláusula de barreira: limpa a máscara e confere se tem exatamente 11 dígitos
+    const cpfLimpo = cpf.replace(/\D/g, '');
+    if (cpfLimpo.length !== 11) {
+      this.cpfValido = false;
+      this.cpfErro = 'CPF incompleto ou inválido';
+      return;
+    }
+
     this.cpfValido = false;
     this.cpfErro = '';
 
-    this.http.post<any>(`${environment.apiUrl}/validacao/cpf/validar`, { cpf })
+    // Envia o CPF limpo para a API
+    this.http.post<any>(`${environment.apiUrl}/validacao/cpf/validar`, { cpf: cpfLimpo })
       .subscribe({
         next: (res) => {
           this.cpfValido = res.valido;
