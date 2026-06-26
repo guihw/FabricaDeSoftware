@@ -15,6 +15,7 @@ import { ApiError } from '../core/services/api.service';
 import { HttpClient } from '@angular/common/http';
 import { debounceTime } from 'rxjs/operators';
 import { AuthService } from '../core/services/auth.service';
+import { AntecedentesService } from '../core/services/antecedentes.service';
 import { environment } from '../../environments/environment';
 
 
@@ -30,6 +31,7 @@ export class Cadastro implements OnInit {
   cadastroForm!: FormGroup;
   perfil = signal<PerfilTipo>('colega');
   carregando = signal(false);
+  statusCadastro = signal('Aguarde...');
   erro = signal<string | null>(null);
   mostrarSenha = signal(false);
   cpfValido = false;
@@ -41,7 +43,8 @@ export class Cadastro implements OnInit {
     private anfitriaoService: AnfitriaoService,
     private colegaService: ColegaService,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private antecedentesService: AntecedentesService
   ) {}
 
   ngOnInit(): void {
@@ -96,6 +99,7 @@ export class Cadastro implements OnInit {
     }
 
     this.carregando.set(true);
+    this.statusCadastro.set('Criando sua conta...');
     this.erro.set(null);
 
     const { nome, cpf, email, senha } = this.cadastroForm.value;
@@ -112,8 +116,12 @@ export class Cadastro implements OnInit {
     next: () => {
       this.authService.login({ email: request.email, senha: request.senha }).subscribe({
         next: () => {
-          this.carregando.set(false);
-          this.router.navigate(['/preferencias']);
+          this.statusCadastro.set('Verificando antecedentes...');
+          const userId = this.authService.getUserId()!;
+          this.antecedentesService.verificar({ usuarioId: userId, tipoUsuario: 'ANFITRIAO' }).subscribe({
+            next: () => { this.carregando.set(false); this.router.navigate(['/preferencias']); },
+            error: () => { this.carregando.set(false); this.router.navigate(['/preferencias']); },
+          });
         },
         error: (err: ApiError) => {
           this.carregando.set(false);
@@ -133,8 +141,12 @@ export class Cadastro implements OnInit {
     next: () => {
       this.authService.login({ email: request.email, senha: request.password }).subscribe({
         next: () => {
-          this.carregando.set(false);
-          this.router.navigate(['/preferencias']);
+          this.statusCadastro.set('Verificando antecedentes...');
+          const userId = this.authService.getUserId()!;
+          this.antecedentesService.verificar({ usuarioId: userId, tipoUsuario: 'COLEGA' }).subscribe({
+            next: () => { this.carregando.set(false); this.router.navigate(['/preferencias']); },
+            error: () => { this.carregando.set(false); this.router.navigate(['/preferencias']); },
+          });
         },
         error: (err: ApiError) => {
           this.carregando.set(false);
