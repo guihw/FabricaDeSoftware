@@ -39,13 +39,16 @@ class DadosImovelService implements IDadosImovel {
         dadosImovel.setQuartos(dto.quartos());
         dadosImovel.setPrecoMensal(dto.precoMensal());
         dadosImovel.setTipoVaga(dto.tipoVaga());
-        dadosImovel.setComodidades(dto.comodidades() != null ? dto.comodidades() : new ArrayList<>());
+
+        List<String> novasComodidades = dto.comodidades() != null ? dto.comodidades() : new ArrayList<>();
+        dadosImovel.getComodidades().clear();
+        dadosImovel.getComodidades().addAll(novasComodidades);
 
         dir.save(dadosImovel);
         return dto;
     }
 
-
+    @Transactional
     public DadosImovelRequestDTO editarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
         DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
                 .orElseThrow(() -> new DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
@@ -61,8 +64,10 @@ class DadosImovelService implements IDadosImovel {
             dadosImovel.setPrecoMensal(dto.precoMensal());
         if (dto.tipoVaga() != null && !dto.tipoVaga().isBlank())
             dadosImovel.setTipoVaga(dto.tipoVaga());
-        if (dto.comodidades() != null)
-            dadosImovel.setComodidades(dto.comodidades());
+        if (dto.comodidades() != null) {
+            dadosImovel.getComodidades().clear();
+            dadosImovel.getComodidades().addAll(dto.comodidades());
+        }
 
         dir.save(dadosImovel);
         return dto;

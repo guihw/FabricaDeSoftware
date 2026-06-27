@@ -6,7 +6,7 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { forkJoin, of } from 'rxjs';
+import { of } from 'rxjs';
 import { catchError, switchMap } from 'rxjs/operators';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
@@ -164,11 +164,9 @@ export class CriarAnuncio implements OnInit {
         error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
       });
     } else {
-      forkJoin([
-        this.dadosImovelService.criar(anfitriaoId, dto),
-        this.arquivoService.upload(arquivos),
-      ]).pipe(
-        switchMap(([_, arquivoDTOs]) =>
+      this.dadosImovelService.criar(anfitriaoId, dto).pipe(
+        switchMap(() => this.arquivoService.upload(arquivos)),
+        switchMap(arquivoDTOs =>
           this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
         )
       ).subscribe({
@@ -194,11 +192,8 @@ export class CriarAnuncio implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
 
-    const reader = new FileReader();
-    reader.onload = e => {
-      this.fotos[index] = { ...this.fotos[index], arquivo: file, preview: e.target?.result as string };
-    };
-    reader.readAsDataURL(file);
+    const preview = URL.createObjectURL(file);
+    this.fotos[index] = { ...this.fotos[index], arquivo: file, preview };
   }
 
   removerFoto(index: number, event: MouseEvent): void {
