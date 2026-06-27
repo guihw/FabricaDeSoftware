@@ -79,6 +79,18 @@ class DadosImovelService implements IDadosImovel {
         dir.deleteById(id);
     }
 
+    @Transactional
+    public void excluirPorAnfitriaoId(Long anfitriaoId) {
+        DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
+                .orElseThrow(() -> new DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
+        dadosImovel.setDescricao(null);
+        dadosImovel.setLocalizacao(null);
+        dadosImovel.setQuartos(0);
+        dadosImovel.setPrecoMensal(null);
+        dadosImovel.setTipoVaga(null);
+        dadosImovel.getComodidades().clear();
+    }
+
 
     @Override
     public DadosImovelDTO getDadosImovel(Long anfitriaoId) {

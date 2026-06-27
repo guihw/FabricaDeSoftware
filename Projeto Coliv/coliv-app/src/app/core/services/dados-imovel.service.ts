@@ -40,4 +40,9 @@ export class DadosImovelService extends ApiService {
   excluir(id: number): Observable<void> {
     return this.delete<void>(`${this.PATH}/excluir/${id}`);
   }
+
+  // DELETE /formularios/dados-imovel/anfitriao/{anfitriaoId}
+  excluirPorAnfitriaoId(anfitriaoId: number): Observable<void> {
+    return this.delete<void>(`${this.PATH}/anfitriao/${anfitriaoId}`);
+  }
 }

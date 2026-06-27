@@ -5,8 +5,6 @@ import { TopNavbarComponent } from '../shared/components/top-navbar-component/to
 import { CardAnfitriaoService, CardAnfitriaoResponseDTO } from '../core/services/card-anfitriao.service';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { ApiError } from '../core/services/api.service';
-import { catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
 
 @Component({
   selector: 'app-gerenciar-anuncios',
@@ -19,7 +17,6 @@ export class GerenciarAnuncios implements OnInit {
   anuncio = signal<CardAnfitriaoResponseDTO | null>(null);
   carregando = signal(true);
   erro = signal<string | null>(null);
-  imovelId = signal<number | null>(null);
   excluindo = signal(false);
 
   status = computed<'rascunho' | 'ativo'>(() => {
@@ -76,11 +73,6 @@ export class GerenciarAnuncios implements OnInit {
       next: (card) => {
         this.anuncio.set(card);
         this.carregando.set(false);
-        this.dadosImovelService.buscarPorAnfitriaoIdSeCompleto(anfitriaoId).pipe(
-          catchError(() => of(null))
-        ).subscribe(imovel => {
-          if (imovel) this.imovelId.set(imovel.id);
-        });
       },
       error: (err: ApiError) => {
         if (err.status === 404) {
@@ -97,14 +89,13 @@ export class GerenciarAnuncios implements OnInit {
   excluirAnuncio(): void {
     if (!confirm('Tem certeza que deseja excluir seu anúncio? Esta ação não pode ser desfeita.')) return;
 
-    const id = this.imovelId();
-    if (!id) return;
+    const anfitriaoId = Number(sessionStorage.getItem('coliv_user_id'));
+    if (!anfitriaoId) return;
 
     this.excluindo.set(true);
-    this.dadosImovelService.excluir(id).subscribe({
+    this.dadosImovelService.excluirPorAnfitriaoId(anfitriaoId).subscribe({
       next: () => {
         this.anuncio.set(null);
-        this.imovelId.set(null);
         this.excluindo.set(false);
       },
       error: () => {
