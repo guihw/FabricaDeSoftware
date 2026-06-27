@@ -41,10 +41,11 @@ class DadosImovelService implements IDadosImovel {
         dadosImovel.setTipoVaga(dto.tipoVaga());
 
         List<String> novasComodidades = dto.comodidades() != null ? dto.comodidades() : new ArrayList<>();
+        // Flush the clear first so the DELETE runs before the INSERT in the same transaction
         dadosImovel.getComodidades().clear();
+        dadosImovel = dir.saveAndFlush(dadosImovel);
         dadosImovel.getComodidades().addAll(novasComodidades);
 
-        dir.save(dadosImovel);
         return dto;
     }
 
@@ -66,10 +67,10 @@ class DadosImovelService implements IDadosImovel {
             dadosImovel.setTipoVaga(dto.tipoVaga());
         if (dto.comodidades() != null) {
             dadosImovel.getComodidades().clear();
+            dadosImovel = dir.saveAndFlush(dadosImovel);
             dadosImovel.getComodidades().addAll(dto.comodidades());
         }
 
-        dir.save(dadosImovel);
         return dto;
     }
 

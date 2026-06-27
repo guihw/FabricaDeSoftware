@@ -82,7 +82,7 @@ export class CriarAnuncio implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      manifesto: ['', [Validators.required, Validators.minLength(50)]],
+      manifesto: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(3000)]],
       preco: [null, [Validators.required, Validators.min(1)]],
       tipoVaga: ['Quarto Privativo', Validators.required],
       bairro: ['', Validators.required],

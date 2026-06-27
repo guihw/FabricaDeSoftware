@@ -133,13 +133,17 @@
               class="w-full bg-surface-container-low border-none rounded-xl p-4 min-h-[180px] focus:ring-1 text-on-surface placeholder:text-outline/60 text-sm leading-relaxed resize-none transition-all"
               [class.ring-1]="campoInvalido('manifesto')"
               [class.ring-error]="campoInvalido('manifesto')"
+              maxlength="3000"
               placeholder="Descreva a alma do seu imóvel, a história do bairro, o perfil da comunidade e as regras de convivência essenciais...">
             </textarea>
             <div class="flex items-center justify-between mt-2">
               <p *ngIf="campoInvalido('manifesto')" class="text-[11px] text-error font-medium flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">error</span> Mínimo de 50 caracteres.
+                <span class="material-symbols-outlined text-sm">error</span>
+                {{ form.get('manifesto')?.errors?.['minlength'] ? 'Mínimo de 50 caracteres.' : 'Máximo de 3000 caracteres.' }}
               </p>
-              <span class="text-[11px] text-outline ml-auto">{{ form.get('manifesto')?.value?.length || 0 }} caracteres</span>
+              <span class="text-[11px] ml-auto" [class.text-error]="(form.get('manifesto')?.value?.length || 0) > 2800" [class.text-outline]="(form.get('manifesto')?.value?.length || 0) <= 2800">
+                {{ form.get('manifesto')?.value?.length || 0 }} / 3000
+              </span>
             </div>
           </div>
 
