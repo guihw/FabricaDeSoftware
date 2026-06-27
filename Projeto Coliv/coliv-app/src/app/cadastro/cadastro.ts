@@ -125,13 +125,13 @@ export class Cadastro implements OnInit {
         },
         error: (err: ApiError) => {
           this.carregando.set(false);
-          this.erro.set(err.message);
+          this.erro.set(this.traduzirErro(err));
         },
       });
     },
     error: (err: ApiError) => {
       this.carregando.set(false);
-      this.erro.set(err.message);
+      this.erro.set(this.traduzirErro(err));
     },
   });
 }
@@ -150,14 +150,63 @@ export class Cadastro implements OnInit {
         },
         error: (err: ApiError) => {
           this.carregando.set(false);
-          this.erro.set(err.message);
+          this.erro.set(this.traduzirErro(err));
         },
       });
     },
     error: (err: ApiError) => {
       this.carregando.set(false);
-      this.erro.set(err.message);
+      this.erro.set(this.traduzirErro(err));
     },
   });
 }
+
+  private traduzirErro(err: ApiError): string {
+    if (err.status === 0) {
+      return 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.';
+    }
+
+    const body = err.raw?.error;
+    const backendMsg: string = (
+      body?.erro ?? body?.message ?? body?.mensagem ?? body?.detail ?? ''
+    ).toLowerCase();
+
+    if (backendMsg.includes('cpf')) {
+      if (backendMsg.includes('já') || backendMsg.includes('cadastrado') || backendMsg.includes('exist')) {
+        return 'Este CPF já está vinculado a uma conta. Tente fazer login.';
+      }
+      return 'CPF inválido. Verifique o número informado.';
+    }
+
+    if (backendMsg.includes('email') || backendMsg.includes('e-mail')) {
+      if (backendMsg.includes('já') || backendMsg.includes('cadastrado') || backendMsg.includes('exist')) {
+        return 'Este e-mail já está em uso. Tente fazer login ou use outro endereço.';
+      }
+      return 'E-mail inválido. Verifique o endereço informado.';
+    }
+
+    if (backendMsg.includes('senha') || backendMsg.includes('password')) {
+      return 'Senha inválida. A senha deve ter pelo menos 8 caracteres.';
+    }
+
+    if (backendMsg.includes('nome')) {
+      return 'Nome inválido. Informe seu nome completo.';
+    }
+
+    if (err.status === 409) {
+      return 'Já existe uma conta com esses dados. Tente fazer login.';
+    }
+
+    if (err.status === 400) {
+      const mensagemBackend = body?.erro ?? body?.message ?? body?.mensagem ?? '';
+      if (mensagemBackend) return mensagemBackend;
+      return 'Dados inválidos. Verifique os campos e tente novamente.';
+    }
+
+    if (err.status >= 500) {
+      return 'Erro no servidor. Tente novamente em alguns instantes.';
+    }
+
+    return 'Ocorreu um erro inesperado. Tente novamente.';
+  }
 }
