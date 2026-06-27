@@ -11,6 +11,9 @@ import { ColegasCardComponent } from './components/colegas-card-component/colega
 import { ColegaDetailModalComponent } from './components/colega-detail-modal/colega-detail-modal';
 import { ApiError } from '../core/services/api.service';
 import { MatchService } from '../core/services/match.service';
+import { CardAnfitriaoService, CardAnfitriaoResponseDTO } from '../core/services/card-anfitriao.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-feed-anfitriao',
@@ -29,6 +32,7 @@ import { MatchService } from '../core/services/match.service';
 export class FeedAnfitriao implements OnInit {
 
   recomendacoes    = signal<RecomendacaoColegaDTO[]>([]);
+  imovelCard       = signal<CardAnfitriaoResponseDTO | null>(null);
   carregando       = signal(true);
   erro             = signal<string | null>(null);
   pagina           = signal(0);
@@ -44,6 +48,7 @@ export class FeedAnfitriao implements OnInit {
   constructor(
     private recomendacaoService: RecomendacaoService,
     private matchService: MatchService,
+    private cardAnfitriaoService: CardAnfitriaoService,
     private router: Router,
   ) {}
 
@@ -56,6 +61,10 @@ export class FeedAnfitriao implements OnInit {
       this.carregando.set(false);
       return;
     }
+
+    this.cardAnfitriaoService.getCardInfo(this.anfitriaoId).pipe(
+      catchError(() => of(null))
+    ).subscribe(card => this.imovelCard.set(card));
 
     this.carregarPagina(0);
   }

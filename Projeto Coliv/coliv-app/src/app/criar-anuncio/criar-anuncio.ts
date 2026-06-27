@@ -107,6 +107,15 @@ export class CriarAnuncio implements OnInit {
           ...a,
           selecionada: imovel.comodidades.includes(a.id),
         }));
+
+        this.cardAnfitriaoService.getCardInfo(anfitriaoId).pipe(
+          catchError(() => of(null))
+        ).subscribe(card => {
+          if (!card?.arquivos?.length) return;
+          card.arquivos.slice(0, 3).forEach((url, i) => {
+            this.fotos[i] = { ...this.fotos[i], preview: url };
+          });
+        });
       });
     }
   }

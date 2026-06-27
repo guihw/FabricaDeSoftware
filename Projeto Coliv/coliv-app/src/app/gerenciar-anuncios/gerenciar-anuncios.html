@@ -59,8 +59,15 @@
     *ngIf="!carregando() && !erro() && anuncio() as card"
     class="bg-surface-card rounded-xl border border-border-subtle editorial-shadow overflow-hidden max-w-md">
 
-    <div class="relative aspect-video bg-gradient-to-br from-primary-container to-surface-container-high flex items-center justify-center">
-      <span class="material-symbols-outlined text-primary opacity-30 text-6xl">home_work</span>
+    <div class="relative aspect-video overflow-hidden">
+      <img *ngIf="card.arquivos?.length"
+        [src]="card.arquivos[0]"
+        alt="Foto do imóvel"
+        class="w-full h-full object-cover" />
+      <div *ngIf="!card.arquivos?.length"
+        class="w-full h-full bg-gradient-to-br from-primary-container to-surface-container-high flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary opacity-30 text-6xl">home_work</span>
+      </div>
 
       <div class="absolute top-4 left-4">
         <span [ngClass]="statusBadgeClasses()"

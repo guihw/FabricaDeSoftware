@@ -17,8 +17,15 @@
   <!-- Hero com resumo do anúncio -->
   <section class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-12">
     <div class="md:col-span-8 bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.02)] flex flex-col md:flex-row">
-      <div class="w-full md:w-2/5 bg-gradient-to-br from-primary-container to-surface-container-high flex items-center justify-center min-h-[200px]">
-        <span class="material-symbols-outlined text-7xl text-primary opacity-20">home</span>
+      <div class="w-full md:w-2/5 overflow-hidden min-h-[200px]">
+        <img *ngIf="imovelCard()?.arquivos?.length"
+          [src]="imovelCard()!.arquivos[0]"
+          alt="Foto do imóvel"
+          class="w-full h-full object-cover" />
+        <div *ngIf="!imovelCard()?.arquivos?.length"
+          class="w-full h-full bg-gradient-to-br from-primary-container to-surface-container-high flex items-center justify-center min-h-[200px]">
+          <span class="material-symbols-outlined text-7xl text-primary opacity-20">home</span>
+        </div>
       </div>
       <div class="p-8 flex-1 flex flex-col justify-center">
         <h2 class="text-3xl font-extrabold text-primary mb-2 leading-tight tracking-tight">Seu Imóvel</h2>
