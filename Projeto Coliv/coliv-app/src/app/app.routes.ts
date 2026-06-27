@@ -8,6 +8,7 @@ import { FeedColega } from './feed-colega/feed-colega';
 import { CriarAnuncio } from './criar-anuncio/criar-anuncio';
 import { GerenciarAnuncios } from './gerenciar-anuncios/gerenciar-anuncios';
 import { Chat } from './chat/chat';
+import { Perfil } from './perfil/perfil';
 import { authGuard } from './core/guards/auth-guard-guard';
 import { despesasGuard } from './core/guards/despesas-guard';
 import { anfitriaoGuard, colegaGuard } from './core/guards/role-guard-guard';
@@ -28,4 +29,5 @@ export const routes: Routes = [
   { path: 'preferencias', component: FormPreferencias, canActivate: [authGuard] },
   { path: 'despesas', component: Despesas, canActivate: [authGuard, despesasGuard] },
   { path: 'chat/:matchId', component: Chat, canActivate: [authGuard] },
+  { path: 'perfil', component: Perfil, canActivate: [authGuard] },
 ];

@@ -6,8 +6,8 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { forkJoin } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
 import { ApiError } from '../core/services/api.service';
@@ -67,6 +67,7 @@ export class CriarAnuncio implements OnInit {
     'Studio Completo',
   ];
 
+  modoEdicao = false;
   publicando = false;
   publicado = false;
   erroPublicacao: string | null = null;
@@ -87,6 +88,27 @@ export class CriarAnuncio implements OnInit {
       bairro: ['', Validators.required],
       quartos: [1, [Validators.required, Validators.min(1)]],
     });
+
+    const anfitriaoId = Number(sessionStorage.getItem('coliv_user_id'));
+    if (anfitriaoId) {
+      this.dadosImovelService.buscarPorAnfitriaoIdSeCompleto(anfitriaoId).pipe(
+        catchError(() => of(null))
+      ).subscribe(imovel => {
+        if (!imovel) return;
+        this.modoEdicao = true;
+        this.form.patchValue({
+          manifesto: imovel.descricao,
+          preco: imovel.precoMensal,
+          tipoVaga: imovel.tipoVaga,
+          bairro: imovel.localizacao,
+          quartos: imovel.quartos,
+        });
+        this.amenidades = this.amenidades.map(a => ({
+          ...a,
+          selecionada: imovel.comodidades.includes(a.id),
+        }));
+      });
+    }
   }
 
   get fotosPreenchidas(): number {
@@ -94,7 +116,7 @@ export class CriarAnuncio implements OnInit {
   }
 
   get prontoParaPublicar(): boolean {
-    return this.form?.valid && this.fotosPreenchidas > 0;
+    return this.form?.valid && (this.modoEdicao || this.fotosPreenchidas > 0);
   }
 
   get amenidadesSelecionadas(): string[] {
@@ -127,23 +149,33 @@ export class CriarAnuncio implements OnInit {
 
     const arquivos = this.fotos.filter(f => f.arquivo !== null).map(f => f.arquivo!);
 
-    forkJoin([
-      this.dadosImovelService.criar(anfitriaoId, dto),
-      this.arquivoService.upload(arquivos),
-    ]).pipe(
-      switchMap(([_, arquivoDTOs]) =>
-        this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
-      )
-    ).subscribe({
-      next: () => {
-        this.publicando = false;
-        this.publicado = true;
-      },
-      error: (err: ApiError) => {
-        this.publicando = false;
-        this.erroPublicacao = err.message;
-      },
-    });
+    if (this.modoEdicao) {
+      this.dadosImovelService.editar(anfitriaoId, dto).pipe(
+        switchMap(() => arquivos.length > 0
+          ? this.arquivoService.upload(arquivos).pipe(
+              switchMap(arquivoDTOs =>
+                this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
+              )
+            )
+          : of(null)
+        )
+      ).subscribe({
+        next: () => { this.publicando = false; this.publicado = true; },
+        error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
+      });
+    } else {
+      forkJoin([
+        this.dadosImovelService.criar(anfitriaoId, dto),
+        this.arquivoService.upload(arquivos),
+      ]).pipe(
+        switchMap(([_, arquivoDTOs]) =>
+          this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
+        )
+      ).subscribe({
+        next: () => { this.publicando = false; this.publicado = true; },
+        error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
+      });
+    }
   }
 
   voltarParaEdicao(): void { this.publicado = false; }
