@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Nucleo;
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.*;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ class DadosImovelService implements IDadosImovel {
 
     // Criar / Upsert
 
+    @Transactional
     public DadosImovelRequestDTO criarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
         DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
                 .orElseGet(DadosImovel::new);
