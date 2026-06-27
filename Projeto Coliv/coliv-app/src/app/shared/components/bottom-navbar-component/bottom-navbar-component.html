@@ -35,14 +35,15 @@
     <span class="text-[10px] font-bold uppercase tracking-widest">Gestão</span>
   </a>
 
-  <!-- Perfil (ainda não implementado) -->
-  <button (click)="irParaPerfil()"
+  <!-- Perfil -->
+  <a routerLink="/perfil"
+     routerLinkActive="nav-tab--active"
+     [routerLinkActiveOptions]="{ exact: true }"
      class="nav-tab flex flex-col items-center gap-1 px-5 py-2
             text-on-surface-variant hover:text-primary
-            transition-all active:scale-90 duration-300 rounded-2xl
-            bg-transparent border-none cursor-pointer">
+            transition-all active:scale-90 duration-300 rounded-2xl">
     <span class="material-symbols-outlined">person</span>
     <span class="text-[10px] font-bold uppercase tracking-widest">Perfil</span>
-  </button>
+  </a>
 
 </nav>
