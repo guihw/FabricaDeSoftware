@@ -7,7 +7,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { catchError, defaultIfEmpty, switchMap } from 'rxjs/operators';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
 import { ApiError } from '../core/services/api.service';
@@ -155,7 +155,8 @@ export class CriarAnuncio implements OnInit {
           ? this.arquivoService.upload(arquivos).pipe(
               switchMap(arquivoDTOs =>
                 this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
-              )
+              ),
+              defaultIfEmpty(null)
             )
           : of(null)
         )
@@ -168,7 +169,8 @@ export class CriarAnuncio implements OnInit {
         switchMap(() => this.arquivoService.upload(arquivos)),
         switchMap(arquivoDTOs =>
           this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
-        )
+        ),
+        defaultIfEmpty(null)
       ).subscribe({
         next: () => { this.publicando = false; this.publicado = true; },
         error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
