@@ -15,6 +15,7 @@ import { anfitriaoGuard, colegaGuard } from './core/guards/role-guard-guard';
 import { anuncioGuard } from './core/guards/anuncio-guard-guard';
 import { Login } from './login/login';
 import { Ajuda } from './ajuda/ajuda';
+import { Planos } from './planos/planos';
 
 
 
@@ -23,6 +24,7 @@ export const routes: Routes = [
   { path: 'login', component: Login },
   { path: 'cadastro', component: Cadastro },
   { path: 'ajuda', component: Ajuda },
+  { path: 'planos', component: Planos },
 
   { path: 'feedcolega', component: FeedColega, canActivate: [colegaGuard] },
   { path: 'feedanfitriao', component: FeedAnfitriao, canActivate: [anfitriaoGuard, anuncioGuard] },
