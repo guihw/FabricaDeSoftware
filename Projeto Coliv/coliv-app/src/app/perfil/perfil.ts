@@ -118,23 +118,34 @@ export class Perfil implements OnInit {
 
     const dados = { nome: this.form.value.nome, email: this.form.value.email };
 
-    const request = this.isAnfitriao()
-      ? this.anfitriaoService.editar(id, dados)
-      : this.colegaService.editar(id, dados);
+    const onErro = (err: ApiError) => {
+      this.salvando.set(false);
+      this.erro.set(err.message ?? 'Não foi possível salvar as alterações.');
+    };
 
-    request.subscribe({
-      next: (user) => {
-        this.usuario.set(user);
-        this.salvando.set(false);
-        this.editando.set(false);
-        this.sucesso.set('Perfil atualizado com sucesso!');
-        setTimeout(() => this.sucesso.set(null), 3000);
-      },
-      error: (err: ApiError) => {
-        this.salvando.set(false);
-        this.erro.set(err.message ?? 'Não foi possível salvar as alterações.');
-      },
-    });
+    if (this.isAnfitriao()) {
+      this.anfitriaoService.editar(id, dados).subscribe({
+        next: (user) => {
+          this.usuario.set(user);
+          this.salvando.set(false);
+          this.editando.set(false);
+          this.sucesso.set('Perfil atualizado com sucesso!');
+          setTimeout(() => this.sucesso.set(null), 3000);
+        },
+        error: onErro,
+      });
+    } else {
+      this.colegaService.editar(id, dados).subscribe({
+        next: (user) => {
+          this.usuario.set(user);
+          this.salvando.set(false);
+          this.editando.set(false);
+          this.sucesso.set('Perfil atualizado com sucesso!');
+          setTimeout(() => this.sucesso.set(null), 3000);
+        },
+        error: onErro,
+      });
+    }
   }
 
   logout(): void {
