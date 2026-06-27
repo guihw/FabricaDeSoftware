@@ -94,9 +94,9 @@
           class="flex-1 bg-primary text-white py-2.5 rounded-lg font-bold text-sm hover:bg-primary-container transition-colors">
           Editar Anúncio
         </button>
-        <button routerLink="/feedanfitriao"
-          class="flex items-center justify-center px-3 border border-border-subtle text-primary rounded-lg hover:bg-surface-container-low transition-colors">
-          <span class="material-symbols-outlined">groups</span>
+        <button (click)="excluirAnuncio()" [disabled]="excluindo()"
+          class="flex items-center justify-center px-3 border border-error text-error rounded-lg hover:bg-error/10 transition-colors disabled:opacity-50">
+          <span class="material-symbols-outlined">delete</span>
         </button>
       </div>
     </div>
