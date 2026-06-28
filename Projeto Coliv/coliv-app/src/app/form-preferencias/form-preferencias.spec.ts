@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, provideRouter } from '@angular/router';
@@ -14,7 +14,7 @@ describe('FormPreferencias', () => {
   let fixture: ComponentFixture<FormPreferencias>;
   let anfitriaoService: { criar: ReturnType<typeof vi.fn> };
   let colegaService: { criar: ReturnType<typeof vi.fn> };
-  let router: { navigate: ReturnType<typeof vi.fn> };
+  let router: Router;
 
   const prefAnfitriaoMock = {
     id: 1, anfitriaoId: 5,
@@ -42,7 +42,6 @@ describe('FormPreferencias', () => {
   beforeEach(async () => {
     anfitriaoService = { criar: vi.fn() };
     colegaService    = { criar: vi.fn() };
-    router           = { navigate: vi.fn() };
 
     await TestBed.configureTestingModule({
       imports: [FormPreferencias, CommonModule, ReactiveFormsModule],
@@ -50,12 +49,13 @@ describe('FormPreferencias', () => {
         provideRouter([]),
         { provide: PreferenciasAnfitriaoService, useValue: anfitriaoService },
         { provide: PreferenciasColegaService,    useValue: colegaService    },
-        { provide: Router,                       useValue: router           },
       ],
     }).compileComponents();
 
     fixture   = TestBed.createComponent(FormPreferencias);
     component = fixture.componentInstance;
+    router    = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
   });
 
   afterEach(() => sessionStorage.clear());
@@ -140,39 +140,39 @@ describe('FormPreferencias', () => {
 
   // ── Salvar Colega ─────────────────────────────────────────────
 
-  it('deve chamar colegaService.criar para perfil colega', fakeAsync(() => {
+  it('deve chamar colegaService.criar para perfil colega', () => {
     colegaService.criar.mockReturnValue(of(prefColegaMock));
     setupSession('colega', 3);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 800, precoMax: 2000 });
     component.salvar();
-    tick();
     expect(colegaService.criar).toHaveBeenCalledWith(3, expect.objectContaining({
       localizacao: 'SP', precoMinimo: 800, precoMaximo: 2000,
     }));
-  }));
+  });
 
-  it('deve navegar para /feedcolega após salvar colega com sucesso', fakeAsync(() => {
+  it('deve navegar para /feedcolega após salvar colega com sucesso', () => {
+    vi.useFakeTimers();
     colegaService.criar.mockReturnValue(of(prefColegaMock));
     setupSession('colega', 3);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 800, precoMax: 2000 });
     component.salvar();
-    tick(800);
+    vi.runAllTimers();
     expect(router.navigate).toHaveBeenCalledWith(['/feedcolega']);
-  }));
+    vi.useRealTimers();
+  });
 
-  it('deve definir erro quando precoMin > precoMax', fakeAsync(() => {
+  it('deve definir erro quando precoMin > precoMax', () => {
     setupSession('colega', 3);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 3000, precoMax: 1000 });
     component.salvar();
-    tick();
     expect(component.erro()).toContain('mínimo');
     expect(colegaService.criar).not.toHaveBeenCalled();
-  }));
+  });
 
-  it('deve exibir erro quando colegaService.criar falha', fakeAsync(() => {
+  it('deve exibir erro quando colegaService.criar falha', () => {
     colegaService.criar.mockReturnValue(
       throwError(() => ({ status: 400, message: 'Dados inválidos.' }))
     );
@@ -180,53 +180,51 @@ describe('FormPreferencias', () => {
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 800, precoMax: 2000 });
     component.salvar();
-    tick();
     expect(component.erro()).toBe('Dados inválidos.');
     expect(component.carregando()).toBe(false);
-  }));
+  });
 
   // ── Salvar Anfitrião ──────────────────────────────────────────
 
-  it('deve chamar anfitriaoService.criar para perfil anfitriao', fakeAsync(() => {
+  it('deve chamar anfitriaoService.criar para perfil anfitriao', () => {
     anfitriaoService.criar.mockReturnValue(of(prefAnfitriaoMock));
     setupSession('anfitriao', 5);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP' });
     component.salvar();
-    tick();
     expect(anfitriaoService.criar).toHaveBeenCalledWith(5, expect.any(Object));
-  }));
+  });
 
-  it('deve navegar para /criaranuncio após salvar anfitrião com sucesso', fakeAsync(() => {
+  it('deve navegar para /criaranuncio após salvar anfitrião com sucesso', () => {
+    vi.useFakeTimers();
     anfitriaoService.criar.mockReturnValue(of(prefAnfitriaoMock));
     setupSession('anfitriao', 5);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP' });
     component.salvar();
-    tick(800);
+    vi.runAllTimers();
     expect(router.navigate).toHaveBeenCalledWith(['/criaranuncio']);
-  }));
+    vi.useRealTimers();
+  });
 
-  it('deve definir sucesso como true após salvar anfitrião', fakeAsync(() => {
+  it('deve definir sucesso como true após salvar anfitrião', () => {
     anfitriaoService.criar.mockReturnValue(of(prefAnfitriaoMock));
     setupSession('anfitriao', 5);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP' });
     component.salvar();
-    tick();
     expect(component.sucesso()).toBe(true);
-  }));
+  });
 
-  it('deve incluir aceitaAnimais no dto do colega', fakeAsync(() => {
+  it('deve incluir aceitaAnimais no dto do colega', () => {
     colegaService.criar.mockReturnValue(of(prefColegaMock));
     setupSession('colega', 3);
     fixture.detectChanges();
     component.form.patchValue({ localizacao: 'SP', precoMin: 800, precoMax: 2000 });
     component.aceitaPets.set(true);
     component.salvar();
-    tick();
     expect(colegaService.criar).toHaveBeenCalledWith(3,
       expect.objectContaining({ aceitaAnimais: true })
     );
-  }));
+  });
 });

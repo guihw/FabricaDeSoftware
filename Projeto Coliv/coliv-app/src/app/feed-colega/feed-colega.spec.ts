@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -16,7 +16,7 @@ function makeCardDTO(id = 1): RecomendacaoCardAnfitriaoDTO {
     card: {
       anfitriaoId: id, nome: `Anf ${id}`, email: `anf${id}@email.com`,
       descricao: 'Casa boa', localizacao: 'SP', quartos: 2,
-      classificacao: 4.5, precoMensal: 1500, arquivos: [],
+      classificacao: 4.5, precoMensal: 1500, arquivos: [], tipoVaga: null, comodidades: [],
     },
     score: 80, resumoCompatibilidade: 'Ótima compatibilidade',
   };
@@ -74,23 +74,21 @@ describe('FeedColega', () => {
     expect(component.carregando()).toBe(false);
   });
 
-  it('deve exibir erro quando feedColega falha', fakeAsync(() => {
+  it('deve exibir erro quando feedColega falha', () => {
     recomendacaoSpy.feedColega.mockReturnValue(
       throwError(() => ({ message: 'Sem conexão.' }))
     );
     component.carregarPagina(0);
-    tick();
     expect(component.erro()).toBe('Sem conexão.');
-  }));
+  });
 
-  it('deve exibir erro de sessão quando não há colega_id', fakeAsync(() => {
+  it('deve exibir erro de sessão quando não há colega_id', () => {
     sessionStorage.clear();
     fixture = TestBed.createComponent(FeedColega);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    tick();
     expect(component.erro()).toContain('Sessão');
-  }));
+  });
 
   it('corScore deve retornar classe verde para score >= 80', () => {
     expect(component.corScore(80)).toContain('secondary');

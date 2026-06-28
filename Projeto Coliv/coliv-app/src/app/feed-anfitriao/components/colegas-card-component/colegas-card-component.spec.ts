@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
+import { vi } from 'vitest';
 import { ColegasCardComponent } from './colegas-card-component';
 import { RecomendacaoColegaDTO } from '../../../core/services/recomendacao.service';
 
@@ -71,16 +72,22 @@ describe('ColegasCardComponent', () => {
   // ── Eventos ───────────────────────────────────────────────────
 
   it('deve emitir evento aceitar ao chamar onAceitar', () => {
+    vi.useFakeTimers();
     let emitido: RecomendacaoColegaDTO | undefined;
     component.aceitar.subscribe(r => (emitido = r));
-    component.onAceitar();
+    component.onAceitar({ stopPropagation: vi.fn() } as unknown as MouseEvent);
+    vi.runAllTimers();
     expect(emitido).toEqual(recomendacao);
+    vi.useRealTimers();
   });
 
   it('deve emitir evento recusar ao chamar onRecusar', () => {
+    vi.useFakeTimers();
     let emitido: RecomendacaoColegaDTO | undefined;
     component.recusar.subscribe(r => (emitido = r));
-    component.onRecusar();
+    component.onRecusar({ stopPropagation: vi.fn() } as unknown as MouseEvent);
+    vi.runAllTimers();
     expect(emitido).toEqual(recomendacao);
+    vi.useRealTimers();
   });
 });
