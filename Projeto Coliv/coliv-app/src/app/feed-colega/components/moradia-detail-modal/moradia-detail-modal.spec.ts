@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MoradiaDetailModal } from './moradia-detail-modal';
+import { MoradiaDetailModalComponent } from './moradia-detail-modal';
 
-describe('MoradiaDetailModal', () => {
-  let component: MoradiaDetailModal;
-  let fixture: ComponentFixture<MoradiaDetailModal>;
+describe('MoradiaDetailModalComponent', () => {
+  let component: MoradiaDetailModalComponent;
+  let fixture: ComponentFixture<MoradiaDetailModalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MoradiaDetailModal]
+      imports: [MoradiaDetailModalComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MoradiaDetailModal);
+    fixture = TestBed.createComponent(MoradiaDetailModalComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

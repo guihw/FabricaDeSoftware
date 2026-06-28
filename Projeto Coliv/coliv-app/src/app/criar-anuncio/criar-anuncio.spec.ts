@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, provideRouter } from '@angular/router';
@@ -7,12 +7,16 @@ import { describe, it, expect, vi } from 'vitest';
 import { CriarAnuncio } from './criar-anuncio';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovel } from '../core/models/formulario.model';
+import { ArquivoService } from '../core/services/arquivo.service';
+import { CardAnfitriaoService } from '../core/services/card-anfitriao.service';
 
 describe('CriarAnuncio', () => {
   let component: CriarAnuncio;
   let fixture: ComponentFixture<CriarAnuncio>;
-  let dadosImovelSpy: { criar: ReturnType<typeof vi.fn> };
-  let routerSpy: { navigate: ReturnType<typeof vi.fn> };
+  let dadosImovelSpy: { criar: ReturnType<typeof vi.fn>; buscarPorAnfitriaoIdSeCompleto: ReturnType<typeof vi.fn> };
+  let arquivoSpy: { upload: ReturnType<typeof vi.fn> };
+  let cardAnfitriaoSpy: { atualizarArquivos: ReturnType<typeof vi.fn> };
+  let routerSpy: Router;
 
   const imovelMock: DadosImovel = {
     id: 1, anfitriaoId: 5,
@@ -32,9 +36,13 @@ describe('CriarAnuncio', () => {
   }
 
   beforeEach(async () => {
-    dadosImovelSpy = { criar: vi.fn() };
+    dadosImovelSpy = {
+      criar: vi.fn(),
+      buscarPorAnfitriaoIdSeCompleto: vi.fn().mockReturnValue(of(null)),
+    };
     dadosImovelSpy.criar.mockReturnValue(of(imovelMock));
-    routerSpy = { navigate: vi.fn() };
+    arquivoSpy = { upload: vi.fn().mockReturnValue(of([])) };
+    cardAnfitriaoSpy = { atualizarArquivos: vi.fn().mockReturnValue(of(undefined)) };
 
     sessionStorage.setItem('coliv_user_id', '5');
 
@@ -43,12 +51,15 @@ describe('CriarAnuncio', () => {
       providers: [
         provideRouter([]),
         { provide: DadosImovelService, useValue: dadosImovelSpy },
-        { provide: Router, useValue: routerSpy },
+        { provide: ArquivoService, useValue: arquivoSpy },
+        { provide: CardAnfitriaoService, useValue: cardAnfitriaoSpy },
       ],
     }).compileComponents();
 
     fixture   = TestBed.createComponent(CriarAnuncio);
     component = fixture.componentInstance;
+    routerSpy = TestBed.inject(Router);
+    vi.spyOn(routerSpy, 'navigate').mockResolvedValue(true);
     fixture.detectChanges();
   });
 
@@ -130,20 +141,18 @@ describe('CriarAnuncio', () => {
     expect(component.amenidadesSelecionadas).toContain('wifi');
   });
 
-  it('não deve publicar se formulário inválido', fakeAsync(() => {
+  it('não deve publicar se formulário inválido', () => {
     component.publicar();
-    tick();
     expect(dadosImovelSpy.criar).not.toHaveBeenCalled();
-  }));
+  });
 
-  it('não deve publicar sem foto', fakeAsync(() => {
+  it('não deve publicar sem foto', () => {
     preencherFormulario(component);
     component.publicar();
-    tick();
     expect(dadosImovelSpy.criar).not.toHaveBeenCalled();
-  }));
+  });
 
-  it('deve chamar dadosImovelService.criar com todos os campos novos', fakeAsync(() => {
+  it('deve chamar dadosImovelService.criar com todos os campos novos', () => {
     preencherFormulario(component);
     component.fotos[0] = {
       id: 0, arquivo: new File([''], 'foto.jpg', { type: 'image/jpeg' }),
@@ -153,7 +162,6 @@ describe('CriarAnuncio', () => {
     component.amenidades.find(a => a.id === 'wifi')!.selecionada = true;
 
     component.publicar();
-    tick();
 
     expect(dadosImovelSpy.criar).toHaveBeenCalledWith(
       5,
@@ -166,21 +174,20 @@ describe('CriarAnuncio', () => {
         comodidades: expect.arrayContaining(['wifi', 'pet']),
       })
     );
-  }));
+  });
 
-  it('deve definir publicado como true após sucesso', fakeAsync(() => {
+  it('deve definir publicado como true após sucesso', () => {
     preencherFormulario(component);
     component.fotos[0] = {
       id: 0, arquivo: new File([''], 'foto.jpg', { type: 'image/jpeg' }),
       preview: 'data:image', principal: true,
     };
     component.publicar();
-    tick();
     expect(component.publicado).toBe(true);
     expect(component.publicando).toBe(false);
-  }));
+  });
 
-  it('deve definir erroPublicacao quando publicar falha', fakeAsync(() => {
+  it('deve definir erroPublicacao quando publicar falha', () => {
     dadosImovelSpy.criar.mockReturnValue(
       throwError(() => ({ status: 500, message: 'Erro no servidor.' }))
     );
@@ -190,12 +197,11 @@ describe('CriarAnuncio', () => {
       preview: 'data:image', principal: true,
     };
     component.publicar();
-    tick();
     expect(component.erroPublicacao).toBe('Erro no servidor.');
     expect(component.publicando).toBe(false);
-  }));
+  });
 
-  it('deve exibir erro de sessão quando não há anfitriaoId', fakeAsync(() => {
+  it('deve exibir erro de sessão quando não há anfitriaoId', () => {
     sessionStorage.clear();
     preencherFormulario(component);
     component.fotos[0] = {
@@ -203,10 +209,9 @@ describe('CriarAnuncio', () => {
       preview: 'data:image', principal: true,
     };
     component.publicar();
-    tick();
     expect(component.erroPublicacao).toContain('Sessão');
     expect(dadosImovelSpy.criar).not.toHaveBeenCalled();
-  }));
+  });
 
   // ── Helpers visuais ───────────────────────────────────────────
 

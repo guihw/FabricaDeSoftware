@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
+import { vi } from 'vitest';
 import { MoradiaCardComponent } from './moradia-card-component';
 import { RecomendacaoCardAnfitriaoDTO } from '../../../core/services/recomendacao.service';
 
@@ -156,7 +157,7 @@ describe('MoradiaCardComponent', () => {
   it('deve emitir evento like com a recomendação ao chamar onLike', () => {
     let emitido: RecomendacaoCardAnfitriaoDTO | undefined;
     component.like.subscribe(r => (emitido = r));
-    component.onLike();
+    component.onLike({ stopPropagation: vi.fn() } as unknown as MouseEvent);
     expect(emitido).toEqual(recomendacaoBase);
   });
 });

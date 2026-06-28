@@ -14,7 +14,7 @@ class DadosImovel {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "descricao")
+    @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
     @Column(name = "localizacao")

@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Nucleo;
 import com.coliv.coliv_backend.Modulos.Formularios.Dados_Imovel.Contratos.*;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.AnfitriaoExcluido;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.UsuarioAnfitriaoCriado;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ class DadosImovelService implements IDadosImovel {
 
     // Criar / Upsert
 
+    @Transactional
     public DadosImovelRequestDTO criarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
         DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
                 .orElseGet(DadosImovel::new);
@@ -37,13 +39,17 @@ class DadosImovelService implements IDadosImovel {
         dadosImovel.setQuartos(dto.quartos());
         dadosImovel.setPrecoMensal(dto.precoMensal());
         dadosImovel.setTipoVaga(dto.tipoVaga());
-        dadosImovel.setComodidades(dto.comodidades() != null ? dto.comodidades() : new ArrayList<>());
 
-        dir.save(dadosImovel);
+        List<String> novasComodidades = dto.comodidades() != null ? dto.comodidades() : new ArrayList<>();
+        // Flush the clear first so the DELETE runs before the INSERT in the same transaction
+        dadosImovel.getComodidades().clear();
+        dadosImovel = dir.saveAndFlush(dadosImovel);
+        dadosImovel.getComodidades().addAll(novasComodidades);
+
         return dto;
     }
 
-
+    @Transactional
     public DadosImovelRequestDTO editarDadosImovel(Long anfitriaoId, DadosImovelRequestDTO dto) {
         DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
                 .orElseThrow(() -> new DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
@@ -59,16 +65,30 @@ class DadosImovelService implements IDadosImovel {
             dadosImovel.setPrecoMensal(dto.precoMensal());
         if (dto.tipoVaga() != null && !dto.tipoVaga().isBlank())
             dadosImovel.setTipoVaga(dto.tipoVaga());
-        if (dto.comodidades() != null)
-            dadosImovel.setComodidades(dto.comodidades());
+        if (dto.comodidades() != null) {
+            dadosImovel.getComodidades().clear();
+            dadosImovel = dir.saveAndFlush(dadosImovel);
+            dadosImovel.getComodidades().addAll(dto.comodidades());
+        }
 
-        dir.save(dadosImovel);
         return dto;
     }
 
     public void excluir(Long id) {
         dir.findById(id).orElseThrow(() -> new DadosImovelIDNaoEncontrado(id));
         dir.deleteById(id);
+    }
+
+    @Transactional
+    public void excluirPorAnfitriaoId(Long anfitriaoId) {
+        DadosImovel dadosImovel = dir.findByAnfitriaoId(anfitriaoId)
+                .orElseThrow(() -> new DadosImovelNaoEncontradoUsandoReferencia(anfitriaoId));
+        dadosImovel.setDescricao(null);
+        dadosImovel.setLocalizacao(null);
+        dadosImovel.setQuartos(0);
+        dadosImovel.setPrecoMensal(null);
+        dadosImovel.setTipoVaga(null);
+        dadosImovel.getComodidades().clear();
     }
 
 

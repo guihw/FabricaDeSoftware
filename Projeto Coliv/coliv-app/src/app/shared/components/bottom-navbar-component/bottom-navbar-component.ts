@@ -25,7 +25,6 @@ export class BottomNavbarComponent {
   }
 
   irParaPerfil(): void {
-    // Perfil ainda não existe
-    alert('Perfil em breve! Esta funcionalidade está sendo desenvolvida.');
+    this.router.navigate(['/perfil']);
   }
 }

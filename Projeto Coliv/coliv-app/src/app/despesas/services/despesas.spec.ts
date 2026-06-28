@@ -159,3 +159,8 @@ describe('DespesasService', () => {
   });
 });
 */
+
+import { describe, it } from 'vitest';
+describe('DespesasService', () => {
+  it.skip('serviço legado de localStorage — fora de uso no momento', () => {});
+});

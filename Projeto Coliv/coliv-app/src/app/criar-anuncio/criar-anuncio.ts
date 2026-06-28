@@ -6,8 +6,8 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { forkJoin } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { catchError, defaultIfEmpty, switchMap } from 'rxjs/operators';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
 import { ApiError } from '../core/services/api.service';
@@ -67,6 +67,7 @@ export class CriarAnuncio implements OnInit {
     'Studio Completo',
   ];
 
+  modoEdicao = false;
   publicando = false;
   publicado = false;
   erroPublicacao: string | null = null;
@@ -81,12 +82,42 @@ export class CriarAnuncio implements OnInit {
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      manifesto: ['', [Validators.required, Validators.minLength(50)]],
+      manifesto: ['', [Validators.required, Validators.minLength(50), Validators.maxLength(3000)]],
       preco: [null, [Validators.required, Validators.min(1)]],
       tipoVaga: ['Quarto Privativo', Validators.required],
       bairro: ['', Validators.required],
       quartos: [1, [Validators.required, Validators.min(1)]],
     });
+
+    const anfitriaoId = Number(sessionStorage.getItem('coliv_user_id'));
+    if (anfitriaoId) {
+      this.dadosImovelService.buscarPorAnfitriaoIdSeCompleto(anfitriaoId).pipe(
+        catchError(() => of(null))
+      ).subscribe(imovel => {
+        if (!imovel) return;
+        this.modoEdicao = true;
+        this.form.patchValue({
+          manifesto: imovel.descricao,
+          preco: imovel.precoMensal,
+          tipoVaga: imovel.tipoVaga,
+          bairro: imovel.localizacao,
+          quartos: imovel.quartos,
+        });
+        this.amenidades = this.amenidades.map(a => ({
+          ...a,
+          selecionada: imovel.comodidades.includes(a.id),
+        }));
+
+        this.cardAnfitriaoService.getCardInfo(anfitriaoId).pipe(
+          catchError(() => of(null))
+        ).subscribe(card => {
+          if (!card?.arquivos?.length) return;
+          card.arquivos.slice(0, 3).forEach((url, i) => {
+            this.fotos[i] = { ...this.fotos[i], preview: url };
+          });
+        });
+      });
+    }
   }
 
   get fotosPreenchidas(): number {
@@ -94,7 +125,7 @@ export class CriarAnuncio implements OnInit {
   }
 
   get prontoParaPublicar(): boolean {
-    return this.form?.valid && this.fotosPreenchidas > 0;
+    return this.form?.valid && (this.modoEdicao || this.fotosPreenchidas > 0);
   }
 
   get amenidadesSelecionadas(): string[] {
@@ -127,23 +158,33 @@ export class CriarAnuncio implements OnInit {
 
     const arquivos = this.fotos.filter(f => f.arquivo !== null).map(f => f.arquivo!);
 
-    forkJoin([
-      this.dadosImovelService.criar(anfitriaoId, dto),
-      this.arquivoService.upload(arquivos),
-    ]).pipe(
-      switchMap(([_, arquivoDTOs]) =>
-        this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
-      )
-    ).subscribe({
-      next: () => {
-        this.publicando = false;
-        this.publicado = true;
-      },
-      error: (err: ApiError) => {
-        this.publicando = false;
-        this.erroPublicacao = err.message;
-      },
-    });
+    if (this.modoEdicao) {
+      this.dadosImovelService.editar(anfitriaoId, dto).pipe(
+        switchMap(() => arquivos.length > 0
+          ? this.arquivoService.upload(arquivos).pipe(
+              switchMap(arquivoDTOs =>
+                this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
+              ),
+              defaultIfEmpty(null)
+            )
+          : of(null)
+        )
+      ).subscribe({
+        next: () => { this.publicando = false; this.publicado = true; },
+        error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
+      });
+    } else {
+      this.dadosImovelService.criar(anfitriaoId, dto).pipe(
+        switchMap(() => this.arquivoService.upload(arquivos)),
+        switchMap(arquivoDTOs =>
+          this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
+        ),
+        defaultIfEmpty(null)
+      ).subscribe({
+        next: () => { this.publicando = false; this.publicado = true; },
+        error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
+      });
+    }
   }
 
   voltarParaEdicao(): void { this.publicado = false; }
@@ -162,11 +203,8 @@ export class CriarAnuncio implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file || !file.type.startsWith('image/')) return;
 
-    const reader = new FileReader();
-    reader.onload = e => {
-      this.fotos[index] = { ...this.fotos[index], arquivo: file, preview: e.target?.result as string };
-    };
-    reader.readAsDataURL(file);
+    const preview = URL.createObjectURL(file);
+    this.fotos[index] = { ...this.fotos[index], arquivo: file, preview };
   }
 
   removerFoto(index: number, event: MouseEvent): void {
