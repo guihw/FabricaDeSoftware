@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 import {
@@ -18,6 +18,7 @@ import { MatchService } from '../core/services/match.service';
   standalone: true,
   imports: [
     RouterOutlet,
+    RouterLink,
     TopNavbarComponent,
     CommonModule,
     MoradiaCardComponent,

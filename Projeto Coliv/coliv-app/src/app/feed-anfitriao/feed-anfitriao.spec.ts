@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -67,62 +67,57 @@ describe('FeedAnfitriao', () => {
     expect(component.carregando()).toBe(false);
   });
 
-  it('deve exibir erro e desativar carregando quando feedAnfitriao falha', fakeAsync(() => {
+  it('deve exibir erro e desativar carregando quando feedAnfitriao falha', () => {
     recomendacaoSpy.feedAnfitriao.mockReturnValue(
       throwError(() => ({ message: 'Erro de rede.' }))
     );
     component.carregarPagina(0);
-    tick();
     expect(component.erro()).toBe('Erro de rede.');
     expect(component.carregando()).toBe(false);
-  }));
+  });
 
-  it('deve exibir erro de sessão quando não há user_id no sessionStorage', fakeAsync(() => {
+  it('deve exibir erro de sessão quando não há user_id no sessionStorage', () => {
     sessionStorage.clear();
     // recria componente sem user_id
     fixture = TestBed.createComponent(FeedAnfitriao);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    tick();
     expect(component.erro()).toContain('Sessão');
     expect(component.carregando()).toBe(false);
-  }));
+  });
 
-  it('deve avançar para próxima página', fakeAsync(() => {
+  it('deve avançar para próxima página', () => {
     const pag1 = { ...makeFeedColega([recColega]), pagina: 0, temProxima: true };
     const pag2 = { ...makeFeedColega([recColega]), pagina: 1, temProxima: false };
     recomendacaoSpy.feedAnfitriao
       .mockReturnValueOnce(of(pag1))
       .mockReturnValueOnce(of(pag2));
-    component.carregarPagina(0); tick();
+    component.carregarPagina(0);
     component.temProxima.set(true);
-    component.proximaPagina();     tick();
+    component.proximaPagina();
     expect(component.pagina()).toBe(1);
-  }));
+  });
 
-  it('não deve avançar página quando temProxima é false', fakeAsync(() => {
-    component.carregarPagina(0); tick();
+  it('não deve avançar página quando temProxima é false', () => {
+    component.carregarPagina(0);
     const chamadas = recomendacaoSpy.feedAnfitriao.mock.calls.length;
     component.proximaPagina();
-    tick();
     expect(recomendacaoSpy.feedAnfitriao.mock.calls.length).toBe(chamadas);
-  }));
+  });
 
-  it('deve voltar para página anterior', fakeAsync(() => {
+  it('deve voltar para página anterior', () => {
     component.pagina.set(1);
     recomendacaoSpy.feedAnfitriao.mockReturnValue(of(makeFeedColega([recColega])));
     component.paginaAnterior();
-    tick();
     expect(recomendacaoSpy.feedAnfitriao).toHaveBeenCalledWith(5, 0);
-  }));
+  });
 
-  it('não deve voltar antes da página 0', fakeAsync(() => {
+  it('não deve voltar antes da página 0', () => {
     component.pagina.set(0);
     const chamadas = recomendacaoSpy.feedAnfitriao.mock.calls.length;
     component.paginaAnterior();
-    tick();
     expect(recomendacaoSpy.feedAnfitriao.mock.calls.length).toBe(chamadas);
-  }));
+  });
 
   it('onRecusar deve remover colega localmente da lista', () => {
     component.recomendacoes.set([recColega]);

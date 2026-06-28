@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { ColegaDetailModal } from './colega-detail-modal';
+import { ColegaDetailModalComponent } from './colega-detail-modal';
 
-describe('ColegaDetailModal', () => {
-  let component: ColegaDetailModal;
-  let fixture: ComponentFixture<ColegaDetailModal>;
+describe('ColegaDetailModalComponent', () => {
+  let component: ColegaDetailModalComponent;
+  let fixture: ComponentFixture<ColegaDetailModalComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ColegaDetailModal]
+      imports: [ColegaDetailModalComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(ColegaDetailModal);
+    fixture = TestBed.createComponent(ColegaDetailModalComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
   });

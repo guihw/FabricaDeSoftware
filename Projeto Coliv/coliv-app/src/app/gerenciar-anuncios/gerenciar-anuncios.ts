@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 import { CardAnfitriaoService, CardAnfitriaoResponseDTO } from '../core/services/card-anfitriao.service';
+import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { ApiError } from '../core/services/api.service';
 
 @Component({
@@ -16,6 +17,7 @@ export class GerenciarAnuncios implements OnInit {
   anuncio = signal<CardAnfitriaoResponseDTO | null>(null);
   carregando = signal(true);
   erro = signal<string | null>(null);
+  excluindo = signal(false);
 
   status = computed<'rascunho' | 'ativo'>(() => {
     const card = this.anuncio();
@@ -46,7 +48,10 @@ export class GerenciarAnuncios implements OnInit {
     }).format(Number(valor));
   });
 
-  constructor(private cardAnfitriaoService: CardAnfitriaoService) {}
+  constructor(
+    private cardAnfitriaoService: CardAnfitriaoService,
+    private dadosImovelService: DadosImovelService,
+  ) {}
 
   ngOnInit(): void {
     this.carregar();
@@ -77,6 +82,24 @@ export class GerenciarAnuncios implements OnInit {
           this.erro.set(err.message ?? 'Não foi possível carregar seu anúncio.');
         }
         this.carregando.set(false);
+      },
+    });
+  }
+
+  excluirAnuncio(): void {
+    if (!confirm('Tem certeza que deseja excluir seu anúncio? Esta ação não pode ser desfeita.')) return;
+
+    const anfitriaoId = Number(sessionStorage.getItem('coliv_user_id'));
+    if (!anfitriaoId) return;
+
+    this.excluindo.set(true);
+    this.dadosImovelService.excluirPorAnfitriaoId(anfitriaoId).subscribe({
+      next: () => {
+        this.anuncio.set(null);
+        this.excluindo.set(false);
+      },
+      error: () => {
+        this.excluindo.set(false);
       },
     });
   }
