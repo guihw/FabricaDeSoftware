@@ -114,4 +114,22 @@ class DespesaService implements IFinanceiro {
                         ))
                 .toList();
     }
+
+    public Despesa marcarComoPago(Long id, Long usuarioId) {
+        Despesa despesa = buscarPorId(id);
+
+        if (!despesa.getPago().contains(usuarioId)) {
+            despesa.getPago().add(usuarioId);
+        }
+
+        return repository.save(despesa);
+    }
+
+    public Despesa desmarcarComoPago(Long id, Long usuarioId) {
+        Despesa despesa = buscarPorId(id);
+
+        despesa.getPago().remove(usuarioId);
+
+        return repository.save(despesa);
+    }
 }

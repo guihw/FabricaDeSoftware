@@ -15,26 +15,24 @@ export class ColegasCardComponent {
 
   @Input({ required: true }) recomendacao!: RecomendacaoColegaDTO;
 
-  @Output() aceitar  = new EventEmitter<RecomendacaoColegaDTO>();
-  @Output() recusar  = new EventEmitter<RecomendacaoColegaDTO>();
+  @Output() aceitar = new EventEmitter<RecomendacaoColegaDTO>();
+  @Output() recusar = new EventEmitter<RecomendacaoColegaDTO>();
+  /** Dispara quando clica no card para ver o perfil completo */
+  @Output() verDetalhes  = new EventEmitter<RecomendacaoColegaDTO>();
 
   direcaoSaida = signal<DirecaoSaida>(null);
 
-  get score() {
-    return this.recomendacao.score;
-  }
-
-  get resumo() {
-    return this.recomendacao.resumoCompatibilidade;
-  }
+  get score()  { return this.recomendacao.score; }
+  get resumo() { return this.recomendacao.resumoCompatibilidade; }
 
   get iniciais(): string {
     return this.recomendacao.nome
-      .split(' ')
-      .slice(0, 2)
+      .split(' ').slice(0, 2)
       .map(p => p[0]?.toUpperCase() ?? '')
       .join('');
   }
+
+  get verificado(): boolean { return this.recomendacao.antecedentesVerificados !== false; }
 
   get corScore(): string {
     if (this.score >= 80) return 'bg-secondary-container text-on-secondary-container';
@@ -42,13 +40,20 @@ export class ColegasCardComponent {
     return 'bg-surface-container-high text-on-surface-variant';
   }
 
-  onAceitar(): void {
-    if (this.direcaoSaida()) return; 
+  onCardClick(): void {
+    if (this.direcaoSaida()) return;
+    this.verDetalhes.emit(this.recomendacao);
+  }
+
+  onAceitar(event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.direcaoSaida()) return;
     this.direcaoSaida.set('direita');
     setTimeout(() => this.aceitar.emit(this.recomendacao), 350);
   }
 
-  onRecusar(): void {
+  onRecusar(event: MouseEvent): void {
+    event.stopPropagation();
     if (this.direcaoSaida()) return;
     this.direcaoSaida.set('esquerda');
     setTimeout(() => this.recusar.emit(this.recomendacao), 350);

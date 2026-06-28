@@ -13,11 +13,13 @@ export interface MatchResponse {
 export class MatchService extends ApiService {
 
   criar(colegaId: number, anfitriaoId: number): Observable<MatchResponse> {
-    return this.post<MatchResponse>(`/matches/${colegaId}/${anfitriaoId}`, {});
+    return this.post<MatchResponse>('/matches/novo', {
+      iniciador: 'COLEGA',
+      colegaId,
+      anfitriaoId,
+    });
   }
 
-  // Usado quando o ANFITRIÃO aceita um colega recomendado no feed dele.
-  // O match já nasce com status ACEITO.
   criarAceito(colegaId: number, anfitriaoId: number): Observable<MatchResponse> {
     return this.post<MatchResponse>(`/matches/${colegaId}/${anfitriaoId}/aceitar`, {});
   }

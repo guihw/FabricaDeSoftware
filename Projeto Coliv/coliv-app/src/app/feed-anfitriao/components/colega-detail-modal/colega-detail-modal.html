@@ -1,0 +1,152 @@
+<div *ngIf="aberto && recomendacao"
+     class="modal-backdrop fixed inset-0 z-50 flex items-end justify-center"
+     style="background: rgba(3,22,54,0.45); backdrop-filter: blur(4px);"
+     (click)="fecharModal()">
+
+  <div class="modal-sheet w-full max-w-lg bg-surface rounded-t-[2rem] overflow-hidden flex flex-col"
+       style="max-height: 88dvh;"
+       (click)="stopPropagation($event)">
+
+    <!-- Drag handle -->
+    <div class="drag-handle flex-shrink-0"></div>
+
+    <!-- Conteúdo rolável -->
+    <div class="overflow-y-auto flex-grow pb-28">
+
+      <!-- Cabeçalho -->
+      <div class="flex items-center justify-between px-5 pt-3 pb-4">
+        <span class="px-3 py-1 rounded-full text-xs font-extrabold" [ngClass]="corScore">
+          {{ score }}% Match
+        </span>
+        <button (click)="fecharModal()"
+          class="w-8 h-8 flex items-center justify-center rounded-full
+                 bg-surface-container-high text-on-surface-variant
+                 hover:bg-surface-container-highest transition-colors active:scale-90">
+          <span class="material-symbols-outlined text-lg">close</span>
+        </button>
+      </div>
+
+      <!-- Hero: avatar grande com iniciais -->
+      <div class="mx-5 mb-6">
+        <div class="w-full aspect-[4/3] rounded-2xl
+                    bg-gradient-to-br from-primary-container to-surface-container-high
+                    flex items-center justify-center relative overflow-hidden">
+          <!-- Avatar com iniciais (sem dependência de foto) -->
+          <div class="w-28 h-28 rounded-full bg-primary/20 flex items-center justify-center">
+            <span class="font-headline font-extrabold text-5xl text-primary">{{ iniciais }}</span>
+          </div>
+
+          <!-- Badge de match sobreposto -->
+          <div class="absolute top-4 right-4 px-4 py-2 rounded-full font-bold text-sm
+                      flex items-center gap-2 shadow-lg backdrop-blur-md"
+               [ngClass]="corScore">
+            <span class="material-symbols-outlined text-[18px]"
+                  style="font-variation-settings: 'FILL' 1;">favorite</span>
+            {{ score }}% Match
+          </div>
+        </div>
+      </div>
+
+      <!-- Nome -->
+      <div class="px-5 mb-5">
+        <h2 class="font-['Plus_Jakarta_Sans'] font-extrabold text-3xl text-primary
+                   tracking-tight leading-tight mb-1">
+          {{ recomendacao?.nome }}
+        </h2>
+        <p class="text-on-surface-variant text-sm">{{ recomendacao?.email }}</p>
+      </div>
+
+      <!-- Verificação de antecedentes criminais -->
+      <div class="px-5 mb-5">
+        <div class="flex items-center gap-3 p-3 bg-secondary-container/30 rounded-xl border border-secondary/10">
+          <span class="material-symbols-outlined text-secondary text-2xl flex-shrink-0"
+                style="font-variation-settings: 'FILL' 1;">verified_user</span>
+          <div>
+            <p class="text-xs font-extrabold text-secondary uppercase tracking-wider">
+              Antecedentes criminais verificados
+            </p>
+            <p class="text-[11px] text-on-surface-variant mt-0.5">
+              Nenhuma ocorrência encontrada nas bases BNMP, INFOSEG e TJ estaduais
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="h-px bg-outline-variant/20 mx-5 mb-5"></div>
+
+      <!-- Insight de compatibilidade -->
+      <div class="px-5 mb-5">
+        <h3 class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">
+          Compatibilidade
+        </h3>
+        <div class="bg-surface-container-low rounded-xl p-4 border border-outline-variant/10
+                    flex items-start gap-3">
+          <span class="material-symbols-outlined text-secondary text-xl flex-shrink-0 mt-0.5"
+                style="font-variation-settings: 'FILL' 1;">psychology</span>
+          <div>
+            <p class="font-bold text-primary text-sm mb-1">{{ tituloResumo }}</p>
+            <p class="text-on-surface-variant text-sm leading-relaxed italic">
+              "{{ resumo }}"
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div class="h-px bg-outline-variant/20 mx-5 mb-5"></div>
+
+      <!-- Score visual por categorias
+           Nota: as preferências detalhadas (sociabilidade, limpeza, trabalho)
+           não vêm no RecomendacaoColegaDTO atual — exibimos apenas o score total
+           e o resumo. Quando o backend expor essas informações, substituir esta seção. -->
+      <div class="px-5 mb-5">
+        <h3 class="text-[11px] font-bold uppercase tracking-widest text-on-surface-variant mb-3">
+          Score de match
+        </h3>
+        <div class="space-y-3">
+          <!-- Barra de score geral -->
+          <div>
+            <div class="flex justify-between items-center mb-1">
+              <span class="text-xs font-bold text-on-surface-variant">Compatibilidade geral</span>
+              <span class="text-xs font-extrabold text-primary">{{ score }}%</span>
+            </div>
+            <div class="h-2 bg-surface-container-high rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-700"
+                   [class.bg-secondary]="score >= 80"
+                   [class.bg-primary-container]="score >= 60 && score < 80"
+                   [class.bg-outline]="score < 60"
+                   [style.width.%]="score">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- fim do scroll -->
+
+    <!-- Barra de ação -->
+    <div class="flex-shrink-0 absolute bottom-0 left-0 right-0
+                bg-surface/95 backdrop-blur-xl border-t border-outline-variant/10
+                px-5 py-4 flex items-center gap-3">
+      <!-- Recusar -->
+      <button (click)="onRecusar()"
+        class="w-14 h-14 rounded-2xl bg-surface-container-low text-outline
+               flex items-center justify-center active:scale-90 transition-transform
+               hover:bg-error-container hover:text-on-error-container">
+        <span class="material-symbols-outlined text-2xl">close</span>
+      </button>
+      <!-- Aceitar -->
+      <button (click)="onAceitar()"
+        class="flex-1 h-14 rounded-2xl font-bold text-xs uppercase tracking-widest
+               bg-gradient-to-br from-primary to-primary-container text-white
+               flex items-center justify-center gap-2 shadow-xl shadow-primary/20
+               active:scale-[0.98] transition-transform">
+        <span class="material-symbols-outlined"
+              style="font-variation-settings: 'FILL' 1;">favorite</span>
+        Aceitar Conexão
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -41,7 +41,7 @@ export class ApiService {
       .pipe(catchError(this.handleError));
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> {
+  protected handleError(error: HttpErrorResponse): Observable<never> {
     let message = 'Erro desconhecido. Tente novamente.';
 
     if (error.status === 0) {

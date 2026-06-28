@@ -3,7 +3,9 @@ package com.coliv.coliv_backend.Modulos.Arquivos.Nucleo;
 import com.coliv.coliv_backend.Modulos.Arquivos.Contratos.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -11,6 +13,9 @@ class ArquivoService implements IArquivos {
 
     @Autowired
     private ArquivoRepository repository;
+
+    @Autowired
+    private StorageService storageService;
 
     public List<Arquivo> listar() {
         return repository.findAll();
@@ -28,6 +33,42 @@ class ArquivoService implements IArquivos {
                 arquivo.getUrl(),
                 arquivo.getType()
         );
+    }
+    public List<ArquivoDTO> upload(
+            MultipartFile[] arquivos
+    ) {
+
+        if (arquivos.length > 10) {
+            throw new QuantidadeArquivosInvalida();
+        }
+
+        List<ArquivoDTO> resultado = new ArrayList<>();
+
+        for (MultipartFile arquivo : arquivos) {
+
+            validarArquivo(arquivo);
+
+            String url =
+                    storageService.upload(arquivo);
+
+            Arquivo entidade =
+                    new Arquivo(
+                            url,
+                            TipoArquivo.IMAGEM
+                    );
+
+            repository.save(entidade);
+
+            resultado.add(
+                    new ArquivoDTO(
+                            entidade.getId(),
+                            entidade.getUrl(),
+                            entidade.getType()
+                    )
+            );
+        }
+
+        return resultado;
     }
 
     @Override
@@ -84,5 +125,31 @@ class ArquivoService implements IArquivos {
                         new ArquivoNaoEncontrado(id));
 
         repository.deleteById(id);
+    }
+    private void validarArquivo(
+            MultipartFile arquivo
+    ) {
+
+        long limite =
+                5 * 1024 * 1024;
+
+        if (arquivo.getSize() > limite) {
+
+            throw new TamanhoArquivoInvalido(
+                    arquivo.getOriginalFilename()
+            );
+        }
+
+        String contentType =
+                arquivo.getContentType();
+
+        if (contentType == null
+                || (!contentType.equals("image/jpeg")
+                && !contentType.equals("image/png"))) {
+
+            throw new TipoArquivoInvalido(
+                    contentType
+            );
+        }
     }
 }

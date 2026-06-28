@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { CanActivateFn } from '@angular/router';
 
-import { anuncioGuardGuard } from './anuncio-guard-guard';
+import { anuncioGuard } from './anuncio-guard-guard';
 
 describe('anuncioGuardGuard', () => {
-  const executeGuard: CanActivateFn = (...guardParameters) => 
-      TestBed.runInInjectionContext(() => anuncioGuardGuard(...guardParameters));
+  const executeGuard: CanActivateFn = (...guardParameters) =>
+      TestBed.runInInjectionContext(() => anuncioGuard(...guardParameters));
 
   beforeEach(() => {
     TestBed.configureTestingModule({});

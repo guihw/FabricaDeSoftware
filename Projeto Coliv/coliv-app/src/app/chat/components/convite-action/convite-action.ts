@@ -4,7 +4,6 @@ import {
   OnInit,
   OnChanges,
   SimpleChanges,
-  signal,
   Output,
   EventEmitter,
 } from '@angular/core';
@@ -20,20 +19,16 @@ import { ConviteService, ConviteResponse } from '../../../core/services/convite.
 })
 export class ConviteActionComponent implements OnInit, OnChanges {
   @Input({ required: true }) matchId!: number;
-
   @Input({ required: true }) isAnfitriao!: boolean;
-
   @Input({ required: true }) anfitriaoId!: number;
-
   @Input({ required: true }) colegaId!: number;
-
   @Input() mensagemConvite?: string;
 
   @Output() conviteAtualizado = new EventEmitter<ConviteResponse | null>();
 
   convite: ConviteResponse | null = null;
 
-  enviando = false;
+  enviando   = false;
   cancelando = false;
   respondendo = false;
   erro: string | null = null;
@@ -77,12 +72,12 @@ export class ConviteActionComponent implements OnInit, OnChanges {
       })
       .subscribe({
         next: (convite) => {
-          this.convite = convite;
+          this.convite  = convite;
           this.enviando = false;
           this.conviteAtualizado.emit(convite);
         },
         error: (err) => {
-          this.erro = err.message ?? 'Erro ao enviar convite.';
+          this.erro     = err.message ?? 'Erro ao enviar convite.';
           this.enviando = false;
         },
       });
@@ -93,14 +88,14 @@ export class ConviteActionComponent implements OnInit, OnChanges {
     this.cancelando = true;
     this.erro = null;
 
-    this.conviteService.cancelar(this.convite.id).subscribe({
+    this.conviteService.cancelar(this.matchId).subscribe({
       next: (convite) => {
-        this.convite = convite;
+        this.convite    = convite;
         this.cancelando = false;
         this.conviteAtualizado.emit(convite);
       },
       error: (err) => {
-        this.erro = err.message ?? 'Erro ao cancelar convite.';
+        this.erro       = err.message ?? 'Erro ao cancelar convite.';
         this.cancelando = false;
       },
     });
@@ -111,14 +106,14 @@ export class ConviteActionComponent implements OnInit, OnChanges {
     this.respondendo = true;
     this.erro = null;
 
-    this.conviteService.aceitar(this.convite.id).subscribe({
+    this.conviteService.aceitar(this.matchId).subscribe({
       next: (convite) => {
-        this.convite = convite;
+        this.convite     = convite;
         this.respondendo = false;
         this.conviteAtualizado.emit(convite);
       },
       error: (err) => {
-        this.erro = err.message ?? 'Erro ao aceitar convite.';
+        this.erro        = err.message ?? 'Erro ao aceitar convite.';
         this.respondendo = false;
       },
     });
@@ -129,14 +124,14 @@ export class ConviteActionComponent implements OnInit, OnChanges {
     this.respondendo = true;
     this.erro = null;
 
-    this.conviteService.recusar(this.convite.id).subscribe({
+    this.conviteService.recusar(this.matchId).subscribe({
       next: (convite) => {
-        this.convite = convite;
+        this.convite     = convite;
         this.respondendo = false;
         this.conviteAtualizado.emit(convite);
       },
       error: (err) => {
-        this.erro = err.message ?? 'Erro ao recusar convite.';
+        this.erro        = err.message ?? 'Erro ao recusar convite.';
         this.respondendo = false;
       },
     });

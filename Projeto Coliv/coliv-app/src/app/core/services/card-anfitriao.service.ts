@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { catchError } from 'rxjs/operators';
 
-// Espelha: CardAnfitriaoResponseDTO.java
+// Espelha: CardAnfitriaoResponseDTO no java
 export interface CardAnfitriaoResponseDTO {
   anfitriaoId: number;
   nome: string;
@@ -12,19 +14,19 @@ export interface CardAnfitriaoResponseDTO {
   quartos: number;
   classificacao: number | null;
   precoMensal: number;
-  arquivos: number[];
+  arquivos: string[];
+  tipoVaga: string | null;
+  comodidades: string[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class CardAnfitriaoService extends ApiService {
   private readonly PATH = '/cards/anfitriao';
 
-  // GET /cards/anfitriao/card/info/listar
   listarCardsCompletos(): Observable<CardAnfitriaoResponseDTO[]> {
     return this.get<CardAnfitriaoResponseDTO[]>(`${this.PATH}/card/info/listar`);
   }
 
-  // GET /cards/anfitriao/card/info/{anfitriaoId}
   getCardInfo(anfitriaoId: number): Observable<CardAnfitriaoResponseDTO> {
     return this.get<CardAnfitriaoResponseDTO>(`${this.PATH}/card/info/${anfitriaoId}`);
   }
@@ -34,5 +36,17 @@ export class CardAnfitriaoService extends ApiService {
       `${this.PATH}/editar/${anfitriaoId}`,
       { precoMensal: String(precoMensal) }
     );
+  }
+
+  atualizarArquivos(anfitriaoId: number, arquivoIds: number[]): Observable<void> {
+    return this.http
+      .put(`${this.baseUrl}${this.PATH}/${anfitriaoId}/arquivos`, arquivoIds, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map(() => void 0),
+        catchError(this.handleError)
+      );
   }
 }
