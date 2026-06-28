@@ -9,6 +9,7 @@ import {
 } from '../core/services/recomendacao.service';
 import { MoradiaCardComponent } from './components/moradia-card-component/moradia-card-component';
 import { MoradiaDetailModalComponent } from './components/moradia-detail-modal/moradia-detail-modal';
+import { PlanoPlusModalComponent } from './components/plano-plus-modal/plano-plus-modal';
 import { ApiError } from '../core/services/api.service';
 import { MatchService } from '../core/services/match.service';
 
@@ -22,6 +23,7 @@ import { MatchService } from '../core/services/match.service';
     CommonModule,
     MoradiaCardComponent,
     MoradiaDetailModalComponent,
+    PlanoPlusModalComponent,
   ],
   templateUrl: './feed-colega.html',
   styleUrl: './feed-colega.css',
@@ -37,6 +39,9 @@ export class FeedColega implements OnInit {
   // ── Estado do modal de detalhe ────────────────────────────────
   modalAberto = false;
   recomendacaoSelecionada: RecomendacaoCardAnfitriaoDTO | null = null;
+
+  // ── Estado do modal do Plano Plus ─────────────────────────────
+  modalPlanoPlusAberto = false;
 
   private colegaId: number | null = null;
   likeEmAndamento = signal<Set<number>>(new Set());
@@ -88,7 +93,7 @@ export class FeedColega implements OnInit {
     if (this.pagina() > 0) this.carregarPagina(this.pagina() - 1);
   }
 
-  // ── Modal ─────────────────────────────────────────────────────
+  // ── Modal de detalhe ──────────────────────────────────────────
 
   abrirDetalhe(rec: RecomendacaoCardAnfitriaoDTO): void {
     this.recomendacaoSelecionada = rec;
@@ -99,6 +104,21 @@ export class FeedColega implements OnInit {
     this.modalAberto = false;
     // pequeno delay para a animação terminar antes de limpar
     setTimeout(() => (this.recomendacaoSelecionada = null), 250);
+  }
+
+  // ── Modal do Plano Plus ───────────────────────────────────────
+
+  abrirModalPlanoPlus(): void {
+    this.modalPlanoPlusAberto = true;
+  }
+
+  fecharModalPlanoPlus(): void {
+    this.modalPlanoPlusAberto = false;
+  }
+
+  onPagamentoPlusConfirmado(): void {
+    // Plano ativado no backend; aqui você pode atualizar algum estado
+    // local se necessário (ex: refletir o selo "Plus" em algum lugar da tela).
   }
 
   // ── Like (pode vir do card ou do modal) ───────────────────────

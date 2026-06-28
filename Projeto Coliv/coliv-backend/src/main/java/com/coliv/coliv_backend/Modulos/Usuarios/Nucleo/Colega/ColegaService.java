@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -74,6 +75,15 @@ public class ColegaService implements IColega {
         return colegaRepository.findByEmail(emailLower)
                 .map(a -> new ColegaCredenciaisDTO(a.getId(), a.getEmail(), a.getSenha()));
 
+    }
+
+    @Override
+    public void ativarPlano(Long id) {
+        Colega colega = colegaRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Colega não encontrado. Id: " + id));
+
+        colega.setPossuiPlano(true);
+        colegaRepository.save(colega);
     }
 
     @Transactional

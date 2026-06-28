@@ -54,6 +54,7 @@ public class SecurityConfig {
                         // Cadastro e login são públicos
                         .requestMatchers(HttpMethod.POST, "/usuarios/anfitriao/novo", "/usuarios/colega/novo", "/auth/login").permitAll()
                         .requestMatchers("/validacao/cpf/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/pagamentos/webhook").permitAll()
 
                         // Exclusivo de anfitrião
                         .requestMatchers("/formularios/preferencias-anfitriao/**",
