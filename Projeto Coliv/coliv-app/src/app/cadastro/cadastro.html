@@ -3,7 +3,7 @@
     <nav class="flex gap-6">
     <a class="text-[#1A2B4C] font-bold transition-opacity hover:opacity-80" href="#">Explorar</a>
     <a class="text-slate-400 font-bold transition-opacity hover:opacity-80" href="#">Sobre</a>
-    <a class="text-slate-400 font-bold transition-opacity hover:opacity-80" href="#">Ajuda</a>
+    <a class="text-slate-400 font-bold transition-opacity hover:opacity-80" routerLink="/ajuda">Ajuda</a>
     </nav>
 </div>
 </app-top-navbar-component>
@@ -87,24 +87,35 @@
     <div class="relative">
       <input formControlName="cpf" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="000.000.000-00" type="text"/>
       <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center">
-        <span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        <span *ngIf="cpfValido" class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        <span *ngIf="cpfErro" class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">cancel</span>
       </div>
     </div>
+    <p *ngIf="campoInvalido('cpf') && !cpfErro" class="text-xs text-error mt-1 ml-1">
+      Informe um CPF válido (000.000.000-00).
+    </p>
+    <p *ngIf="cpfErro" class="text-xs text-error mt-1 ml-1">{{ cpfErro }}</p>
   </div>
 
   <div class="group">
     <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">E-mail</label>
     <input formControlName="email" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="exemplo@email.com" type="email"/>
+    <p *ngIf="campoInvalido('email')" class="text-xs text-error mt-1 ml-1">
+      Informe um e-mail válido.
+    </p>
   </div>
 
   <div class="group">
     <label class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 ml-1">Senha</label>
     <div class="relative">
-      <input formControlName="senha" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="Mínimo 8 caracteres" type="password"/>
+      <input formControlName="senha" class="w-full px-5 py-4 bg-surface-container-low border-none rounded-xl focus:ring-1 focus:ring-primary focus:bg-white transition-all text-on-surface placeholder:text-outline-variant" placeholder="Mínimo 8 caracteres" [type]="mostrarSenha() ? 'text' : 'password'"/>
       <button class="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant" type="button" (click)="toggleSenha()">
-        <span class="material-symbols-outlined">visibility</span>
+        <span class="material-symbols-outlined">{{ mostrarSenha() ? 'visibility_off' : 'visibility' }}</span>
       </button>
     </div>
+    <p *ngIf="campoInvalido('senha')" class="text-xs text-error mt-1 ml-1">
+      A senha deve ter pelo menos 8 caracteres.
+    </p>
   </div>
 
 </div>
@@ -120,7 +131,7 @@
       </span>
       <span *ngIf="carregando()" class="flex items-center gap-2 justify-center">
         <span class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-        Aguarde...
+        {{ statusCadastro() }}
       </span>
     </button>
 

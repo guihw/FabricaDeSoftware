@@ -1,0 +1,14 @@
+/* Tab inativa — herda cor do template (text-on-surface-variant) */
+.nav-tab {
+  text-decoration: none;
+}
+
+/* Tab ativa — fundo teal + texto escuro, igual ao design original */
+.nav-tab--active {
+  background-color: #79F7EA;
+  color: #007169 !important;
+}
+
+.nav-tab--active .material-symbols-outlined {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}

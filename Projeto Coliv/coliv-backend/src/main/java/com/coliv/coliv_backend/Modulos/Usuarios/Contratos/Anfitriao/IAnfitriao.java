@@ -13,4 +13,5 @@ public interface IAnfitriao {
     
     public List<UsuarioDTO> obterListaDeUsuarios();
     Optional<AnfitriaoCredenciaisDTO> buscarCredenciais(String email);
+    void ativarPlano(Long id);
 }

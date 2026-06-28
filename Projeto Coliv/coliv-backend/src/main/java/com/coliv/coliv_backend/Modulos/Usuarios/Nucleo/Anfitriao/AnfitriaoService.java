@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -56,6 +57,14 @@ class AnfitriaoService implements IAnfitriao {
         publisher.publishEvent(new UsuarioAnfitriaoCriado(usuario.getId()));
 
         return anfitriaoPostDTO;
+    }
+    @Override
+    public void ativarPlano(Long id) {
+        Anfitriao anfitriao = anfitriaoRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Anfitrião não encontrado. Id: " + id));
+
+        anfitriao.setPossuiPlano(true);
+        anfitriaoRepository.save(anfitriao);
     }
 
     public AnfitriaoPutDTO editarAnfitriao(Long id, AnfitriaoPostDTO anfitriao) {

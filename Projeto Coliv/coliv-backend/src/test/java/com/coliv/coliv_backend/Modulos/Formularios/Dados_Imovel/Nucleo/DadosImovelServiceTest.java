@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,203 +26,256 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class DadosImovelServiceTest {
 
-    @Mock
-    private DadosImovelRepository dir;
+    @Mock  private DadosImovelRepository dir;
+    @InjectMocks private DadosImovelService dis;
+    @Captor ArgumentCaptor<DadosImovel> diCaptor;
 
-    @InjectMocks
-    private DadosImovelService dis;
+    private DadosImovelRequestDTO requestDTOCompleto() {
+        return new DadosImovelRequestDTO(
+                "Apartamento no centro",
+                "Pinheiros, SP",
+                3,
+                new BigDecimal("2500.00"),
+                "Quarto Privativo",
+                List.of("wifi", "pet", "academia")
+        );
+    }
 
-    @Captor
-    ArgumentCaptor<DadosImovel> diCaptor;
-
-    @Test
-    @DisplayName("Buscar Dado do Imovel Retorno Positivo")
-    public void buscarDadoImovelRetornoPositivo() {
-        Long id = 1L;
-        DadosImovel buscado = new DadosImovel("Imóvel no centro da cidade", "Rua xyz", 4);
-        buscado.setId(id);
-
-        when(dir.findById(id)).thenReturn(Optional.of(buscado));
-
-        DadosImovel dadosImovel = dis.buscarPorId(id);
-        verify(dir, times(1)).findById(id);
-
-        assertThat(dadosImovel.getDescricao()).isEqualTo("Imóvel no centro da cidade");
-        assertThat(dadosImovel.getLocalizacao()).isEqualTo("Rua xyz");
+    private DadosImovel entidadeCompleta(Long anfitriaoId) {
+        DadosImovel d = new DadosImovel("Apartamento no centro", "Pinheiros, SP", 3);
+        d.setAnfitriaoId(anfitriaoId);
+        d.setPrecoMensal(new BigDecimal("2500.00"));
+        d.setTipoVaga("Quarto Privativo");
+        d.setComodidades(List.of("wifi", "pet", "academia"));
+        return d;
     }
 
     @Test
-    @DisplayName("Buscar Dado do Imovel Retorno Negativo")
-    public void buscarDadoImovelRetornoNegativo() {
-        Long id = -1L;
+    @DisplayName("Buscar por id — retorno positivo")
+    void buscarPorIdPositivo() {
+        DadosImovel entidade = entidadeCompleta(1L);
+        entidade.setId(1L);
 
-        when(dir.findById(id)).thenReturn(Optional.empty());
+        when(dir.findById(1L)).thenReturn(Optional.of(entidade));
 
-        assertThatThrownBy(() -> dis.buscarPorId(id)).isInstanceOf(DadosImovelIDNaoEncontrado.class);
-        verify(dir, times(1)).findById(id);
+        DadosImovel resultado = dis.buscarPorId(1L);
+
+        assertThat(resultado.getDescricao()).isEqualTo("Apartamento no centro");
+        assertThat(resultado.getPrecoMensal()).isEqualByComparingTo(new BigDecimal("2500.00"));
+        assertThat(resultado.getTipoVaga()).isEqualTo("Quarto Privativo");
+        assertThat(resultado.getComodidades()).containsExactlyInAnyOrder("wifi", "pet", "academia");
     }
 
     @Test
-    @DisplayName("Criar Dados do Imovel")
-    public void criarDadosImovel() {
-        Long id = 1L;
-        DadosImovelRequestDTO dto = new DadosImovelRequestDTO( "Imóvel no centro da cidade",
-                "Rua xyz", 3);
-        DadosImovel salvo = new DadosImovel("Imóvel no centro da cidade", "Rua xyz", 3);
-        salvo.setId(id);
+    @DisplayName("Buscar por id — retorno negativo")
+    void buscarPorIdNegativo() {
+        when(dir.findById(-1L)).thenReturn(Optional.empty());
 
+        assertThatThrownBy(() -> dis.buscarPorId(-1L))
+                .isInstanceOf(DadosImovelIDNaoEncontrado.class);
+    }
+
+    @Test
+    @DisplayName("Criar dados do imóvel com todos os novos campos")
+    void criarDadosImovelComNovoCampos() {
+        Long anfitriaoId = 5L;
+        DadosImovelRequestDTO dto = requestDTOCompleto();
+        DadosImovel salvo = entidadeCompleta(anfitriaoId);
+        salvo.setId(10L);
+
+        when(dir.findByAnfitriaoId(anfitriaoId)).thenReturn(Optional.empty());
         when(dir.save(any())).thenReturn(salvo);
 
-        DadosImovelRequestDTO dadosImovel = dis.criarDadosImovel(id + 1, dto);
-        verify(dir, times(1)).save(diCaptor.capture());
-        DadosImovel captura = diCaptor.getValue();
+        DadosImovelRequestDTO retorno = dis.criarDadosImovel(anfitriaoId, dto);
 
-        assertThat(captura.getId()).isNull();
-        assertThat(dadosImovel).isNotNull();
+        verify(dir).save(diCaptor.capture());
+        DadosImovel capturado = diCaptor.getValue();
 
+        // id deve ser null antes de salvar (upsert criando novo)
+        assertThat(capturado.getId()).isNull();
+        assertThat(capturado.getAnfitriaoId()).isEqualTo(anfitriaoId);
+        assertThat(capturado.getPrecoMensal()).isEqualByComparingTo(new BigDecimal("2500.00"));
+        assertThat(capturado.getTipoVaga()).isEqualTo("Quarto Privativo");
+        assertThat(capturado.getComodidades()).containsExactlyInAnyOrder("wifi", "pet", "academia");
+        assertThat(retorno).isNotNull();
     }
 
     @Test
-    @DisplayName("Editar Dados do Imovel Teste com Retorno Positivo")
-    public void editarDadosImovelTesteRetornoPositivo() {
-        Long id = 1L, aid = 2L;
-        DadosImovelRequestDTO dto = new DadosImovelRequestDTO("Imóvel no centro da cidade",
-                "Rua poc", 5);
-        DadosImovel dadosImovel = new DadosImovel("Imóvel no centro da cidade", "Rua xyz", 3);
-        DadosImovel dadosEditados = new DadosImovel("Imóvel no centro da cidade", "Rua poc", 5);
-        dadosImovel.setId(id);
-        dadosImovel.setAnfitriaoId(aid);
-        dadosEditados.setId(id);
-        dadosEditados.setAnfitriaoId(aid);
+    @DisplayName("Criar dados do imóvel — upsert reutiliza registro existente")
+    void criarDadosImovelUpsert() {
+        Long anfitriaoId = 5L;
+        DadosImovel existente = entidadeCompleta(anfitriaoId);
+        existente.setId(10L);
 
-        when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.of(dadosImovel));
-        when(dir.save(any())).thenReturn(dadosEditados);
+        when(dir.findByAnfitriaoId(anfitriaoId)).thenReturn(Optional.of(existente));
+        when(dir.save(any())).thenReturn(existente);
 
-        DadosImovelRequestDTO edicao = dis.editarDadosImovel(aid, dto);
-        verify(dir, times(1)).findByAnfitriaoId(aid);
-        verify(dir, times(1)).save(diCaptor.capture());
-        DadosImovel captura = diCaptor.getValue();
+        DadosImovelRequestDTO dto = new DadosImovelRequestDTO(
+                "Nova descrição", "Nova localização", 2,
+                new BigDecimal("1800.00"), "Quarto Compartilhado", List.of("wifi")
+        );
 
-        assertThat(edicao).isNotNull();
-        assertThat(captura.getQuartos()).isEqualTo(edicao.quartos());
+        dis.criarDadosImovel(anfitriaoId, dto);
+
+        verify(dir).save(diCaptor.capture());
+        DadosImovel capturado = diCaptor.getValue();
+
+        assertThat(capturado.getId()).isEqualTo(10L);
+        assertThat(capturado.getPrecoMensal()).isEqualByComparingTo(new BigDecimal("1800.00"));
+        assertThat(capturado.getTipoVaga()).isEqualTo("Quarto Compartilhado");
     }
 
     @Test
-    @DisplayName("Editar Dados do Imovel Teste com Retorno Negativo")
-    public void editarDadosImovelTesteRetornoNegativo() {
-        Long id = -1L, aid = -2L;
-        DadosImovelRequestDTO dto = new DadosImovelRequestDTO("Imóvel no centro da cidade",
-                "Rua poc", 5);
-        DadosImovel dadosImovel = new DadosImovel();
-        dadosImovel.setId(id);
+    @DisplayName("Criar com comodidades null não lança exceção — salva lista vazia")
+    void criarComComodidadesNull() {
+        Long anfitriaoId = 5L;
+        DadosImovelRequestDTO dtoSemComodidades = new DadosImovelRequestDTO(
+                "Desc", "Local", 1,
+                new BigDecimal("1000.00"), "Quarto Privativo",
+                null   // comodidades null
+        );
+        DadosImovel salvo = new DadosImovel("Desc", "Local", 1);
+        salvo.setAnfitriaoId(anfitriaoId);
 
-        when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.empty());
+        when(dir.findByAnfitriaoId(anfitriaoId)).thenReturn(Optional.empty());
+        when(dir.save(any())).thenReturn(salvo);
 
-        assertThatThrownBy(() -> dis.editarDadosImovel(aid, dto)).isInstanceOf(DadosImovelNaoEncontradoUsandoReferencia.class);
-        verify(dir, times(1)).findByAnfitriaoId(aid);
+        dis.criarDadosImovel(anfitriaoId, dtoSemComodidades);
+
+        verify(dir).save(diCaptor.capture());
+        assertThat(diCaptor.getValue().getComodidades()).isNotNull().isEmpty();
+    }
+
+    @Test
+    @DisplayName("Editar dados do imóvel — atualiza todos os campos novos")
+    void editarDadosImovelPositivo() {
+        Long anfitriaoId = 5L;
+        DadosImovel existente = entidadeCompleta(anfitriaoId);
+        existente.setId(10L);
+
+        DadosImovelRequestDTO dto = new DadosImovelRequestDTO(
+                "Desc editada", "Novo bairro, SP", 4,
+                new BigDecimal("3000.00"), "Suíte Master",
+                List.of("piscina", "rooftop")
+        );
+
+        when(dir.findByAnfitriaoId(anfitriaoId)).thenReturn(Optional.of(existente));
+        when(dir.save(any())).thenReturn(existente);
+
+        DadosImovelRequestDTO retorno = dis.editarDadosImovel(anfitriaoId, dto);
+
+        verify(dir).save(diCaptor.capture());
+        DadosImovel capturado = diCaptor.getValue();
+
+        assertThat(capturado.getPrecoMensal()).isEqualByComparingTo(new BigDecimal("3000.00"));
+        assertThat(capturado.getTipoVaga()).isEqualTo("Suíte Master");
+        assertThat(capturado.getComodidades()).containsExactlyInAnyOrder("piscina", "rooftop");
+        assertThat(retorno).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Editar dados do imóvel — retorno negativo")
+    void editarDadosImovelNegativo() {
+        when(dir.findByAnfitriaoId(-2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> dis.editarDadosImovel(-2L, requestDTOCompleto()))
+                .isInstanceOf(DadosImovelNaoEncontradoUsandoReferencia.class);
+
         verify(dir, never()).save(any());
     }
 
     @Test
-    @DisplayName("Remover Dados do Imovel Retorno Positivo")
-    public void removerDadosImovelRetornoPositivo() {
-        Long id = 1L;
-        DadosImovel di = new DadosImovel();
-        di.setId(id);
+    @DisplayName("Excluir — retorno positivo")
+    void excluirPositivo() {
+        DadosImovel d = new DadosImovel();
+        d.setId(1L);
 
-        when(dir.findById(id)).thenReturn(Optional.of(di));
-        dis.excluir(id);
+        when(dir.findById(1L)).thenReturn(Optional.of(d));
 
-        verify(dir, times(1)).findById(id);
-        verify(dir, times(1)).deleteById(id);
+        dis.excluir(1L);
+
+        verify(dir).deleteById(1L);
     }
 
     @Test
-    @DisplayName("Remover Dados do Imovel Retorno Negativo")
-    public void removerDadosImovelRetornoNegativo() {
-        Long id = -1L;
+    @DisplayName("Excluir — retorno negativo")
+    void excluirNegativo() {
+        when(dir.findById(-1L)).thenReturn(Optional.empty());
 
-        when(dir.findById(id)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> dis.excluir(-1L))
+                .isInstanceOf(DadosImovelIDNaoEncontrado.class);
 
-        assertThatThrownBy(() -> dis.excluir(id)).isInstanceOf(DadosImovelIDNaoEncontrado.class);
-        verify(dir, times(1)).findById(id);
-        verify(dir, never()).deleteById(id);
+        verify(dir, never()).deleteById(any());
     }
 
     @Test
-    @DisplayName("Get Dados do Imovel Interno Retorno Positivo")
-    public void getDadosImovelInternoRetornoPositivo() {
-        Long id = 1L, aid = 2L;
-        DadosImovel dadosImovel = new DadosImovel("Imóvel no centro da cidade", "Rua poc", 5);
-        dadosImovel.setId(id);
-        dadosImovel.setAnfitriaoId(aid);
+    @DisplayName("getDadosImovel — retorna DTO com todos os campos novos")
+    void getDadosImovelPositivo() {
+        Long anfitriaoId = 2L;
+        DadosImovel entidade = entidadeCompleta(anfitriaoId);
+        entidade.setId(1L);
 
-        when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.of(dadosImovel));
+        when(dir.findByAnfitriaoId(anfitriaoId)).thenReturn(Optional.of(entidade));
 
-        DadosImovelDTO retornado = dis.getDadosImovel(aid);
-        verify(dir, times(1)).findByAnfitriaoId(aid);
+        DadosImovelDTO retorno = dis.getDadosImovel(anfitriaoId);
 
-        assertThat(retornado.descricao()).isEqualTo("Imóvel no centro da cidade");
-        assertThat(retornado.localizacao()).isEqualTo("Rua poc");
-        assertThat(retornado.quartos()).isEqualTo(5);
+        assertThat(retorno.descricao()).isEqualTo("Apartamento no centro");
+        assertThat(retorno.localizacao()).isEqualTo("Pinheiros, SP");
+        assertThat(retorno.precoMensal()).isEqualByComparingTo(new BigDecimal("2500.00"));
+        assertThat(retorno.tipoVaga()).isEqualTo("Quarto Privativo");
+        assertThat(retorno.comodidades()).containsExactlyInAnyOrder("wifi", "pet", "academia");
     }
 
     @Test
-    @DisplayName("Get Dados do Imovel Interno Retorno Negativo")
-    public void getDadosImovelInternoRetornoNegativo() {
-        Long aid = -2L;
+    @DisplayName("getDadosImovel — retorno negativo")
+    void getDadosImovelNegativo() {
+        when(dir.findByAnfitriaoId(-2L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> dis.getDadosImovel(-2L))
+                .isInstanceOf(DadosImovelNaoEncontradoUsandoReferencia.class);
+    }
+
+    @Test
+    @DisplayName("Anfitriao Criado Evento — cria registro vazio")
+    void anfitriaoCriadoEvento() {
+        Long aid = 1L;
+        DadosImovel salvo = new DadosImovel();
+        salvo.setId(aid);
+        salvo.setAnfitriaoId(aid);
 
         when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.empty());
+        when(dir.save(any(DadosImovel.class))).thenReturn(salvo);
 
-        assertThatThrownBy(() -> dis.getDadosImovel(aid)).isInstanceOf(DadosImovelNaoEncontradoUsandoReferencia.class);
-        verify(dir, times(1)).findByAnfitriaoId(aid);
+        dis.eventoAnfitriaoCriado(new UsuarioAnfitriaoCriado(aid));
+
+        verify(dir).save(diCaptor.capture());
+        assertThat(diCaptor.getValue().getId()).isNull();
+        assertThat(diCaptor.getValue().getAnfitriaoId()).isEqualTo(aid);
     }
 
     @Test
-    @DisplayName("Anfitriao Criado Evento")
-    public void anfitriaoCriadoEvento() {
-        Long aid = 1L;
-        DadosImovel dadosSalvo = new DadosImovel();
-        UsuarioAnfitriaoCriado evento = new UsuarioAnfitriaoCriado(aid);
-        dadosSalvo.setId(aid);
-        dadosSalvo.setAnfitriaoId(aid);
-
-        when(dir.save(any(DadosImovel.class))).thenReturn(dadosSalvo);
-
-        dis.eventoAnfitriaoCriado(evento);
-        verify(dir, times(1)).save(diCaptor.capture());
-        DadosImovel captura = diCaptor.getValue();
-
-        assertThat(captura.getId()).isNull();
-        assertThat(captura.getAnfitriaoId()).isEqualTo(dadosSalvo.getAnfitriaoId());
-    }
-
-    @Test
-    @DisplayName("Anfitriao Excluido Evento Retorno Positivo")
-    public void anfitriaoExcluidoEventoRetornoPositivo() {
+    @DisplayName("Anfitriao Excluido Evento — retorno positivo")
+    void anfitriaoExcluidoEventoPositivo() {
         Long aid = 1L;
         DadosImovel dadosImovel = new DadosImovel();
-        AnfitriaoExcluido evento = new AnfitriaoExcluido(aid);
         dadosImovel.setId(aid);
         dadosImovel.setAnfitriaoId(aid);
 
         when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.of(dadosImovel));
 
-        dis.eventoAnfitriaoExcluido(evento);
-        verify(dir, times(1)).findByAnfitriaoId(aid);
-        verify(dir, times(1)).deleteById(aid);
+        dis.eventoAnfitriaoExcluido(new AnfitriaoExcluido(aid));
+
+        verify(dir).deleteById(aid);
     }
 
     @Test
-    @DisplayName("Anfitriao Excluido Evento Retorno Negativo")
-    public void anfitriaoExcluidoEventoRetornoNegativo() {
-        Long aid = -1L;
-        AnfitriaoExcluido evento = new AnfitriaoExcluido(aid);
+    @DisplayName("Anfitriao Excluido Evento — retorno negativo")
+    void anfitriaoExcluidoEventoNegativo() {
+        when(dir.findByAnfitriaoId(-1L)).thenReturn(Optional.empty());
 
-        when(dir.findByAnfitriaoId(aid)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> dis.eventoAnfitriaoExcluido(new AnfitriaoExcluido(-1L)))
+                .isInstanceOf(DadosImovelNaoEncontradoUsandoReferencia.class);
 
-        assertThatThrownBy(() -> dis.eventoAnfitriaoExcluido(evento)).isInstanceOf(DadosImovelNaoEncontradoUsandoReferencia.class);
-        verify(dir, times(1)).findByAnfitriaoId(aid);
-        verify(dir, never()).deleteById(aid);
+        verify(dir, never()).deleteById(any());
     }
 }

@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
+import { vi } from 'vitest';
 import { MoradiaCardComponent } from './moradia-card-component';
 import { RecomendacaoCardAnfitriaoDTO } from '../../../core/services/recomendacao.service';
 
@@ -12,14 +13,16 @@ describe('MoradiaCardComponent', () => {
     resumoCompatibilidade: 'Perfil compatível',
     card: {
       anfitriaoId: 1,
-      nome: 'Casa Pinheiros',
-      email: 'anf@email.com',
+      nome: 'Ricardo Silveira',       
+      email: 'anf@email.com',        
       descricao: 'Casa espaçosa',
       localizacao: 'Pinheiros, SP',
       quartos: 3,
       classificacao: 4.2,
       precoMensal: 2500,
       arquivos: [],
+      tipoVaga: 'Quarto Privativo',
+      comodidades: ['wifi', 'pet', 'academia', 'piscina'], // 4 comodidades — badge mostra até 3
     },
   };
 
@@ -48,7 +51,53 @@ describe('MoradiaCardComponent', () => {
     expect(component.resumo).toBe('Perfil compatível');
   });
 
-  // ── precoFormatado ─────────────────────────────────────────────
+
+  it('titulo deve ser "tipoVaga, localização" — não o nome do anfitrião', () => {
+    expect(component.titulo).toBe('Quarto Privativo, Pinheiros, SP');
+    expect(component.titulo).not.toContain('Ricardo Silveira');
+  });
+
+  it('titulo deve usar apenas tipoVaga quando localizacao for vazia', () => {
+    component.recomendacao = {
+      ...recomendacaoBase,
+      card: { ...recomendacaoBase.card, localizacao: '' },
+    };
+    expect(component.titulo).toBe('Quarto Privativo');
+  });
+
+  it('titulo deve usar "Imóvel" quando tipoVaga for null', () => {
+    component.recomendacao = {
+      ...recomendacaoBase,
+      card: { ...recomendacaoBase.card, tipoVaga: null },
+    };
+    expect(component.titulo).toBe('Imóvel, Pinheiros, SP');
+  });
+
+
+  it('badgesComodidades deve retornar no máximo 3 itens', () => {
+    // recomendacaoBase tem 4 comodidades
+    expect(component.badgesComodidades.length).toBeLessThanOrEqual(3);
+  });
+
+  it('badgesComodidades deve priorizar pet, wifi, academia sobre piscina', () => {
+    const badges = component.badgesComodidades;
+    expect(badges).toContain('Pet OK');
+    expect(badges).toContain('Wi-Fi');
+    expect(badges).not.toContain('Piscina'); // 4ª na prioridade, cortada no limite de 3
+  });
+
+  it('badgesComodidades deve retornar array vazio quando não há comodidades', () => {
+    component.recomendacao = {
+      ...recomendacaoBase,
+      card: { ...recomendacaoBase.card, comodidades: [] },
+    };
+    expect(component.badgesComodidades).toHaveLength(0);
+  });
+
+  it('badgesComodidades não deve incluir e-mail do anfitrião', () => {
+    expect(component.badgesComodidades).not.toContain('anf@email.com');
+  });
+
 
   it('deve formatar preço em BRL corretamente', () => {
     expect(component.precoFormatado).toContain('2.500');
@@ -58,6 +107,14 @@ describe('MoradiaCardComponent', () => {
     component.recomendacao = {
       ...recomendacaoBase,
       card: { ...recomendacaoBase.card, precoMensal: 0 },
+    };
+    expect(component.precoFormatado).toBe('A consultar');
+  });
+
+  it('deve retornar "A consultar" quando preço é null', () => {
+    component.recomendacao = {
+      ...recomendacaoBase,
+      card: { ...recomendacaoBase.card, precoMensal: null as any },
     };
     expect(component.precoFormatado).toBe('A consultar');
   });
@@ -96,10 +153,11 @@ describe('MoradiaCardComponent', () => {
     expect(component.estrelas(1)).toBe(false);
   });
 
-  it('deve emitir evento like com a recomendação ao clicar', () => {
+
+  it('deve emitir evento like com a recomendação ao chamar onLike', () => {
     let emitido: RecomendacaoCardAnfitriaoDTO | undefined;
     component.like.subscribe(r => (emitido = r));
-    component.onLike();
+    component.onLike({ stopPropagation: vi.fn() } as unknown as MouseEvent);
     expect(emitido).toEqual(recomendacaoBase);
   });
 });

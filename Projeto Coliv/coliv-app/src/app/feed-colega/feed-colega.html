@@ -3,20 +3,29 @@
     <div class="p-2 rounded-full bg-surface-container-low active:scale-95 transition-all duration-200">
       <span class="material-symbols-outlined text-[#1A2B4C]">search</span>
     </div>
-    <div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-secondary-container overflow-hidden">
+    <a routerLink="/perfil"
+      class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-secondary-container overflow-hidden hover:ring-2 hover:ring-primary transition-all">
       <span class="material-symbols-outlined text-primary">person</span>
-    </div>
+    </a>
   </div>
 </app-top-navbar-component>
 
 <main class="max-w-7xl mx-auto px-6 pt-8 pb-32">
 
   <!-- Hero -->
-  <section class="mb-10">
-    <h1 class="font-headline font-bold text-4xl tracking-tight text-on-surface mb-2">
-      Encontre seu <span class="text-secondary">próximo santuário.</span>
-    </h1>
-    <p class="text-on-surface-variant font-medium">Curadoria exclusiva baseada no seu estilo de vida.</p>
+  <section class="mb-10 flex items-start justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="font-headline font-bold text-4xl tracking-tight text-on-surface mb-2">
+        Encontre seu <span class="text-secondary">próximo santuário.</span>
+      </h1>
+      <p class="text-on-surface-variant font-medium">Curadoria exclusiva baseada no seu estilo de vida.</p>
+    </div>
+
+    <button (click)="abrirModalPlanoPlus()"
+      class="flex items-center gap-2 px-5 py-3 bg-primary text-white rounded-xl font-bold text-sm active:scale-95 transition-all shrink-0">
+      <span class="material-symbols-outlined text-base">workspace_premium</span>
+      Plano Plus
+    </button>
   </section>
 
   <!-- Estado: carregando -->
@@ -49,13 +58,14 @@
 
   <!-- Grid de recomendações -->
   <div *ngIf="!carregando() && !erro() && recomendacoes().length > 0"
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-    <app-moradia-card-component
-  *ngFor="let rec of recomendacoes()"
-  [recomendacao]="rec"
-  (like)="onLike($event)">
-</app-moradia-card-component>
-  </div>
+  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+  <app-moradia-card-component
+    *ngFor="let rec of recomendacoes()"
+    [recomendacao]="rec"
+    (like)="onLike($event)"
+    (verDetalhes)="abrirDetalhe($event)">
+  </app-moradia-card-component>
+</div>
 
   <!-- Paginação -->
   <div *ngIf="!carregando() && !erro() && recomendacoes().length > 0"
@@ -114,3 +124,18 @@
 </nav>
 
 <router-outlet></router-outlet>
+
+<!-- Modal de detalhe da moradia -->
+<app-moradia-detail-modal
+  [recomendacao]="recomendacaoSelecionada"
+  [aberto]="modalAberto"
+  (fechar)="fecharDetalhe()"
+  (interesse)="onLike($event)">
+</app-moradia-detail-modal>
+
+<!-- Modal do Plano Plus -->
+<app-plano-plus-modal
+  [aberto]="modalPlanoPlusAberto"
+  (fechar)="fecharModalPlanoPlus()"
+  (pagamentoConfirmado)="onPagamentoPlusConfirmado()">
+</app-plano-plus-modal>
