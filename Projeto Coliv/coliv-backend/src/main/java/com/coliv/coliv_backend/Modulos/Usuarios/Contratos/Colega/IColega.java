@@ -9,4 +9,5 @@ public interface IColega {
     boolean verificarExistencia(Long id);
 
     Optional<ColegaCredenciaisDTO> buscarCredenciais(String email);
+    void ativarPlano(Long id);
 }

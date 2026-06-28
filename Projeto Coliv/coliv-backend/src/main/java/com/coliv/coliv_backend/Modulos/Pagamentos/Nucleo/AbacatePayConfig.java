@@ -1,29 +1,23 @@
 package com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestClient;
 
 @Configuration
+@EnableConfigurationProperties(AbacatePayProperties.class)
 public class AbacatePayConfig {
 
-    @Value("${abacatepay.url}")
-    private String url;
-
-    @Value("${abacatepay.api-key}")
-    private String apiKey;
-
-    @Value("${abacatepay.webhook-secret}")
-    private String webhookSecret;
-
-    public String getUrl() {
-        return url;
-    }
-
-    public String getApiKey() {
-        return apiKey;
-    }
-
-    public String getWebhookSecret() {
-        return webhookSecret;
+    @Bean
+    RestClient restClient(
+            RestClient.Builder builder,
+            AbacatePayProperties properties
+    ) {
+        return builder
+                .baseUrl(properties.getUrl())
+                .defaultHeader("Authorization", "Bearer " + properties.getApiKey())
+                .defaultHeader("Content-Type", "application/json")
+                .build();
     }
 }
