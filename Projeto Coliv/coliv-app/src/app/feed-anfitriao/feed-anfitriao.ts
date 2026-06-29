@@ -31,12 +31,12 @@ import { of } from 'rxjs';
 })
 export class FeedAnfitriao implements OnInit {
 
-  recomendacoes    = signal<RecomendacaoColegaDTO[]>([]);
-  imovelCard       = signal<CardAnfitriaoResponseDTO | null>(null);
-  carregando       = signal(true);
-  erro             = signal<string | null>(null);
-  pagina           = signal(0);
-  temProxima       = signal(false);
+  recomendacoes = signal<RecomendacaoColegaDTO[]>([]);
+  imovelCard = signal<CardAnfitriaoResponseDTO | null>(null);
+  carregando  = signal(true);
+  erro = signal<string | null>(null);
+  pagina = signal(0);
+  temProxima = signal(false);
   acaoEmAndamento  = signal<Set<number>>(new Set());
 
   // ── Estado do modal ───────────────────────────────────────────
