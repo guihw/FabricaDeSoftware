@@ -3,9 +3,10 @@ package com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo;
 import com.coliv.coliv_backend.Modulos.Pagamentos.Contratos.CriarPagamentoPlusRequest;
 import com.coliv.coliv_backend.Modulos.Pagamentos.Contratos.IAbacatePay;
 import com.coliv.coliv_backend.Modulos.Pagamentos.Contratos.PixResponse;
-import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacatePixData;
-import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacatePixQrCodeRequest;
-import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacatePixQrCodeResponse;
+import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacateTransparentData;
+import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacateTransparentRequest;
+import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacateTransparentResponse;
+import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacateTransparentResultData;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
@@ -23,18 +24,20 @@ public class AbacatePayService implements IAbacatePay {
 
     @Override
     public PixResponse criarPagamentoPlus(CriarPagamentoPlusRequest request) {
-        AbacatePixQrCodeRequest corpo = new AbacatePixQrCodeRequest(
+        AbacateTransparentData dados = new AbacateTransparentData(
                 request.valorEmCentavos(),
                 EXPIRACAO_PIX_SEGUNDOS,
                 request.descricao()
         );
 
+        AbacateTransparentRequest corpo = AbacateTransparentRequest.pix(dados);
+
         try {
-            AbacatePixQrCodeResponse resposta = restClient.post()
-                    .uri("/pixQrCode/create")
+            AbacateTransparentResponse resposta = restClient.post()
+                    .uri("/v2/transparents/create")
                     .body(corpo)
                     .retrieve()
-                    .body(AbacatePixQrCodeResponse.class);
+                    .body(AbacateTransparentResponse.class);
 
             if (resposta == null || resposta.data() == null) {
                 throw new IllegalStateException(
@@ -42,7 +45,7 @@ public class AbacatePayService implements IAbacatePay {
                 );
             }
 
-            AbacatePixData data = resposta.data();
+            AbacateTransparentResultData data = resposta.data();
 
             return new PixResponse(
                     data.id(),
