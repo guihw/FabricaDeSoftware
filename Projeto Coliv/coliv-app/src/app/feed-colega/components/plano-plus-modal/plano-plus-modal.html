@@ -22,7 +22,7 @@
       </div>
 
       <div class="bg-white p-3 rounded-2xl border-2 border-surface-container-high">
-        <img [src]="'data:image/png;base64,' + pix()!.qrCodeBase64" alt="QR Code Pix" class="w-52 h-52" />
+        <img [src]="pix()!.qrCodeBase64" alt="QR Code Pix" class="w-52 h-52" />
       </div>
 
       <button (click)="copiarCodigoPix()"
