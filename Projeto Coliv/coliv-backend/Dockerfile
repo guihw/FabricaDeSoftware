@@ -25,3 +25,7 @@ COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+FROM rabbitmq:4-management
+
+RUN rabbitmq-plugins enable --offline rabbitmq_stomp
