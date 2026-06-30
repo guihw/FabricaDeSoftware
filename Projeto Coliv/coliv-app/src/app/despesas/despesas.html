@@ -74,6 +74,53 @@
         </div>
       </div>
 
+      <!-- Divisão personalizada — visível apenas em despesas coletivas com mais de 1 membro -->
+      <div *ngIf="form.get('tipodeDespesa')?.value === 'coletiva' && membrosDaCasa.length > 1 && !modoEdicao"
+           class="flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">
+            Como dividir
+          </label>
+          <div class="flex rounded-xl overflow-hidden bg-surface-container-low text-xs">
+            <button type="button" (click)="divisaoPersonalizada = false; valoresCustomizados = {}"
+              [ngClass]="{
+                'bg-secondary text-on-secondary': !divisaoPersonalizada,
+                'text-on-surface-variant': divisaoPersonalizada
+              }"
+              class="px-3 py-1.5 font-bold transition-all">
+              Igualitária
+            </button>
+            <button type="button" (click)="ativarDivisaoPersonalizada()"
+              [ngClass]="{
+                'bg-secondary text-on-secondary': divisaoPersonalizada,
+                'text-on-surface-variant': !divisaoPersonalizada
+              }"
+              class="px-3 py-1.5 font-bold transition-all">
+              Personalizada
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="divisaoPersonalizada" class="flex flex-col gap-2 bg-surface-container-low rounded-xl p-4">
+          <div *ngFor="let membro of membrosInfo" class="flex items-center gap-3">
+            <span class="text-sm font-medium text-on-surface flex-1 truncate">{{ membro.label }}</span>
+            <div class="flex items-center gap-1">
+              <span class="text-xs text-on-surface-variant">R$</span>
+              <input type="number" step="0.01" min="0"
+                [value]="valoresCustomizados[membro.id] ?? 0"
+                (change)="atualizarValorMembro(membro.id, $event)"
+                class="w-28 bg-surface-container border-none rounded-xl px-3 py-2
+                       focus:ring-2 focus:ring-secondary/20 font-medium text-sm text-right" />
+            </div>
+          </div>
+          <p *ngIf="!divisoesValidas()"
+             class="text-xs text-error font-medium pt-1">
+            Soma das partes (R$ {{ somaCustomizada() | number:'1.2-2' }})
+            deve ser igual ao total (R$ {{ form.get('valor')?.value | number:'1.2-2' }}).
+          </p>
+        </div>
+      </div>
+
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">
           Descrição (opcional)

@@ -1,30 +1,5 @@
-import { inject } from '@angular/core';
-import { CanActivateFn, Router } from '@angular/router';
-import { map, catchError, of } from 'rxjs';
-import { ConviteService } from '../services/convite.service';
+import { CanActivateFn } from '@angular/router';
 
-export const despesasGuard: CanActivateFn = (_route, _state) => {
-  const router  = inject(Router);
-  const service = inject(ConviteService);
-
-  const tipo = sessionStorage.getItem('coliv_user_tipo');
-  const id   = Number(sessionStorage.getItem('coliv_user_id'));
-
-  // Anfitrião sempre tem acesso às despesas
-  if (tipo === 'anfitriao') return true;
-
-  // Colega só acessa se tiver pelo menos um convite ACEITO
-  return service.listarParaColega(id).pipe(
-    map((convites) => {
-      const temAcesso = convites.some((c) => c.status === 'ACEITO');
-      if (!temAcesso) {
-        router.navigate(['/feedcolega']);
-      }
-      return temAcesso;
-    }),
-    catchError(() => {
-      router.navigate(['/feedcolega']);
-      return of(false);
-    })
-  );
-};
+// A restrição de acesso por convite aceito é tratada visualmente no componente
+// (banner informativo). O authGuard já garante que o usuário está autenticado.
+export const despesasGuard: CanActivateFn = () => true;

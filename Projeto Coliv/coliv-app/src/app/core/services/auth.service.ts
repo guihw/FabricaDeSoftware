@@ -30,6 +30,9 @@ export class AuthService extends ApiService {
     sessionStorage.removeItem(this.TOKEN_KEY);
     sessionStorage.removeItem('coliv_user_id');
     sessionStorage.removeItem('coliv_user_tipo');
+    sessionStorage.removeItem('coliv_foto_perfil');
+    sessionStorage.removeItem('coliv_chat_outro_id');
+    sessionStorage.removeItem('coliv_chat_outro_nome');
     this.isLoggedIn.set(false);
   }
 
