@@ -55,7 +55,8 @@ class CardColegaServiceTest {
                         "fernando@email.com",
                         "Dev Java",
                         5.0f,
-                        10L
+                        10L,
+                        null
                 );
 
         PreferenciasColegaResponse preferencias =

@@ -73,7 +73,7 @@ class AnfitriaoServiceTest {
         Anfitriao anfitriaoSalvo = new Anfitriao(1L, "Teste", "511.995.364-25", "testeemail.com",
                 "senhateste", false);
         AnfitriaoPostDTO dto = new AnfitriaoPostDTO("Teste", "511.995.364-25", "testeemail.com",
-                "senhateste");
+                "senhateste", null);
 
         when(anfitriaoRepository.save(any())).thenReturn(anfitriaoSalvo);
         when(anfitriaoRepository.existsByEmail(dto.email())).thenReturn(false);
@@ -97,7 +97,7 @@ class AnfitriaoServiceTest {
     @DisplayName("Criar Anfitriao Teste Retorno Negativo 1")
     public void criarAnfitriaoTesteRetornoNegativo1() {
         AnfitriaoPostDTO dto = new AnfitriaoPostDTO("Teste", "511.995.364-25", "testeemail.com",
-                "senhateste");
+                "senhateste", null);
 
         when(anfitriaoRepository.existsByEmail(dto.email())).thenReturn(true);
 
@@ -112,7 +112,7 @@ class AnfitriaoServiceTest {
     @DisplayName("Criar Anfitriao Teste Retorno Negativo 2")
     public void criarAnfitriaoTesteRetornoNegativo2() {
         AnfitriaoPostDTO dto = new AnfitriaoPostDTO("Teste", "511.995.364-25", "testeemail.com",
-                "senhateste");
+                "senhateste", null);
 
         when(anfitriaoRepository.existsByCpf(dto.cpf())).thenReturn(true);
 
@@ -130,7 +130,7 @@ class AnfitriaoServiceTest {
         Anfitriao anfitriao = new Anfitriao(id, "Teste", "511.995.364-25", "testeemail.com",
                 "senhateste", false);
         AnfitriaoPostDTO anfitriaoUpdate = new AnfitriaoPostDTO("Teste1", "511.995.364-25",
-                "teste1email@email.com", "senhateste1");
+                "teste1email@email.com", "senhateste1", null);
 
         when(anfitriaoRepository.findById(id)).thenReturn(Optional.of(anfitriao));
         when(anfitriaoRepository.save(any())).thenReturn(anfitriao);
@@ -155,7 +155,7 @@ class AnfitriaoServiceTest {
         Long id = -1L;
 
         AnfitriaoPostDTO anfitriaoUpdate = new AnfitriaoPostDTO("Teste1", "511.995.364-25",
-                "teste1email@email.com", "senhateste1");
+                "teste1email@email.com", "senhateste1", null);
 
         when(anfitriaoRepository.findById(id)).thenReturn(Optional.empty());
 
