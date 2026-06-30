@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, ViewChild, ElementRef, signal, computed } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 
@@ -16,7 +17,7 @@ import { TopNavbarComponent }    from '../shared/components/top-navbar-component
 
 @Component({
   selector: 'app-despesas',
-  imports: [CommonModule, ReactiveFormsModule, BottomNavbarComponent, TopNavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, BottomNavbarComponent, TopNavbarComponent, RouterLink],
   templateUrl: './despesas.html',
   styleUrl: './despesas.css',
 })
@@ -47,6 +48,8 @@ export class Despesas implements OnInit {
   usuarioId    = 0;
   isAnfitriao  = false;
   membrosDaCasa: number[] = [];
+  temColegaAceito = signal(false);
+  temConviteAceito = signal(false);
 
   despesas         = signal<DespesaView[]>([]);
   despesaSelecionada: DespesaView = this.despesaVazia();
@@ -85,8 +88,13 @@ export class Despesas implements OnInit {
         map(convites => {
           const colegas = convites.filter(c => c.status === 'ACEITO').map(c => c.colegaId);
           this.membrosDaCasa = [this.usuarioId, ...colegas];
+          this.temColegaAceito.set(colegas.length > 0);
         }),
-        catchError(() => { this.membrosDaCasa = [this.usuarioId]; return of(null); })
+        catchError(() => {
+          this.membrosDaCasa = [this.usuarioId];
+          this.temColegaAceito.set(false);
+          return of(null);
+        })
       );
     }
 
@@ -96,8 +104,13 @@ export class Despesas implements OnInit {
         this.membrosDaCasa = aceito
           ? [aceito.anfitriaoId, this.usuarioId]
           : [this.usuarioId];
+        this.temConviteAceito.set(!!aceito);
       }),
-      catchError(() => { this.membrosDaCasa = [this.usuarioId]; return of(null); })
+      catchError(() => {
+        this.membrosDaCasa = [this.usuarioId];
+        this.temConviteAceito.set(false);
+        return of(null);
+      })
     );
   }
 

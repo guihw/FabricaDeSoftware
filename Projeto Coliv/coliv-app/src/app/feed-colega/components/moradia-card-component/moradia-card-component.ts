@@ -24,6 +24,7 @@ const COMODIDADE_LABEL: Record<string, string> = {
 })
 export class MoradiaCardComponent {
   @Input({ required: true }) recomendacao!: RecomendacaoCardAnfitriaoDTO;
+  @Input() curtido = false;
 
   /** Dispara quando o usuário quer dar like (botão "Tenho Interesse") */
   @Output() like = new EventEmitter<RecomendacaoCardAnfitriaoDTO>();

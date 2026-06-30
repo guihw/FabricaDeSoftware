@@ -5,6 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
+import { ArquivoService } from '../core/services/arquivo.service';
 import { Anfitriao, Colega } from '../core/models/usuario.model';
 import { ApiError } from '../core/services/api.service';
 import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
@@ -22,11 +23,13 @@ export class Perfil implements OnInit {
   salvando = signal(false);
   excluindo = signal(false);
   editando = signal(false);
+  uploadandoFoto = signal(false);
   erro = signal<string | null>(null);
   sucesso = signal<string | null>(null);
 
   isAnfitriao = signal(false);
   usuario = signal<Anfitriao | Colega | null>(null);
+  fotoPerfilUrl = signal<string | null>(null);
 
   form!: FormGroup;
 
@@ -34,6 +37,7 @@ export class Perfil implements OnInit {
     private auth: AuthService,
     private anfitriaoService: AnfitriaoService,
     private colegaService: ColegaService,
+    private arquivoService: ArquivoService,
     private fb: FormBuilder,
     private router: Router,
   ) {}
@@ -42,6 +46,10 @@ export class Perfil implements OnInit {
     const tipo = this.auth.getUserType();
     const id = this.auth.getUserId();
     this.isAnfitriao.set(tipo === 'anfitriao');
+
+    // Restaura foto do sessionStorage (exibição imediata)
+    const fotoSalva = sessionStorage.getItem('coliv_foto_perfil');
+    if (fotoSalva) this.fotoPerfilUrl.set(fotoSalva);
 
     if (!id) {
       this.router.navigate(['/login']);
@@ -78,6 +86,44 @@ export class Perfil implements OnInit {
         },
       });
     }
+  }
+
+  onFotoSelecionada(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    const id = this.auth.getUserId();
+    if (!id) return;
+
+    this.uploadandoFoto.set(true);
+    this.erro.set(null);
+
+    this.arquivoService.upload([file]).subscribe({
+      next: (arquivos) => {
+        if (!arquivos || arquivos.length === 0) return;
+        const arquivo = arquivos[0];
+
+        // Persiste URL localmente
+        sessionStorage.setItem('coliv_foto_perfil', arquivo.url);
+        this.fotoPerfilUrl.set(arquivo.url);
+
+        // Salva ID no backend
+        const dados: any = { fotoPerfilId: arquivo.id };
+        const req = this.isAnfitriao()
+          ? this.anfitriaoService.editar(id, dados)
+          : this.colegaService.editar(id, dados);
+
+        req.subscribe({
+          next: () => this.uploadandoFoto.set(false),
+          error: () => this.uploadandoFoto.set(false),
+        });
+      },
+      error: (err: ApiError) => {
+        this.uploadandoFoto.set(false);
+        this.erro.set(err.message ?? 'Erro ao enviar foto.');
+      },
+    });
   }
 
   get iniciais(): string {

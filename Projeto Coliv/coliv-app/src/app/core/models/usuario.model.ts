@@ -49,4 +49,5 @@ export interface Colega {
   email: string;
   descricao?: string;
   classificacao?: number;
+  fotoPerfilId?: number | null;
 }

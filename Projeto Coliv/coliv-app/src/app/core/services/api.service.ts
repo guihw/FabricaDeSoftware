@@ -52,6 +52,9 @@ export class ApiService {
       message = 'Sem permissão para realizar esta ação.';
     } else if (error.status === 404) {
       message = 'Recurso não encontrado.';
+    } else if (error.status === 503) {
+      const body = error.error as { erro?: string } | null;
+      message = body?.erro ?? 'Serviço temporariamente indisponível. Tente novamente em instantes.';
     } else if (error.status >= 500) {
       message = 'Erro interno no servidor. Tente novamente mais tarde.';
     }

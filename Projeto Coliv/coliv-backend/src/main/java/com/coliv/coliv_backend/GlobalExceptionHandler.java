@@ -31,6 +31,17 @@ public class GlobalExceptionHandler {
                 .body(Map.of("erro", "Dados inconsistentes no banco: registro duplicado. Contate o suporte."));
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalState(IllegalStateException ex) {
+        String msg = ex.getMessage();
+        if (msg != null && (msg.startsWith("Serviço de pagamento") || msg.startsWith("Não foi possível conectar ao serviço de pagamento") || msg.startsWith("Resposta vazia da AbacatePay"))) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of("erro", msg));
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("erro", msg != null ? msg : "Erro interno do servidor"));
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

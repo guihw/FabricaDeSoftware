@@ -6,7 +6,8 @@ public record UpdateColegaRequest(
         String cpf,
         String email,
         String password,
-        String descricao
+        String descricao,
+        Long fotoPerfilId
 
 ) {
 }

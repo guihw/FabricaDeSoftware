@@ -43,7 +43,8 @@ public class ColegaService implements IColega {
                         colega.getEmail(),
                         colega.getDescricao(),
                         colega.getClassificacao(),
-                        colega.preferenciaColegaId
+                        colega.preferenciaColegaId,
+                        colega.getFotoPerfilId()
                 ))
                 .toList();
     }
@@ -60,7 +61,8 @@ public class ColegaService implements IColega {
                 colega.getEmail(),
                 colega.getDescricao(),
                 colega.getClassificacao(),
-                colega.preferenciaColegaId
+                colega.preferenciaColegaId,
+                colega.getFotoPerfilId()
         );
     }
 
@@ -135,7 +137,8 @@ public class ColegaService implements IColega {
                 savedColega.getEmail(),
                 savedColega.getDescricao(),
                 savedColega.getClassificacao(),
-                savedColega.preferenciaColegaId
+                savedColega.preferenciaColegaId,
+                savedColega.getFotoPerfilId()
         );
     }
 
@@ -168,6 +171,9 @@ public class ColegaService implements IColega {
         if (request.descricao() != null && !request.descricao().isBlank()) {
             original.setDescricao(request.descricao());
         }
+        if (request.fotoPerfilId() != null) {
+            original.setFotoPerfilId(request.fotoPerfilId());
+        }
 
         Colega updatedColega = colegaRepository.save(original);
 
@@ -177,7 +183,8 @@ public class ColegaService implements IColega {
                 updatedColega.getEmail(),
                 updatedColega.getDescricao(),
                 updatedColega.getClassificacao(),
-                updatedColega.preferenciaColegaId
+                updatedColega.preferenciaColegaId,
+                updatedColega.getFotoPerfilId()
         );
     }
 

@@ -38,6 +38,7 @@ export class FeedAnfitriao implements OnInit {
   pagina = signal(0);
   temProxima = signal(false);
   acaoEmAndamento  = signal<Set<number>>(new Set());
+  fotoPerfilUrl = signal<string | null>(null);
 
   // ── Estado do modal ───────────────────────────────────────────
   modalAberto              = false;
@@ -55,6 +56,7 @@ export class FeedAnfitriao implements OnInit {
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
     this.anfitriaoId = id ? Number(id) : null;
+    this.fotoPerfilUrl.set(sessionStorage.getItem('coliv_foto_perfil'));
 
     if (!this.anfitriaoId) {
       this.erro.set('Sessão expirada. Faça login novamente.');

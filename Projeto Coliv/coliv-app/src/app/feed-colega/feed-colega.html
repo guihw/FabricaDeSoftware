@@ -5,7 +5,8 @@
     </div>
     <a routerLink="/perfil"
       class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center border-2 border-secondary-container overflow-hidden hover:ring-2 hover:ring-primary transition-all">
-      <span class="material-symbols-outlined text-primary">person</span>
+      <img *ngIf="fotoPerfilUrl()" [src]="fotoPerfilUrl()!" alt="Foto" class="w-full h-full object-cover"/>
+      <span *ngIf="!fotoPerfilUrl()" class="material-symbols-outlined text-primary">person</span>
     </a>
   </div>
 </app-top-navbar-component>
@@ -62,6 +63,7 @@
   <app-moradia-card-component
     *ngFor="let rec of recomendacoes()"
     [recomendacao]="rec"
+    [curtido]="curtidos().has(rec.card.anfitriaoId)"
     (like)="onLike($event)"
     (verDetalhes)="abrirDetalhe($event)">
   </app-moradia-card-component>
@@ -109,7 +111,7 @@
     <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">home</span>
     <span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Início</span>
   </a>
-  <a routerLink="/chat" class="flex flex-col items-center justify-center text-slate-400 hover:text-[#1A2B4C] px-5 py-2 active:scale-90 transition-transform duration-300 ease-out">
+  <a routerLink="/chats" class="flex flex-col items-center justify-center text-slate-400 hover:text-[#1A2B4C] px-5 py-2 active:scale-90 transition-transform duration-300 ease-out">
     <span class="material-symbols-outlined">chat</span>
     <span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Chat</span>
   </a>
@@ -117,8 +119,9 @@
     <span class="material-symbols-outlined">account_balance_wallet</span>
     <span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Gestão</span>
   </a>
-  <a class="flex flex-col items-center justify-center text-slate-400 hover:text-[#1A2B4C] px-5 py-2 active:scale-90 transition-transform duration-300 ease-out">
-    <span class="material-symbols-outlined">person</span>
+  <a routerLink="/perfil" class="flex flex-col items-center justify-center text-slate-400 hover:text-[#1A2B4C] px-5 py-2 active:scale-90 transition-transform duration-300 ease-out">
+    <img *ngIf="fotoPerfilUrl()" [src]="fotoPerfilUrl()!" alt="Foto" class="w-6 h-6 rounded-full object-cover ring-2 ring-primary/30"/>
+    <span *ngIf="!fotoPerfilUrl()" class="material-symbols-outlined">person</span>
     <span class="font-['Manrope'] text-[10px] font-bold uppercase tracking-widest mt-1">Perfil</span>
   </a>
 </nav>

@@ -30,15 +30,39 @@
 
       <!-- Avatar + identificação -->
       <div class="flex items-center gap-4 mb-6">
-        <div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-white text-2xl font-bold flex-shrink-0">
-          {{ iniciais }}
-        </div>
+        <!-- Avatar clicável para upload -->
+        <label class="relative cursor-pointer group flex-shrink-0" title="Alterar foto de perfil">
+          <input type="file" accept="image/jpeg,image/png" class="hidden"
+                 (change)="onFotoSelecionada($event)" [disabled]="uploadandoFoto()"/>
+
+          <!-- Foto ou iniciais -->
+          <div class="w-16 h-16 rounded-full overflow-hidden bg-primary flex items-center justify-center
+                      text-white text-2xl font-bold ring-2 ring-primary/30 group-hover:ring-primary transition-all">
+            <img *ngIf="fotoPerfilUrl()" [src]="fotoPerfilUrl()" alt="Foto de perfil"
+                 class="w-full h-full object-cover"/>
+            <span *ngIf="!fotoPerfilUrl()">{{ iniciais }}</span>
+          </div>
+
+          <!-- Overlay de câmera no hover -->
+          <div class="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center
+                      opacity-0 group-hover:opacity-100 transition-opacity">
+            <span class="material-symbols-outlined text-white text-xl">photo_camera</span>
+          </div>
+
+          <!-- Spinner de upload -->
+          <div *ngIf="uploadandoFoto()"
+            class="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+            <span class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          </div>
+        </label>
+
         <div>
           <p class="text-xl font-bold text-primary leading-tight">{{ usuario()!.nome }}</p>
           <span class="inline-block mt-1 px-3 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-widest"
             [ngClass]="isAnfitriao() ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-container'">
             {{ isAnfitriao() ? 'Anfitrião' : 'Colega' }}
           </span>
+          <p class="text-xs text-on-surface-variant mt-1 opacity-70">Clique na foto para alterar</p>
         </div>
       </div>
 
