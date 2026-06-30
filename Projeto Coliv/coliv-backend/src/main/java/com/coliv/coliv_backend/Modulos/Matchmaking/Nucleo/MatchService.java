@@ -39,19 +39,23 @@ class MatchService implements IMatchmaking {
         );
     }
 
-    // Quando o ANFITRIÃO aceita um colega recomendado, o match já nasce ACEITO.
-    public MatchResponse criarAceito(
-            Long colegaId,
-            Long anfitriaoId
-    ) {
+    // Quando o ANFITRIÃO aceita um colega recomendado.
+    // Se o colega já demonstrou interesse (match PENDENTE), atualiza para ACEITO.
+    // Caso contrário, cria um match ACEITO diretamente.
+    @Transactional
+    public MatchResponse criarAceito(Long colegaId, Long anfitriaoId) {
 
-        Match match = new Match();
+        Match match = repository
+                .findByColegaIdAndAnfitriaoIdAndStatus(colegaId, anfitriaoId, StatusMatch.PENDENTE)
+                .orElseGet(() -> {
+                    Match novo = new Match();
+                    novo.setColegaId(colegaId);
+                    novo.setAnfitriaoId(anfitriaoId);
+                    novo.setCriadoEm(LocalDateTime.now());
+                    return novo;
+                });
 
-        match.setColegaId(colegaId);
-        match.setAnfitriaoId(anfitriaoId);
         match.setStatus(StatusMatch.ACEITO);
-        match.setCriadoEm(LocalDateTime.now());
-
         match = repository.save(match);
 
         return new MatchResponse(
@@ -94,6 +98,18 @@ class MatchService implements IMatchmaking {
     public List<MatchResponse> listar() {
         return repository.findAll().stream().map(match -> new MatchResponse(match.getId(), match.getColegaId(),
                 match.getAnfitriaoId(), match.getStatus())).toList();
+    }
+
+    public List<MatchResponse> listarPorColega(Long colegaId) {
+        return repository.findByColegaId(colegaId).stream()
+                .map(m -> new MatchResponse(m.getId(), m.getColegaId(), m.getAnfitriaoId(), m.getStatus()))
+                .toList();
+    }
+
+    public List<MatchResponse> listarPorAnfitriao(Long anfitriaoId) {
+        return repository.findByAnfitriaoId(anfitriaoId).stream()
+                .map(m -> new MatchResponse(m.getId(), m.getColegaId(), m.getAnfitriaoId(), m.getStatus()))
+                .toList();
     }
 
     public MatchResponse buscar(Long id) {

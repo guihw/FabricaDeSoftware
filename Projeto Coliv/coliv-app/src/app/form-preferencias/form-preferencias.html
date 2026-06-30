@@ -48,7 +48,7 @@
     <div [class]="isAnfitriao() ? 'md:col-span-12' : 'md:col-span-8'"
          class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_24px_48px_rgba(0,0,0,0.03)]">
       <h2 class="font-headline text-2xl font-bold mb-2">
-        {{ isAnfitriao() ? 'Localização do Imóvel' : 'Faixa de Investimento' }}
+        {{ isAnfitriao() ? 'Endereço Pessoal' : 'Faixa de Investimento' }}
       </h2>
 
       <!-- Colega: sliders de preço -->
@@ -75,15 +75,15 @@
         </p>
       </ng-container>
 
-      <!-- Anfitrião: localização apenas informativa -->
+      <!-- Anfitrião: endereço pessoal -->
       <ng-container *ngIf="isAnfitriao()">
-        <p class="text-on-surface-variant text-sm mb-6">Onde fica seu imóvel?</p>
+        <p class="text-on-surface-variant text-sm mb-6">Informe seu endereço pessoal (diferente do endereço do imóvel anunciado).</p>
       </ng-container>
 
       <!-- Localização (ambos) -->
       <div class="mt-4">
         <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant mb-1 block">
-          {{ isAnfitriao() ? 'Bairro / Cidade' : 'Onde prefere morar?' }}
+          {{ isAnfitriao() ? 'Endereço pessoal (Bairro / Cidade)' : 'Onde prefere morar?' }}
         </label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">location_on</span>

@@ -54,7 +54,7 @@ class CardAnfitriaoServiceTest {
     }
 
     private UsuarioDTO usuarioMock(Long id) {
-        return new UsuarioDTO(id, "Teste", "teste@email.com");
+        return new UsuarioDTO(id, "Teste", "teste@email.com", false, null);
     }
 
     @Test

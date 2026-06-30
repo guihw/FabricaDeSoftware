@@ -1,0 +1,108 @@
+<app-top-navbar-component>
+  <a [routerLink]="feedLink"
+     class="p-2 rounded-full bg-surface-container-low active:scale-95 transition-all">
+    <span class="material-symbols-outlined text-primary">arrow_back</span>
+  </a>
+</app-top-navbar-component>
+
+<main class="max-w-2xl mx-auto px-6 pt-8 pb-32">
+
+  <section class="mb-8">
+    <h1 class="font-headline font-bold text-3xl text-on-surface tracking-tight">
+      {{ isAnfitriao ? 'Suas Conversas' : 'Matches' }}
+    </h1>
+    <p class="text-on-surface-variant text-sm mt-1">
+      {{ isAnfitriao
+        ? 'Acompanhe o status dos convites enviados'
+        : 'Veja seus matches e convites recebidos' }}
+    </p>
+  </section>
+
+  <!-- Carregando -->
+  <div *ngIf="carregando()" class="space-y-3">
+    <div *ngFor="let i of [1,2,3]"
+      class="bg-surface-container-low rounded-2xl h-20 animate-pulse">
+    </div>
+  </div>
+
+  <!-- Erro -->
+  <div *ngIf="!carregando() && erro()"
+    class="flex flex-col items-center gap-3 py-16 text-center">
+    <span class="material-symbols-outlined text-5xl text-error opacity-60">error_outline</span>
+    <p class="text-on-surface-variant font-medium">{{ erro() }}</p>
+  </div>
+
+  <!-- Estado vazio para colega sem matches -->
+  <div *ngIf="!carregando() && !erro() && itens().length === 0 && !isAnfitriao"
+    class="flex flex-col items-center gap-4 py-20 text-center">
+    <div class="w-20 h-20 bg-surface-container-low rounded-full flex items-center justify-center">
+      <span class="material-symbols-outlined text-4xl text-outline opacity-50">waving_hand</span>
+    </div>
+    <h2 class="font-headline font-bold text-xl text-on-surface">Nenhum match ainda</h2>
+    <p class="text-on-surface-variant text-sm max-w-xs leading-relaxed">
+      Você ainda não deu match com nenhum anfitrião. Explore o feed e demonstre interesse em imóveis!
+    </p>
+    <a routerLink="/feedcolega"
+      class="mt-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm active:scale-95 transition-all">
+      Explorar imóveis
+    </a>
+  </div>
+
+  <!-- Estado vazio para anfitrião sem matches -->
+  <div *ngIf="!carregando() && !erro() && itens().length === 0 && isAnfitriao"
+    class="flex flex-col items-center gap-4 py-20 text-center">
+    <div class="w-20 h-20 bg-surface-container-low rounded-full flex items-center justify-center">
+      <span class="material-symbols-outlined text-4xl text-outline opacity-50">people</span>
+    </div>
+    <h2 class="font-headline font-bold text-xl text-on-surface">Nenhuma conversa ainda</h2>
+    <p class="text-on-surface-variant text-sm max-w-xs leading-relaxed">
+      Nenhum colega aceitou seu interesse ainda. Explore o feed para encontrar colegas!
+    </p>
+    <a routerLink="/feedanfitriao"
+      class="mt-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm active:scale-95 transition-all">
+      Explorar colegas
+    </a>
+  </div>
+
+  <!-- Lista de matches -->
+  <div *ngIf="!carregando() && !erro() && itens().length > 0" class="space-y-3">
+    <button *ngFor="let item of itens()"
+      (click)="abrirChat(item)"
+      class="w-full bg-surface-container-lowest rounded-2xl p-4
+             flex items-center gap-4 text-left
+             active:scale-[0.98] transition-all duration-150
+             hover:shadow-md hover:shadow-primary/5 border border-outline-variant/10">
+
+      <!-- Avatar -->
+      <div class="w-12 h-12 rounded-full bg-surface-container flex-shrink-0
+                  flex items-center justify-center text-primary font-bold text-lg">
+        {{ item.nomeOutro.charAt(0).toUpperCase() }}
+      </div>
+
+      <!-- Info -->
+      <div class="flex-grow min-w-0">
+        <p class="font-bold text-on-surface leading-tight truncate">{{ item.nomeOutro }}</p>
+        <p class="text-xs text-on-surface-variant mt-0.5">
+          {{ isAnfitriao ? 'Colega' : 'Anfitrião' }}
+        </p>
+      </div>
+
+      <!-- Status do convite (apenas anfitrião) -->
+      <ng-container *ngIf="isAnfitriao">
+        <span [ngClass]="corStatusConvite(item.convite)"
+          class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg flex-shrink-0">
+          {{ labelStatusConvite(item.convite) }}
+        </span>
+      </ng-container>
+
+      <!-- Badge de convite pendente para colega -->
+      <ng-container *ngIf="!isAnfitriao && item.convite?.status === 'PENDENTE'">
+        <span class="w-3 h-3 rounded-full bg-secondary animate-pulse flex-shrink-0"></span>
+      </ng-container>
+
+      <span class="material-symbols-outlined text-outline-variant flex-shrink-0">chevron_right</span>
+    </button>
+  </div>
+</main>
+
+<app-navbar-bottom></app-navbar-bottom>

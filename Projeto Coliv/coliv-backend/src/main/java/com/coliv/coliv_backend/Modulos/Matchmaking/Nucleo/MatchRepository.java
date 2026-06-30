@@ -9,4 +9,6 @@ interface MatchRepository extends JpaRepository<Match, Long> {
     List<Match> findByColegaId(Long colegaId);
 
     List<Match> findByAnfitriaoId(Long anfitriaoId);
+
+    java.util.Optional<Match> findByColegaIdAndAnfitriaoIdAndStatus(Long colegaId, Long anfitriaoId, StatusMatch status);
 }

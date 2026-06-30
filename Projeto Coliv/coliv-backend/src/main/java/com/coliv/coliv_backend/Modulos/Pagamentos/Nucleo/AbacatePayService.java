@@ -9,6 +9,7 @@ import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacateTransparentR
 import com.coliv.coliv_backend.Modulos.Pagamentos.Nucleo.dto.AbacateTransparentResultData;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestClientResponseException;
 
 @Service
@@ -55,7 +56,12 @@ public class AbacatePayService implements IAbacatePay {
             );
         } catch (RestClientResponseException e) {
             throw new IllegalStateException(
-                    "Erro ao chamar a AbacatePay: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(),
+                    "Serviço de pagamento retornou erro: " + e.getStatusCode() + " - " + e.getResponseBodyAsString(),
+                    e
+            );
+        } catch (RestClientException e) {
+            throw new IllegalStateException(
+                    "Não foi possível conectar ao serviço de pagamento. Tente novamente em instantes.",
                     e
             );
         }

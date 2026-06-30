@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Tag(name = "Matches", description = "Criação e gerenciamento de matches entre colega e anfitrião. Endpoints públicos (não requerem token).")
 @RestController
 @RequestMapping("/matches")
@@ -50,5 +52,19 @@ class MatchController {
     @DeleteMapping("/{id}")
     public void cancelar(@PathVariable Long id) {
         service.cancelar(id);
+    }
+
+    @Operation(summary = "Listar matches do colega")
+    @SecurityRequirements
+    @GetMapping("/colega/{colegaId}")
+    public List<MatchResponse> listarPorColega(@PathVariable Long colegaId) {
+        return service.listarPorColega(colegaId);
+    }
+
+    @Operation(summary = "Listar matches do anfitrião")
+    @SecurityRequirements
+    @GetMapping("/anfitriao/{anfitriaoId}")
+    public List<MatchResponse> listarPorAnfitriao(@PathVariable Long anfitriaoId) {
+        return service.listarPorAnfitriao(anfitriaoId);
     }
 }

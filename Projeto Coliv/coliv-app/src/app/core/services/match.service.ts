@@ -31,4 +31,12 @@ export class MatchService extends ApiService {
   cancelar(id: number): Observable<void> {
     return this.delete<void>(`/matches/${id}`);
   }
+
+  listarPorColega(colegaId: number): Observable<MatchResponse[]> {
+    return this.get<MatchResponse[]>(`/matches/colega/${colegaId}`);
+  }
+
+  listarPorAnfitriao(anfitriaoId: number): Observable<MatchResponse[]> {
+    return this.get<MatchResponse[]>(`/matches/anfitriao/${anfitriaoId}`);
+  }
 }

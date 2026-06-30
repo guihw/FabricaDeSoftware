@@ -99,13 +99,28 @@
 
     <!-- Botão like — stopPropagation para não abrir detalhe -->
     <button (click)="onLike($event)"
-      class="w-full text-on-primary font-label text-sm font-bold tracking-[0.05em]
-             py-3 rounded-xl uppercase active:scale-[0.98] transition-transform
-             bg-gradient-to-br from-primary to-primary-container
-             flex items-center justify-center gap-2 flex-shrink-0">
-      Tenho Interesse
-      <span class="material-symbols-outlined text-base"
-        style="font-variation-settings: 'FILL' 1;">favorite</span>
+      [disabled]="curtido"
+      [class.bg-secondary-container]="curtido"
+      [class.text-on-secondary-container]="curtido"
+      [class.cursor-default]="curtido"
+      [class.bg-gradient-to-br]="!curtido"
+      [class.from-primary]="!curtido"
+      [class.to-primary-container]="!curtido"
+      [class.text-on-primary]="!curtido"
+      class="w-full font-label text-sm font-bold tracking-[0.05em]
+             py-3 rounded-xl uppercase transition-all duration-200
+             flex items-center justify-center gap-2 flex-shrink-0
+             active:scale-[0.98]">
+      <ng-container *ngIf="!curtido">
+        Tenho Interesse
+        <span class="material-symbols-outlined text-base"
+          style="font-variation-settings: 'FILL' 1;">favorite</span>
+      </ng-container>
+      <ng-container *ngIf="curtido">
+        <span class="material-symbols-outlined text-base"
+          style="font-variation-settings: 'FILL' 1;">check_circle</span>
+        Interesse Enviado
+      </ng-container>
     </button>
   </div>
 </article>

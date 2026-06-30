@@ -19,6 +19,9 @@ public abstract class Usuario {
     @Column(name = "possui_plano_id")
     private boolean possuiPlano = false;
 
+    @Column(name = "foto_perfil_id")
+    private Long fotoPerfilId;
+
     public Usuario(){}
 
     public Usuario(String nome, String cpf, String email, String senha) {
@@ -83,5 +86,13 @@ public abstract class Usuario {
 
     public void setPossuiPlano(boolean possuiPlano) {
         this.possuiPlano = possuiPlano;
+    }
+
+    public Long getFotoPerfilId() {
+        return fotoPerfilId;
+    }
+
+    public void setFotoPerfilId(Long fotoPerfilId) {
+        this.fotoPerfilId = fotoPerfilId;
     }
 }

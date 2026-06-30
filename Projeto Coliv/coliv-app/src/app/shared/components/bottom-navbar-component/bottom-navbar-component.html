@@ -14,7 +14,7 @@
   </a>
 
   <!-- Chat -->
-  <a routerLink="/chat"
+  <a routerLink="/chats"
      routerLinkActive="nav-tab--active"
      [routerLinkActiveOptions]="{ exact: false }"
      class="nav-tab flex flex-col items-center gap-1 px-5 py-2
@@ -42,7 +42,9 @@
      class="nav-tab flex flex-col items-center gap-1 px-5 py-2
             text-on-surface-variant hover:text-primary
             transition-all active:scale-90 duration-300 rounded-2xl">
-    <span class="material-symbols-outlined">person</span>
+    <span *ngIf="!fotoPerfilUrl()" class="material-symbols-outlined">person</span>
+    <img *ngIf="fotoPerfilUrl()" [src]="fotoPerfilUrl()!" alt="Foto"
+         class="w-6 h-6 rounded-full object-cover ring-2 ring-primary/30"/>
     <span class="text-[10px] font-bold uppercase tracking-widest">Perfil</span>
   </a>
 

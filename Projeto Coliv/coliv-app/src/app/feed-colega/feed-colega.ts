@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 import {
@@ -45,16 +45,17 @@ export class FeedColega implements OnInit {
 
   private colegaId: number | null = null;
   likeEmAndamento = signal<Set<number>>(new Set());
+  fotoPerfilUrl = signal<string | null>(null);
 
   constructor(
     private recomendacaoService: RecomendacaoService,
     private matchService: MatchService,
-    private router: Router,
   ) {}
 
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
     this.colegaId = id ? Number(id) : null;
+    this.fotoPerfilUrl.set(sessionStorage.getItem('coliv_foto_perfil'));
 
     if (!this.colegaId) {
       this.erro.set('Sessão expirada. Faça login novamente.');
@@ -121,6 +122,9 @@ export class FeedColega implements OnInit {
     // local se necessário (ex: refletir o selo "Plus" em algum lugar da tela).
   }
 
+  // Set de anfitriãoIds já curtidos (match criado com sucesso)
+  curtidos = signal<Set<number>>(new Set());
+
   // ── Like (pode vir do card ou do modal) ───────────────────────
 
   onLike(rec: RecomendacaoCardAnfitriaoDTO): void {
@@ -128,24 +132,26 @@ export class FeedColega implements OnInit {
 
     const anfitriaoId = rec.card.anfitriaoId;
 
+    // Já curtido: não faz nada
+    if (this.curtidos().has(anfitriaoId)) return;
     if (this.likeEmAndamento().has(anfitriaoId)) return;
+
     this.likeEmAndamento.update(s => new Set([...s, anfitriaoId]));
     this.erro.set(null);
 
     this.matchService.criar(this.colegaId, anfitriaoId).subscribe({
-      next: (match) => {
+      next: () => {
         this.likeEmAndamento.update(s => {
           const next = new Set(s); next.delete(anfitriaoId); return next;
         });
-        sessionStorage.setItem('coliv_chat_outro_id',   String(anfitriaoId));
-        sessionStorage.setItem('coliv_chat_outro_nome', rec.card.nome);
-        this.router.navigate(['/chat', match.id]);
+        // Marca como curtido — sem redirecionar ao chat
+        this.curtidos.update(s => new Set([...s, anfitriaoId]));
       },
       error: (err: ApiError) => {
         this.likeEmAndamento.update(s => {
           const next = new Set(s); next.delete(anfitriaoId); return next;
         });
-        this.erro.set(err.message ?? 'Não foi possível criar o match. Tente novamente.');
+        this.erro.set(err.message ?? 'Não foi possível registrar o interesse. Tente novamente.');
       },
     });
   }
