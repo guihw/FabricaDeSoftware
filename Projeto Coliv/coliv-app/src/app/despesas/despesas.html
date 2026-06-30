@@ -247,9 +247,10 @@
     </div>
 
     <div class="bg-surface-container-low p-5 rounded-2xl space-y-2">
-      <span class="material-symbols-outlined text-primary">pending</span>
+      <span class="material-symbols-outlined" [class.text-primary]="totalPendente() > 0" [class.text-secondary]="totalPendente() === 0">pending</span>
       <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Pendente</p>
-      <p class="text-xl font-black text-primary">R$ {{ totalPendente() | number:'1.2-2' }}</p>
+      <p *ngIf="totalPendente() > 0" class="text-xl font-black text-primary">R$ {{ totalPendente() | number:'1.2-2' }}</p>
+      <p *ngIf="totalPendente() === 0" class="text-sm font-bold text-secondary">nada pendente</p>
     </div>
   </section>
 
@@ -303,10 +304,16 @@
                 {{ gasto.tipodeDespesa }}
               </span>
               <!-- Indicador de pago -->
-              <span *ngIf="euJaPaguei(gasto)"
+              <span *ngIf="euJaPaguei(gasto) && !todosJaPagaram(gasto)"
                 class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide
                        text-secondary bg-secondary-container/40">
                 ✓ Pago
+              </span>
+              <!-- Badge quitada -->
+              <span *ngIf="todosJaPagaram(gasto)"
+                class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide
+                       text-primary bg-primary-container/60">
+                ✓ Quitada
               </span>
             </div>
           </div>

@@ -78,7 +78,13 @@ export class Despesas implements OnInit {
     }, 0)
   );
 
-  totalPendente = computed(() => this.soma() - this.totalPago());
+  totalPendente = computed(() =>
+    this.despesas().reduce((acc, d) => {
+      if (d.pago.includes(this.usuarioId)) return acc;
+      const minhaDivisao = d.divisoes.find(dv => dv.usuarioId === this.usuarioId);
+      return acc + (minhaDivisao ? minhaDivisao.valor : 0);
+    }, 0)
+  );
 
   ngOnInit(): void {
     this.usuarioId   = this.authService.getUserId() ?? 0;
@@ -344,6 +350,11 @@ export class Despesas implements OnInit {
 
   euJaPaguei(despesa: DespesaView): boolean {
     return despesa.pago.includes(this.usuarioId);
+  }
+
+  todosJaPagaram(despesa: DespesaView): boolean {
+    if (despesa.divisoes.length === 0) return false;
+    return despesa.divisoes.every(div => despesa.pago.includes(div.usuarioId));
   }
 
   minhaParte(despesa: DespesaView): number {
