@@ -110,14 +110,12 @@ export class Perfil implements OnInit {
 
         // Salva ID no backend
         const dados: any = { fotoPerfilId: arquivo.id };
-        const req = this.isAnfitriao()
-          ? this.anfitriaoService.editar(id, dados)
-          : this.colegaService.editar(id, dados);
-
-        req.subscribe({
-          next: () => this.uploadandoFoto.set(false),
-          error: () => this.uploadandoFoto.set(false),
-        });
+        const onDone = () => this.uploadandoFoto.set(false);
+        if (this.isAnfitriao()) {
+          this.anfitriaoService.editar(id, dados).subscribe({ next: onDone, error: onDone });
+        } else {
+          this.colegaService.editar(id, dados).subscribe({ next: onDone, error: onDone });
+        }
       },
       error: (err: ApiError) => {
         this.uploadandoFoto.set(false);
