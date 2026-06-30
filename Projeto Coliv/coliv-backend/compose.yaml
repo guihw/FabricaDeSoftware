@@ -19,6 +19,9 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+      RABBITMQ_ENABLED_PLUGINS_FILE: /etc/rabbitmq/enabled_plugins
+    entrypoint: >
+      sh -c "rabbitmq-plugins enable rabbitmq_stomp && rabbitmq-server"
     healthcheck:
       test: [ "CMD", "rabbitmq-diagnostics", "check_running" ]
       interval: 5s

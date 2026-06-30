@@ -107,6 +107,7 @@ export class ChatList implements OnInit {
 
   abrirChat(item: ItemChat): void {
     sessionStorage.setItem('coliv_chat_outro_id', String(item.outroId));
+    sessionStorage.setItem('coliv_chat_outro_nome', item.nomeOutro);
     this.router.navigate(['/chat', item.matchId]);
   }
 
