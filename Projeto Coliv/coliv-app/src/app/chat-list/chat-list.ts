@@ -7,6 +7,8 @@ import { catchError, map, switchMap } from 'rxjs/operators';
 import { AuthService } from '../core/services/auth.service';
 import { MatchService, MatchResponse } from '../core/services/match.service';
 import { ConviteService, ConviteResponse } from '../core/services/convite.service';
+import { AnfitriaoService } from '../core/services/anfitriao.service';
+import { ColegaService } from '../core/services/colega.service';
 import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 
@@ -36,6 +38,8 @@ export class ChatList implements OnInit {
     private auth: AuthService,
     private matchService: MatchService,
     private conviteService: ConviteService,
+    private anfitriaoService: AnfitriaoService,
+    private colegaService: ColegaService,
     private router: Router,
   ) {}
 
@@ -60,18 +64,31 @@ export class ChatList implements OnInit {
         const aceitos = matches.filter(m => m.status === 'ACEITO');
         if (aceitos.length === 0) return of([] as ItemChat[]);
 
-        const tasks = aceitos.map(m =>
-          this.conviteService.buscarPorMatch(m.id).pipe(
-            catchError(() => of(null)),
-            map((convite): ItemChat => ({
+        const tasks = aceitos.map(m => {
+          const outroId = this.isAnfitriao ? m.colegaId : m.anfitriaoId;
+          const nome$ = this.isAnfitriao
+            ? this.colegaService.buscarPorId(outroId).pipe(
+                map(c => c.nome),
+                catchError(() => of('Colega'))
+              )
+            : this.anfitriaoService.buscarPorId(outroId).pipe(
+                map(a => a.nome),
+                catchError(() => of('Anfitrião'))
+              );
+
+          return forkJoin({
+            convite: this.conviteService.buscarPorMatch(m.id).pipe(catchError(() => of(null))),
+            nome: nome$,
+          }).pipe(
+            map(({ convite, nome }): ItemChat => ({
               matchId: m.id,
-              nomeOutro: sessionStorage.getItem('coliv_chat_outro_nome') ?? 'Usuário',
-              outroId: this.isAnfitriao ? m.colegaId : m.anfitriaoId,
+              nomeOutro: nome,
+              outroId,
               statusMatch: m.status,
               convite,
             }))
-          )
-        );
+          );
+        });
 
         return forkJoin(tasks);
       }),

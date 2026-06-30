@@ -66,6 +66,10 @@ export class Perfil implements OnInit {
         next: (user) => {
           this.usuario.set(user);
           this.form.patchValue({ nome: user.nome, email: user.email });
+          if (!user.fotoPerfil) {
+            sessionStorage.removeItem('coliv_foto_perfil');
+            this.fotoPerfilUrl.set(null);
+          }
           this.carregando.set(false);
         },
         error: () => {
@@ -78,6 +82,10 @@ export class Perfil implements OnInit {
         next: (user) => {
           this.usuario.set(user);
           this.form.patchValue({ nome: user.nome, email: user.email });
+          if (!user.fotoPerfilId) {
+            sessionStorage.removeItem('coliv_foto_perfil');
+            this.fotoPerfilUrl.set(null);
+          }
           this.carregando.set(false);
         },
         error: () => {
