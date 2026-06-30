@@ -38,6 +38,8 @@ export class FeedAnfitriao implements OnInit {
   pagina = signal(0);
   temProxima = signal(false);
   acaoEmAndamento  = signal<Set<number>>(new Set());
+  /** Colegas para quem o anfitrião demonstrou interesse mas ainda sem match confirmado */
+  interessados = signal<Set<number>>(new Set());
   fotoPerfilUrl = signal<string | null>(null);
 
   // ── Estado do modal ───────────────────────────────────────────
@@ -118,6 +120,7 @@ export class FeedAnfitriao implements OnInit {
 
     const colegaId = rec.colegaId;
     if (this.acaoEmAndamento().has(colegaId)) return;
+    if (this.interessados().has(colegaId)) return;
 
     this.acaoEmAndamento.update(s => new Set([...s, colegaId]));
     this.erro.set(null);
@@ -125,14 +128,21 @@ export class FeedAnfitriao implements OnInit {
     this.matchService.criarAceito(colegaId, this.anfitriaoId).subscribe({
       next: (match) => {
         this.acaoEmAndamento.update(s => { const n = new Set(s); n.delete(colegaId); return n; });
-        this.recomendacoes.update(lista => lista.filter(r => r.colegaId !== colegaId));
-        sessionStorage.setItem('coliv_chat_outro_id',   String(colegaId));
-        sessionStorage.setItem('coliv_chat_outro_nome', rec.nome);
-        this.router.navigate(['/chat', match.id]);
+
+        if (match.status === 'ACEITO') {
+          // Match real: ambos demonstraram interesse — abre chat
+          this.recomendacoes.update(lista => lista.filter(r => r.colegaId !== colegaId));
+          sessionStorage.setItem('coliv_chat_outro_id',   String(colegaId));
+          sessionStorage.setItem('coliv_chat_outro_nome', rec.nome);
+          this.router.navigate(['/chat', match.id]);
+        } else {
+          // Interesse registrado, aguardando colega confirmar
+          this.interessados.update(s => new Set([...s, colegaId]));
+        }
       },
       error: (err: ApiError) => {
         this.acaoEmAndamento.update(s => { const n = new Set(s); n.delete(colegaId); return n; });
-        this.erro.set(err.message ?? 'Não foi possível criar o match. Tente novamente.');
+        this.erro.set(err.message ?? 'Não foi possível registrar o interesse. Tente novamente.');
       },
     });
   }

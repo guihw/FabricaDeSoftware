@@ -2,7 +2,7 @@ import { Component, Input, Output, EventEmitter, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RecomendacaoColegaDTO } from '../../../core/services/recomendacao.service';
 
-type DirecaoSaida = 'direita' | 'esquerda' | null;
+type DirecaoSaida = 'esquerda' | null;
 
 @Component({
   selector: 'app-colegas-card-component',
@@ -14,6 +14,10 @@ type DirecaoSaida = 'direita' | 'esquerda' | null;
 export class ColegasCardComponent {
 
   @Input({ required: true }) recomendacao!: RecomendacaoColegaDTO;
+  /** Anfitrião já demonstrou interesse mas o colega ainda não confirmou */
+  @Input() interesse = false;
+  /** API call em andamento — desabilita botão durante o request */
+  @Input() carregandoInteresse = false;
 
   @Output() aceitar = new EventEmitter<RecomendacaoColegaDTO>();
   @Output() recusar = new EventEmitter<RecomendacaoColegaDTO>();
@@ -40,6 +44,10 @@ export class ColegasCardComponent {
     return 'bg-surface-container-high text-on-surface-variant';
   }
 
+  get botaoDesabilitado(): boolean {
+    return this.interesse || this.carregandoInteresse || !!this.direcaoSaida();
+  }
+
   onCardClick(): void {
     if (this.direcaoSaida()) return;
     this.verDetalhes.emit(this.recomendacao);
@@ -47,9 +55,8 @@ export class ColegasCardComponent {
 
   onAceitar(event: MouseEvent): void {
     event.stopPropagation();
-    if (this.direcaoSaida()) return;
-    this.direcaoSaida.set('direita');
-    setTimeout(() => this.aceitar.emit(this.recomendacao), 350);
+    if (this.botaoDesabilitado) return;
+    this.aceitar.emit(this.recomendacao);
   }
 
   onRecusar(event: MouseEvent): void {
