@@ -39,6 +39,8 @@ const TRABALHO: Record<string, { label: string; icon: string }> = {
 export class ColegaDetailModalComponent implements OnChanges {
   @Input() recomendacao: RecomendacaoColegaDTO | null = null;
   @Input() aberto = false;
+  /** Anfitrião já demonstrou interesse mas o colega ainda não confirmou */
+  @Input() interesse = false;
 
   @Output() fechar  = new EventEmitter<void>();
   @Output() aceitar = new EventEmitter<RecomendacaoColegaDTO>();

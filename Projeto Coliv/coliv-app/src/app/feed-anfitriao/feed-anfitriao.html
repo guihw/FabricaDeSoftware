@@ -102,6 +102,8 @@
       <app-colegas-card-component
         *ngFor="let rec of recomendacoes()"
         [recomendacao]="rec"
+        [interesse]="interessados().has(rec.colegaId)"
+        [carregandoInteresse]="acaoEmAndamento().has(rec.colegaId)"
         (aceitar)="onAceitar($event)"
         (recusar)="onRecusar($event)"
         (verDetalhes)="abrirDetalhe($event)">
@@ -162,6 +164,7 @@
 <app-colega-detail-modal
   [recomendacao]="recomendacaoSelecionada"
   [aberto]="modalAberto"
+  [interesse]="recomendacaoSelecionada ? interessados().has(recomendacaoSelecionada.colegaId) : false"
   (fechar)="fecharDetalhe()"
   (aceitar)="onAceitar($event)"
   (recusar)="onRecusar($event)">
