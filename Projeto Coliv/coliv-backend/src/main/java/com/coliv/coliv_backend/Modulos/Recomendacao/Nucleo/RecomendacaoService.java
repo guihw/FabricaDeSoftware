@@ -1,5 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Recomendacao.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Arquivos.Nucleo.ArquivoRepository;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Contratos.CardAnfitriaoResponseDTO;
 import com.coliv.coliv_backend.Modulos.Cards.CardAnfitriao.Nucleo.CardAnfitriaoService;
 import com.coliv.coliv_backend.Modulos.Formularios.Preferencias_Colega.Contratos.IPreferenciasColega;
@@ -29,6 +30,7 @@ public class RecomendacaoService {
     @Autowired private CardAnfitriaoService cardAnfitriaoService;
     @Autowired private ColegaRepository colegaRepository;
     @Autowired private CompatibilidadeService compatibilidade;
+    @Autowired private ArquivoRepository arquivoRepository;
 
     public FeedPageDTO<RecomendacaoCardAnfitriaoDTO> feedColega(
             Long colegaId, int pagina, int tamanhoPagina) {
@@ -77,12 +79,20 @@ public class RecomendacaoService {
                         int score = compatibilidade.calcularScore(
                                 prefColega, cardAnfitriao, anfitriaoId);
 
+                        String fotoPerfil = null;
+                        if (colega.getFotoPerfilId() != null) {
+                            fotoPerfil = arquivoRepository.findById(colega.getFotoPerfilId())
+                                    .map(a -> a.getUrl())
+                                    .orElse(null);
+                        }
+
                         return new RecomendacaoColegaDTO(
                                 colega.getId(),
                                 colega.getNome(),
                                 colega.getEmail(),
                                 score,
-                                compatibilidade.gerarResumo(score));
+                                compatibilidade.gerarResumo(score),
+                                fotoPerfil);
                     } catch (Exception e) {
                         return null;
                     }

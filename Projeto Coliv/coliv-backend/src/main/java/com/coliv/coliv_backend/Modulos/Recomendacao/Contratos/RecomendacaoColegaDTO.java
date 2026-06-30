@@ -5,5 +5,6 @@ public record RecomendacaoColegaDTO(
         String nome,
         String email,
         int score,
-        String resumoCompatibilidade
+        String resumoCompatibilidade,
+        String fotoPerfil
 ) {}
