@@ -74,9 +74,11 @@
              hover:shadow-md hover:shadow-primary/5 border border-outline-variant/10">
 
       <!-- Avatar -->
-      <div class="w-12 h-12 rounded-full bg-surface-container flex-shrink-0
+      <div class="w-12 h-12 rounded-full bg-surface-container flex-shrink-0 overflow-hidden
                   flex items-center justify-center text-primary font-bold text-lg">
-        {{ item.nomeOutro.charAt(0).toUpperCase() }}
+        <img *ngIf="item.fotoOutro" [src]="item.fotoOutro" alt="Foto de {{ item.nomeOutro }}"
+             class="w-full h-full object-cover"/>
+        <span *ngIf="!item.fotoOutro">{{ item.nomeOutro.charAt(0).toUpperCase() }}</span>
       </div>
 
       <!-- Info -->

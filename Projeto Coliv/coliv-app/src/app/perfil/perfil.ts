@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../core/services/auth.service';
+import { NotificacaoService } from '../core/services/notificacao.service';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
 import { ArquivoService } from '../core/services/arquivo.service';
@@ -35,6 +36,7 @@ export class Perfil implements OnInit {
 
   constructor(
     private auth: AuthService,
+    private notificacaoService: NotificacaoService,
     private anfitriaoService: AnfitriaoService,
     private colegaService: ColegaService,
     private arquivoService: ArquivoService,
@@ -201,6 +203,7 @@ export class Perfil implements OnInit {
   }
 
   logout(): void {
+    this.notificacaoService.desconectar();
     this.auth.logout();
     this.router.navigate(['/login']);
   }

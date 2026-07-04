@@ -1,6 +1,7 @@
 package com.coliv.coliv_backend.Modulos.Matchmaking.Nucleo;
 
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.*;
+import com.coliv.coliv_backend.Modulos.Notificacao.Contratos.NovoMatchEvent;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,87 +22,57 @@ class MatchService implements IMatchmaking {
 
     @Transactional
     public MatchResponse criar(MatchDTO dto) {
-
-        // Se o anfitrião já demonstrou interesse (PENDENTE com iniciador ANFITRIAO),
-        // completa o match e cria o chat em vez de gerar um segundo PENDENTE.
-        Optional<Match> pendenteAnfitriaoOpt = repository
-                .findByColegaIdAndAnfitriaoIdAndStatus(dto.colegaId(), dto.anfitriaoId(), StatusMatch.PENDENTE);
-
-        if (pendenteAnfitriaoOpt.isPresent()) {
-            Match match = pendenteAnfitriaoOpt.get();
-            match.setStatus(StatusMatch.ACEITO);
-            match = repository.save(match);
-
-            publisher.publishEvent(new MatchEvento(
-                    new MatchEventoDTO(dto.anfitriaoId(), dto.colegaId(), match.getIniciador())));
-
-            return new MatchResponse(
-                    match.getId(),
-                    match.getColegaId(),
-                    match.getAnfitriaoId(),
-                    match.getStatus()
-            );
-        }
-
-        Match match = new Match();
-        match.setColegaId(dto.colegaId());
-        match.setAnfitriaoId(dto.anfitriaoId());
-        match.setIniciador(dto.iniciador());
-        match.setStatus(StatusMatch.PENDENTE);
-        match.setCriadoEm(LocalDateTime.now());
-
-        match = repository.save(match);
-
-        return new MatchResponse(
-                match.getId(),
-                match.getColegaId(),
-                match.getAnfitriaoId(),
-                match.getStatus()
-        );
+        return demonstrarInteresse(dto.colegaId(), dto.anfitriaoId(), dto.iniciador());
     }
 
     // Quando o ANFITRIÃO demonstra interesse em um colega recomendado.
-    // Se o colega já demonstrou interesse (match PENDENTE com iniciador COLEGA),
-    // completa o match como ACEITO e cria o chat.
-    // Caso contrário, registra apenas o interesse do anfitrião (PENDENTE com iniciador ANFITRIAO).
     @Transactional
     public MatchResponse criarAceito(Long colegaId, Long anfitriaoId) {
+        return demonstrarInteresse(colegaId, anfitriaoId, TipoUsuario.ANFITRIAO);
+    }
 
-        Optional<Match> pendenteOpt = repository
-                .findByColegaIdAndAnfitriaoIdAndStatus(colegaId, anfitriaoId, StatusMatch.PENDENTE);
+    // Registra o interesse de um dos lados (colega ou anfitrião) no outro.
+    // - Se já existe match ACEITO para o par: idempotente, apenas retorna (não duplica, não republica eventos).
+    // - Se já existe PENDENTE do MESMO lado (ex.: clique repetido/refresh): idempotente, retorna o existente.
+    // - Se já existe PENDENTE do lado OPOSTO: os dois demonstraram interesse — completa o match e dispara os eventos.
+    // - Caso contrário: cria um novo PENDENTE.
+    // Matches CANCELADO são ignorados, permitindo um novo interesse ser registrado após um cancelamento.
+    private MatchResponse demonstrarInteresse(Long colegaId, Long anfitriaoId, TipoUsuario iniciador) {
 
-        if (pendenteOpt.isPresent()) {
-            // Colega já demonstrou interesse — match completo
-            Match match = pendenteOpt.get();
+        Optional<Match> existenteOpt = repository
+                .findFirstByColegaIdAndAnfitriaoIdAndStatusNot(colegaId, anfitriaoId, StatusMatch.CANCELADO);
+
+        if (existenteOpt.isPresent()) {
+            Match match = existenteOpt.get();
+
+            if (match.getStatus() == StatusMatch.ACEITO || match.getIniciador() == iniciador) {
+                return toResponse(match);
+            }
+
             match.setStatus(StatusMatch.ACEITO);
             match = repository.save(match);
 
             publisher.publishEvent(new MatchEvento(
-                    new MatchEventoDTO(anfitriaoId, colegaId, match.getIniciador())));
+                    new MatchEventoDTO(match.getAnfitriaoId(), match.getColegaId(), match.getIniciador())));
+            publisher.publishEvent(new NovoMatchEvent(match.getAnfitriaoId(), match.getColegaId(), match.getId()));
 
-            return new MatchResponse(
-                    match.getId(),
-                    match.getColegaId(),
-                    match.getAnfitriaoId(),
-                    match.getStatus()
-            );
+            return toResponse(match);
         }
 
-        // Anfitrião vai primeiro — registra interesse sem abrir chat
         Match match = new Match();
         match.setColegaId(colegaId);
         match.setAnfitriaoId(anfitriaoId);
-        match.setIniciador(TipoUsuario.ANFITRIAO);
+        match.setIniciador(iniciador);
         match.setStatus(StatusMatch.PENDENTE);
         match.setCriadoEm(LocalDateTime.now());
         match = repository.save(match);
 
-        return new MatchResponse(
-                match.getId(),
-                match.getColegaId(),
-                match.getAnfitriaoId(),
-                match.getStatus()
-        );
+        return toResponse(match);
+    }
+
+    private MatchResponse toResponse(Match match) {
+        return new MatchResponse(match.getId(), match.getColegaId(), match.getAnfitriaoId(), match.getStatus(),
+                match.getIniciador());
     }
 
     @Transactional
@@ -115,6 +86,7 @@ class MatchService implements IMatchmaking {
 
         publisher.publishEvent(new MatchEvento(new MatchEventoDTO(match.getAnfitriaoId(), match.getColegaId(),
                 match.getIniciador())));
+        publisher.publishEvent(new NovoMatchEvent(match.getAnfitriaoId(), match.getColegaId(), match.getId()));
 
         repository.save(match);
     }
@@ -134,20 +106,17 @@ class MatchService implements IMatchmaking {
 
     @Override
     public List<MatchResponse> listar() {
-        return repository.findAll().stream().map(match -> new MatchResponse(match.getId(), match.getColegaId(),
-                match.getAnfitriaoId(), match.getStatus())).toList();
+        return repository.findAll().stream().map(this::toResponse).toList();
     }
 
+    @Override
     public List<MatchResponse> listarPorColega(Long colegaId) {
-        return repository.findByColegaId(colegaId).stream()
-                .map(m -> new MatchResponse(m.getId(), m.getColegaId(), m.getAnfitriaoId(), m.getStatus()))
-                .toList();
+        return repository.findByColegaId(colegaId).stream().map(this::toResponse).toList();
     }
 
+    @Override
     public List<MatchResponse> listarPorAnfitriao(Long anfitriaoId) {
-        return repository.findByAnfitriaoId(anfitriaoId).stream()
-                .map(m -> new MatchResponse(m.getId(), m.getColegaId(), m.getAnfitriaoId(), m.getStatus()))
-                .toList();
+        return repository.findByAnfitriaoId(anfitriaoId).stream().map(this::toResponse).toList();
     }
 
     public MatchResponse buscar(Long id) {
@@ -157,12 +126,7 @@ class MatchService implements IMatchmaking {
                         .orElseThrow(() ->
                                 new MatchIdNaoEncontrado(id));
 
-        return new MatchResponse(
-                match.getId(),
-                match.getColegaId(),
-                match.getAnfitriaoId(),
-                match.getStatus()
-        );
+        return toResponse(match);
     }
 
     @Override

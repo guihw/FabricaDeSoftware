@@ -3,6 +3,7 @@ package com.coliv.coliv_backend.Modulos.Financeiro.Nucleo;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoDTO;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoEditada;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoIdNaoEncontrado;
+import com.coliv.coliv_backend.Modulos.Notificacao.Contratos.DespesaAdicionadaEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
@@ -27,7 +28,11 @@ class DivisaoService {
         divisao.setArquivoId(dto.arquivoId());
         divisao.setValor(dto.valor());
 
-        return repository.save(divisao);
+        Divisao salva = repository.save(divisao);
+
+        publisher.publishEvent(new DespesaAdicionadaEvent(salva.getUsuarioId(), salva.getDespesaId(), salva.getValor()));
+
+        return salva;
     }
 
     public List<Divisao> listar() {

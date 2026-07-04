@@ -1,4 +1,3 @@
-// src/app/core/services/auth.service.ts
 import { Injectable, signal } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { ApiService } from './api.service';
@@ -21,6 +20,7 @@ export class AuthService extends ApiService {
         sessionStorage.setItem(this.TOKEN_KEY, res.token);
         sessionStorage.setItem('coliv_user_id', String(res.id));
         sessionStorage.setItem('coliv_user_tipo', res.tipo.toLowerCase());
+        sessionStorage.removeItem('coliv_foto_perfil');
         this.isLoggedIn.set(true);
       })
     );
@@ -33,6 +33,7 @@ export class AuthService extends ApiService {
     sessionStorage.removeItem('coliv_foto_perfil');
     sessionStorage.removeItem('coliv_chat_outro_id');
     sessionStorage.removeItem('coliv_chat_outro_nome');
+    sessionStorage.removeItem('coliv_chat_outro_foto');
     this.isLoggedIn.set(false);
   }
 

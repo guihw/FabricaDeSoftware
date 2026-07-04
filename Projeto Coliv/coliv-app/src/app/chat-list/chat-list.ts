@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, Observable } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { AuthService } from '../core/services/auth.service';
@@ -9,12 +9,14 @@ import { MatchService, MatchResponse } from '../core/services/match.service';
 import { ConviteService, ConviteResponse } from '../core/services/convite.service';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
+import { ArquivoService } from '../core/services/arquivo.service';
 import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 
 interface ItemChat {
   matchId: number;
   nomeOutro: string;
+  fotoOutro: string | null;
   outroId: number;
   statusMatch: string;
   convite: ConviteResponse | null;
@@ -40,6 +42,7 @@ export class ChatList implements OnInit {
     private conviteService: ConviteService,
     private anfitriaoService: AnfitriaoService,
     private colegaService: ColegaService,
+    private arquivoService: ArquivoService,
     private router: Router,
   ) {}
 
@@ -66,23 +69,24 @@ export class ChatList implements OnInit {
 
         const tasks = aceitos.map(m => {
           const outroId = this.isAnfitriao ? m.colegaId : m.anfitriaoId;
-          const nome$ = this.isAnfitriao
+          const dados$ = this.isAnfitriao
             ? this.colegaService.buscarPorId(outroId).pipe(
-                map(c => c.nome),
-                catchError(() => of('Colega'))
+                switchMap(c => this.resolverFoto(c.nome, c.fotoPerfilId ?? null)),
+                catchError(() => of({ nome: 'Colega', fotoUrl: null as string | null }))
               )
             : this.anfitriaoService.buscarPorId(outroId).pipe(
-                map(a => a.nome),
-                catchError(() => of('Anfitrião'))
+                switchMap(a => this.resolverFoto(a.nome, a.fotoPerfil)),
+                catchError(() => of({ nome: 'Anfitrião', fotoUrl: null as string | null }))
               );
 
           return forkJoin({
             convite: this.conviteService.buscarPorMatch(m.id).pipe(catchError(() => of(null))),
-            nome: nome$,
+            dados: dados$,
           }).pipe(
-            map(({ convite, nome }): ItemChat => ({
+            map(({ convite, dados }): ItemChat => ({
               matchId: m.id,
-              nomeOutro: nome,
+              nomeOutro: dados.nome,
+              fotoOutro: dados.fotoUrl,
               outroId,
               statusMatch: m.status,
               convite,
@@ -105,9 +109,22 @@ export class ChatList implements OnInit {
     });
   }
 
+  private resolverFoto(nome: string, fotoId: number | null): Observable<{ nome: string; fotoUrl: string | null }> {
+    if (!fotoId) return of({ nome, fotoUrl: null });
+    return this.arquivoService.buscarPorId(fotoId).pipe(
+      map(a => ({ nome, fotoUrl: a.url })),
+      catchError(() => of({ nome, fotoUrl: null }))
+    );
+  }
+
   abrirChat(item: ItemChat): void {
     sessionStorage.setItem('coliv_chat_outro_id', String(item.outroId));
     sessionStorage.setItem('coliv_chat_outro_nome', item.nomeOutro);
+    if (item.fotoOutro) {
+      sessionStorage.setItem('coliv_chat_outro_foto', item.fotoOutro);
+    } else {
+      sessionStorage.removeItem('coliv_chat_outro_foto');
+    }
     this.router.navigate(['/chat', item.matchId]);
   }
 

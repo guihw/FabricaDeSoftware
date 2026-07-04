@@ -7,9 +7,11 @@ import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemRequestDT
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Mensagem.MensagemResponseDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat.Chat;
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Chat.ChatRepository;
+import com.coliv.coliv_backend.Modulos.Notificacao.Contratos.NovaMensagemEvent;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +24,8 @@ public class MensagemDiretaService {
     private MensagemDiretaRepository msgRepository;
     @Autowired
     private ChatRepository chatRepository;
+    @Autowired
+    private ApplicationEventPublisher publisher;
 
     public List<MensagemResponseDTO> listar() {
         return msgRepository.findAll().stream().map(mensagem ->
@@ -66,6 +70,11 @@ public class MensagemDiretaService {
         Chat chat = chatRepository.findById(chatId).orElseThrow(() -> new ChatIDNaoEncontrado(chatId));
         chat.addMensagens(mensagemDireta);
         chatRepository.save(chat);
+
+        Long destinatarioId = dto.tipoUsuario() == TipoUsuario.ANFITRIAO
+                ? chat.getColegaId()
+                : chat.getAnfitriaoId();
+        publisher.publishEvent(new NovaMensagemEvent(destinatarioId, chatId));
 
         return new MensagemResponseDTO(mensagemDireta.getSequencialId(), mensagemDireta.getTexto(),
                 mensagemDireta.getTipoUsuario(), mensagemDireta.getCriadoEm(), mensagemDireta.getArquivoId(),

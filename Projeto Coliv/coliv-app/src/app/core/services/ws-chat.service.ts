@@ -28,7 +28,7 @@ export class WsChatService implements OnDestroy {
       reconnectDelay: 5000,
       onConnect: () => {
         this.subscription = this.client!.subscribe(
-          `/topic/chat/${chatId}`,
+          `/topic/chat.${chatId}`,
           (frame) => {
             this.ngZone.run(() => {
               const evento: WsMensagemEvento = JSON.parse(frame.body);

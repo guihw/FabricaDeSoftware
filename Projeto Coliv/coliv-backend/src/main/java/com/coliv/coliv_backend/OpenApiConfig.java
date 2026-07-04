@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
     info = @Info(
         title = "Coliv API",
         version = "1.0.0",
-        description = "API da plataforma Coliv — matching entre anfitriões e colegas de moradia compartilhada."
+        description = "API da plataforma Coliv, matching entre anfitriões e colegas de moradia compartilhada."
     ),
     servers = @Server(url = "/", description = "Servidor atual"),
     security = @SecurityRequirement(name = "bearerAuth")
