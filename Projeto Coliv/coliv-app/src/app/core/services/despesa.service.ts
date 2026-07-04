@@ -35,7 +35,7 @@ export class DespesaService extends ApiService {
     return this.patch<Despesa>(`${this.PATH}/${id}/desmarcar/${usuarioId}`);
   }
 
-  protected patch<T>(path: string, body?: unknown): Observable<T> {
+  protected override patch<T>(path: string, body?: unknown): Observable<T> {
     return this.http
       .patch<T>(`${this.baseUrl}${path}`, body ?? {});
   }

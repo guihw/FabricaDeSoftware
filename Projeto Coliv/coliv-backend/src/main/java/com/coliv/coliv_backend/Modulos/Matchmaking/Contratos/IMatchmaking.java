@@ -11,4 +11,8 @@ public interface IMatchmaking {
     MatchResponse buscar(Long id);
 
     Long getUserId(Long id, TipoUsuario tipoUsuario);
+
+    List<MatchResponse> listarPorColega(Long colegaId);
+
+    List<MatchResponse> listarPorAnfitriao(Long anfitriaoId);
 }

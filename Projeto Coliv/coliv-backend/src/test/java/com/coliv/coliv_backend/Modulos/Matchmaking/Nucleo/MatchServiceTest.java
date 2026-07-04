@@ -1,14 +1,17 @@
 package com.coliv.coliv_backend.Modulos.Matchmaking.Nucleo;
 
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchDTO;
+import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchEvento;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchIdNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.MatchResponse;
+import com.coliv.coliv_backend.Modulos.Notificacao.Contratos.NovoMatchEvent;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Optional;
 
@@ -22,6 +25,9 @@ class MatchServiceTest {
 
     @Mock
     private MatchRepository repository;
+
+    @Mock
+    private ApplicationEventPublisher publisher;
 
     @InjectMocks
     private MatchService service;
@@ -47,6 +53,72 @@ class MatchServiceTest {
 
         verify(repository, times(1))
                 .save(any(Match.class));
+    }
+
+    @Test
+    void criar_quandoJaAceito_eIdempotenteENaoDuplica() {
+
+        Match matchExistente = new Match();
+        matchExistente.setId(5L);
+        matchExistente.setColegaId(1L);
+        matchExistente.setAnfitriaoId(2L);
+        matchExistente.setIniciador(TipoUsuario.ANFITRIAO);
+        matchExistente.setStatus(StatusMatch.ACEITO);
+
+        when(repository.findFirstByColegaIdAndAnfitriaoIdAndStatusNot(1L, 2L, StatusMatch.CANCELADO))
+                .thenReturn(Optional.of(matchExistente));
+
+        MatchResponse response = service.criar(new MatchDTO(TipoUsuario.COLEGA, 1L, 2L));
+
+        assertEquals(StatusMatch.ACEITO, response.status());
+        assertEquals(5L, response.id());
+        verify(repository, never()).save(any());
+        verify(publisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void criar_quandoPendenteDoMesmoIniciador_eIdempotenteENaoDuplica() {
+
+        // Colega já demonstrou interesse antes (ex.: clicou, deu refresh e clicou de novo)
+        Match matchExistente = new Match();
+        matchExistente.setId(7L);
+        matchExistente.setColegaId(1L);
+        matchExistente.setAnfitriaoId(2L);
+        matchExistente.setIniciador(TipoUsuario.COLEGA);
+        matchExistente.setStatus(StatusMatch.PENDENTE);
+
+        when(repository.findFirstByColegaIdAndAnfitriaoIdAndStatusNot(1L, 2L, StatusMatch.CANCELADO))
+                .thenReturn(Optional.of(matchExistente));
+
+        MatchResponse response = service.criar(new MatchDTO(TipoUsuario.COLEGA, 1L, 2L));
+
+        assertEquals(StatusMatch.PENDENTE, response.status());
+        assertEquals(7L, response.id());
+        verify(repository, never()).save(any());
+        verify(publisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void criar_quandoPendenteDoOutroIniciador_completaOMatch() {
+
+        // Anfitrião já havia demonstrado interesse; colega curte de volta
+        Match matchExistente = new Match();
+        matchExistente.setId(9L);
+        matchExistente.setColegaId(1L);
+        matchExistente.setAnfitriaoId(2L);
+        matchExistente.setIniciador(TipoUsuario.ANFITRIAO);
+        matchExistente.setStatus(StatusMatch.PENDENTE);
+
+        when(repository.findFirstByColegaIdAndAnfitriaoIdAndStatusNot(1L, 2L, StatusMatch.CANCELADO))
+                .thenReturn(Optional.of(matchExistente));
+        when(repository.save(any(Match.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        MatchResponse response = service.criar(new MatchDTO(TipoUsuario.COLEGA, 1L, 2L));
+
+        assertEquals(StatusMatch.ACEITO, response.status());
+        verify(repository, times(1)).save(any(Match.class));
+        verify(publisher, times(1)).publishEvent(any(MatchEvento.class));
+        verify(publisher, times(1)).publishEvent(any(NovoMatchEvent.class));
     }
 
     @Test

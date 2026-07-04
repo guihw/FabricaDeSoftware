@@ -3,6 +3,8 @@ package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Convite;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.*;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Convite.ConviteStatus;
 import com.coliv.coliv_backend.Modulos.Matchmaking.Contratos.IMatchmaking;
+import com.coliv.coliv_backend.Modulos.Notificacao.Contratos.ConviteAceitoEvent;
+import com.coliv.coliv_backend.Modulos.Notificacao.Contratos.ConviteRecebidoEvent;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.TipoUsuario;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,7 @@ public class ConviteService {
         publisher.publishEvent(new ConviteEnviado(new ConviteInfoDTO(convite.getId(), matchId, convite.getTexto(),
                 convite.getCriadoEm(), convite.getAtualizadoEm())
         ));
+        publisher.publishEvent(new ConviteRecebidoEvent(convite.getColegaId(), convite.getId()));
 
         return new ConviteResponseDTO(convite.getId(), convite.getConviteStatus(), convite.getTexto(),
                 convite.getCriadoEm(), convite.getAnfitriaoId(), convite.getColegaId(), convite.getMatchId(),
@@ -90,6 +93,7 @@ public class ConviteService {
                 new ConviteInfoDTO(convite.getId(), matchId, convite.getTexto(), convite.getCriadoEm(),
                         convite.getAtualizadoEm()
                 ))));
+        publisher.publishEvent(new ConviteAceitoEvent(convite.getAnfitriaoId(), convite.getId()));
     }
 
     @Transactional

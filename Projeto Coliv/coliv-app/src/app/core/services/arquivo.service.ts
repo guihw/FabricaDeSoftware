@@ -15,4 +15,8 @@ export class ArquivoService extends ApiService {
     files.forEach(f => formData.append('arquivos', f));
     return this.post<ArquivoDTO[]>('/arquivos/upload', formData);
   }
+
+  buscarPorId(id: number): Observable<ArquivoDTO> {
+    return this.get<ArquivoDTO>(`/arquivos/${id}`);
+  }
 }

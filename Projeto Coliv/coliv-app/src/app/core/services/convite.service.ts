@@ -133,7 +133,7 @@ export class ConviteService extends ApiService {
   }
 
   // ── helper PATCH ──────────────────────────────────────────────
-  protected patch<T>(path: string, body?: unknown): Observable<T> {
+  protected override patch<T>(path: string, body?: unknown): Observable<T> {
     return this.http
       .patch<T>(`${this.baseUrl}${path}`, body ?? {});
   }

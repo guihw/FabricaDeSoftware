@@ -25,6 +25,7 @@ export class Chat implements OnInit, OnDestroy {
   colegaId = 0;
   usuarioId = 0;
   nomeOutro = '';
+  fotoOutro: string | null = null;
   tipoUsuario: 'ANFITRIAO' | 'COLEGA' = 'COLEGA';
 
   mensagens: MensagemResponse[] = [];
@@ -64,6 +65,7 @@ export class Chat implements OnInit, OnDestroy {
     }
 
     this.nomeOutro = sessionStorage.getItem('coliv_chat_outro_nome') ?? 'Usuário';
+    this.fotoOutro = sessionStorage.getItem('coliv_chat_outro_foto') || null;
 
     this.chatApi.listarChatsPorUsuario(this.usuarioId, this.tipoUsuario).subscribe({
       next: (chats) => {
