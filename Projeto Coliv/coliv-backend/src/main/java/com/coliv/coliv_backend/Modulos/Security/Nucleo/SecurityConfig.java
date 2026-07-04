@@ -85,6 +85,8 @@ public class SecurityConfig {
 
         configuration.setAllowedOrigins(List.of(
                 "https://fabrica-de-software-eight.vercel.app", // Produção Vercel
+                "https://localhost",
+                "http://localhost",
                 "http://localhost:4200",                        // Frontend Angular Local
                 "http://localhost",                             // Mobile Local
                 "capacitor://localhost",                        // Capacitor Mobile
