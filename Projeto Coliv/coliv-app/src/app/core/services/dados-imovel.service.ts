@@ -19,8 +19,8 @@ export class DadosImovelService extends ApiService {
 
   // GET /formularios/dados-imovel/anfitriao/{anfitriaoId}
   // Retorna 204 (sem corpo) se o anúncio ainda não estiver completo.
-  buscarPorAnfitriaoIdSeCompleto(anfitriaoId: number): Observable<DadosImovelDTO> {
-    return this.get<DadosImovelDTO>(`${this.PATH}/anfitriao/${anfitriaoId}`);
+  buscarPorAnfitriaoIdSeCompleto(anfitriaoId: number): Observable<DadosImovel> {
+    return this.get<DadosImovel>(`${this.PATH}/anfitriao/${anfitriaoId}`);
   }
 
   // POST /formularios/dados-imovel/{anfitriaoId}/novo-dados-imovel
@@ -39,5 +39,10 @@ export class DadosImovelService extends ApiService {
   // DELETE /formularios/dados-imovel/excluir/{id}
   excluir(id: number): Observable<void> {
     return this.delete<void>(`${this.PATH}/excluir/${id}`);
+  }
+
+  // DELETE /formularios/dados-imovel/anfitriao/{anfitriaoId}
+  excluirPorAnfitriaoId(anfitriaoId: number): Observable<void> {
+    return this.delete<void>(`${this.PATH}/anfitriao/${anfitriaoId}`);
   }
 }

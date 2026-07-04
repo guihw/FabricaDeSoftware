@@ -11,6 +11,9 @@ import { ColegasCardComponent } from './components/colegas-card-component/colega
 import { ColegaDetailModalComponent } from './components/colega-detail-modal/colega-detail-modal';
 import { ApiError } from '../core/services/api.service';
 import { MatchService } from '../core/services/match.service';
+import { CardAnfitriaoService, CardAnfitriaoResponseDTO } from '../core/services/card-anfitriao.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-feed-anfitriao',
@@ -28,12 +31,16 @@ import { MatchService } from '../core/services/match.service';
 })
 export class FeedAnfitriao implements OnInit {
 
-  recomendacoes    = signal<RecomendacaoColegaDTO[]>([]);
-  carregando       = signal(true);
-  erro             = signal<string | null>(null);
-  pagina           = signal(0);
-  temProxima       = signal(false);
+  recomendacoes = signal<RecomendacaoColegaDTO[]>([]);
+  imovelCard = signal<CardAnfitriaoResponseDTO | null>(null);
+  carregando  = signal(true);
+  erro = signal<string | null>(null);
+  pagina = signal(0);
+  temProxima = signal(false);
   acaoEmAndamento  = signal<Set<number>>(new Set());
+  /** Colegas para quem o anfitrião demonstrou interesse mas ainda sem match confirmado */
+  interessados = signal<Set<number>>(new Set());
+  fotoPerfilUrl = signal<string | null>(null);
 
   // ── Estado do modal ───────────────────────────────────────────
   modalAberto              = false;
@@ -44,18 +51,24 @@ export class FeedAnfitriao implements OnInit {
   constructor(
     private recomendacaoService: RecomendacaoService,
     private matchService: MatchService,
+    private cardAnfitriaoService: CardAnfitriaoService,
     private router: Router,
   ) {}
 
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
     this.anfitriaoId = id ? Number(id) : null;
+    this.fotoPerfilUrl.set(sessionStorage.getItem('coliv_foto_perfil'));
 
     if (!this.anfitriaoId) {
       this.erro.set('Sessão expirada. Faça login novamente.');
       this.carregando.set(false);
       return;
     }
+
+    this.cardAnfitriaoService.getCardInfo(this.anfitriaoId).pipe(
+      catchError(() => of(null))
+    ).subscribe(card => this.imovelCard.set(card));
 
     this.carregarPagina(0);
   }
@@ -107,6 +120,7 @@ export class FeedAnfitriao implements OnInit {
 
     const colegaId = rec.colegaId;
     if (this.acaoEmAndamento().has(colegaId)) return;
+    if (this.interessados().has(colegaId)) return;
 
     this.acaoEmAndamento.update(s => new Set([...s, colegaId]));
     this.erro.set(null);
@@ -114,14 +128,21 @@ export class FeedAnfitriao implements OnInit {
     this.matchService.criarAceito(colegaId, this.anfitriaoId).subscribe({
       next: (match) => {
         this.acaoEmAndamento.update(s => { const n = new Set(s); n.delete(colegaId); return n; });
-        this.recomendacoes.update(lista => lista.filter(r => r.colegaId !== colegaId));
-        sessionStorage.setItem('coliv_chat_outro_id',   String(colegaId));
-        sessionStorage.setItem('coliv_chat_outro_nome', rec.nome);
-        this.router.navigate(['/chat', match.id]);
+
+        if (match.status === 'ACEITO') {
+          // Match real: ambos demonstraram interesse — abre chat
+          this.recomendacoes.update(lista => lista.filter(r => r.colegaId !== colegaId));
+          sessionStorage.setItem('coliv_chat_outro_id',   String(colegaId));
+          sessionStorage.setItem('coliv_chat_outro_nome', rec.nome);
+          this.router.navigate(['/chat', match.id]);
+        } else {
+          // Interesse registrado, aguardando colega confirmar
+          this.interessados.update(s => new Set([...s, colegaId]));
+        }
       },
       error: (err: ApiError) => {
         this.acaoEmAndamento.update(s => { const n = new Set(s); n.delete(colegaId); return n; });
-        this.erro.set(err.message ?? 'Não foi possível criar o match. Tente novamente.');
+        this.erro.set(err.message ?? 'Não foi possível registrar o interesse. Tente novamente.');
       },
     });
   }

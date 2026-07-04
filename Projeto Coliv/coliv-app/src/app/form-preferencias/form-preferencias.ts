@@ -14,6 +14,8 @@ import {
   HabitoDeTrabalho,
 } from '../core/services/preferencias-colega.service';
 
+import { ArquivoService } from '../core/services/arquivo.service';
+import { ColegaService } from '../core/services/colega.service';
 import { ApiError } from '../core/services/api.service';
 
 // ── Tipos locais para as seleções visuais ─────────────────────
@@ -51,9 +53,11 @@ export class FormPreferencias implements OnInit {
 
   // ── Estado do formulário ───────────────────────────────────
   form!: FormGroup;
-  carregando = signal(false);
-  erro       = signal<string | null>(null);
-  sucesso    = signal(false);
+  carregando    = signal(false);
+  erro          = signal<string | null>(null);
+  sucesso       = signal(false);
+  uploadandoFoto = signal(false);
+  fotoPerfilUrl  = signal<string | null>(null);
 
   // ── Seleções visuais (estado real ligado ao envio) ─────────
   ritmoSono     = signal<RitmoSono>('EQUILIBRADO');
@@ -92,6 +96,8 @@ export class FormPreferencias implements OnInit {
     private router: Router,
     private preferenciasAnfitriaoService: PreferenciasAnfitriaoService,
     private preferenciasColegaService: PreferenciasColegaService,
+    private arquivoService: ArquivoService,
+    private colegaService: ColegaService,
   ) {}
 
   ngOnInit(): void {
@@ -100,6 +106,9 @@ export class FormPreferencias implements OnInit {
 
     this.isAnfitriao.set(tipo === 'anfitriao');
     this.userId.set(id ? Number(id) : null);
+
+    const fotoSalva = sessionStorage.getItem('coliv_foto_perfil');
+    if (fotoSalva) this.fotoPerfilUrl.set(fotoSalva);
 
     this.form = this.fb.group({
       localizacao:   ['', Validators.required],
@@ -125,6 +134,38 @@ export class FormPreferencias implements OnInit {
 
   togglePets(): void {
     this.aceitaPets.update(v => !v);
+  }
+
+  // ── Upload de foto (colega) ────────────────────────────────
+
+  onFotoSelecionada(event: Event): void {
+    if (this.isAnfitriao()) return;
+
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const id = this.userId();
+    if (!id) return;
+
+    this.uploadandoFoto.set(true);
+    this.erro.set(null);
+
+    this.arquivoService.upload([input.files[0]]).subscribe({
+      next: (arquivos) => {
+        if (!arquivos || arquivos.length === 0) return;
+        const arquivo = arquivos[0];
+        sessionStorage.setItem('coliv_foto_perfil', arquivo.url);
+        this.fotoPerfilUrl.set(arquivo.url);
+        this.colegaService.editar(id, { fotoPerfilId: arquivo.id }).subscribe({
+          next: () => this.uploadandoFoto.set(false),
+          error: () => this.uploadandoFoto.set(false),
+        });
+      },
+      error: (err: ApiError) => {
+        this.uploadandoFoto.set(false);
+        this.erro.set(err.message ?? 'Erro ao enviar foto.');
+      },
+    });
   }
 
   // ── Envio ──────────────────────────────────────────────────

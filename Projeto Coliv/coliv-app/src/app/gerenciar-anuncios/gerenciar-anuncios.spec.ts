@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -19,8 +19,10 @@ describe('GerenciarAnuncios', () => {
     localizacao: 'Pinheiros, SP',
     quartos: 3,
     classificacao: 4.5,
-    precoMensal: 2500 as any,
+    precoMensal: 2500,
     arquivos: [],
+    tipoVaga: null,
+    comodidades: [],
   };
 
   const cardIncompleto: CardAnfitriaoResponseDTO = {
@@ -78,35 +80,32 @@ describe('GerenciarAnuncios', () => {
     expect(component.precoFormatado()).toContain('2.500');
   });
 
-  it('deve tratar 404 como "sem anúncio ainda" (não como erro)', fakeAsync(() => {
+  it('deve tratar 404 como "sem anúncio ainda" (não como erro)', () => {
     cardServiceSpy.getCardInfo.mockReturnValue(
       throwError(() => ({ status: 404, message: 'Recurso não encontrado.' }))
     );
     component.carregar();
-    tick();
     expect(component.anuncio()).toBeNull();
     expect(component.erro()).toBeNull();
     expect(component.carregando()).toBe(false);
-  }));
+  });
 
-  it('deve exibir mensagem de erro quando getCardInfo falha com erro genérico', fakeAsync(() => {
+  it('deve exibir mensagem de erro quando getCardInfo falha com erro genérico', () => {
     cardServiceSpy.getCardInfo.mockReturnValue(
       throwError(() => ({ status: 500, message: 'Erro interno no servidor.' }))
     );
     component.carregar();
-    tick();
     expect(component.erro()).toBe('Erro interno no servidor.');
     expect(component.carregando()).toBe(false);
-  }));
+  });
 
-  it('deve exibir erro de sessão quando não há user_id no sessionStorage', fakeAsync(() => {
+  it('deve exibir erro de sessão quando não há user_id no sessionStorage', () => {
     sessionStorage.clear();
     fixture = TestBed.createComponent(GerenciarAnuncios);
     component = fixture.componentInstance;
     fixture.detectChanges();
-    tick();
     expect(component.erro()).toContain('Sessão');
     expect(component.carregando()).toBe(false);
     expect(cardServiceSpy.getCardInfo).not.toHaveBeenCalledWith(NaN);
-  }));
+  });
 });

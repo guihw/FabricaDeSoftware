@@ -61,9 +61,16 @@ class DadosImovelController {
         return dis.editarDadosImovel(anfitriaoId, dto);
     }
 
-    @Operation(summary = "Excluir dados do imóvel")
+    @Operation(summary = "Excluir dados do imóvel por ID interno")
     @DeleteMapping("excluir/{id}")
     public void excluir(@PathVariable Long id) {
         dis.excluir(id);
+    }
+
+    @Operation(summary = "Resetar anúncio do anfitrião para rascunho")
+    @DeleteMapping("anfitriao/{anfitriaoId}")
+    public ResponseEntity<Void> excluirPorAnfitriaoId(@PathVariable Long anfitriaoId) {
+        dis.excluirPorAnfitriaoId(anfitriaoId);
+        return ResponseEntity.noContent().build();
     }
 }

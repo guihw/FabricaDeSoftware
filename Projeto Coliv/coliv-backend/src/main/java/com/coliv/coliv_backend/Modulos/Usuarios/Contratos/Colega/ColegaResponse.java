@@ -4,5 +4,8 @@ public record ColegaResponse(
         Long id,
         String nome,
         String email,
-        String descricao, Float classificacao, Long preferenciaColegaId) {
+        String descricao,
+        Float classificacao,
+        Long preferenciaColegaId,
+        Long fotoPerfilId) {
 }

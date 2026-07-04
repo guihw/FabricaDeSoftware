@@ -1,0 +1,90 @@
+<app-top-navbar-component>
+  <div class="flex items-center gap-6">
+    <a *ngIf="estaLogado"
+       [routerLink]="feedLink"
+       class="text-on-surface-variant font-bold hover:text-primary transition-colors hidden md:block">
+      Feed
+    </a>
+    <a *ngIf="!estaLogado"
+       routerLink="/"
+       class="text-on-surface-variant font-bold hover:text-primary transition-colors hidden md:block">
+      Início
+    </a>
+  </div>
+</app-top-navbar-component>
+
+<main class="max-w-3xl mx-auto w-full px-6 pt-12 pb-32">
+
+  <!-- Hero -->
+  <section class="mb-12 text-center">
+    <div class="inline-flex w-16 h-16 rounded-2xl bg-primary/10 items-center justify-center mb-5">
+      <span class="material-symbols-outlined text-primary text-4xl">contact_support</span>
+    </div>
+    <h1 class="font-headline text-4xl font-extrabold text-primary tracking-tight mb-3">Central de Ajuda</h1>
+    <p class="text-on-surface-variant text-lg max-w-md mx-auto leading-relaxed">
+      Encontre respostas para as perguntas mais comuns sobre o Coliv.
+    </p>
+  </section>
+
+  <!-- Tópicos rápidos -->
+  <section class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-12">
+    <button *ngFor="let s of secoes; let i = index"
+      (click)="toggle(s.titulo)"
+      class="flex flex-col items-center gap-2 p-4 rounded-2xl bg-surface-container-low border-2 transition-all hover:bg-surface-container-high text-center"
+      [class.border-primary]="aberto() === s.titulo"
+      [class.border-transparent]="aberto() !== s.titulo">
+      <span class="material-symbols-outlined text-primary">{{ s.icone }}</span>
+      <span class="text-xs font-bold text-on-surface leading-tight">{{ s.titulo }}</span>
+    </button>
+  </section>
+
+  <!-- FAQ por seção -->
+  <div class="space-y-8">
+    <div *ngFor="let secao of secoes" class="space-y-3">
+
+      <!-- Cabeçalho da seção -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-9 h-9 rounded-xl bg-secondary/10 flex items-center justify-center flex-shrink-0">
+          <span class="material-symbols-outlined text-secondary text-xl">{{ secao.icone }}</span>
+        </div>
+        <h2 class="font-headline text-lg font-bold text-primary">{{ secao.titulo }}</h2>
+      </div>
+
+      <!-- Itens da seção -->
+      <div *ngFor="let item of secao.itens; let j = index"
+           class="bg-surface-container-low rounded-2xl border border-outline-variant/10 overflow-hidden transition-all">
+
+        <button
+          (click)="toggle(secao.titulo + j)"
+          class="w-full flex items-center justify-between px-6 py-4 text-left gap-4 hover:bg-surface-container-high transition-colors">
+          <span class="font-semibold text-on-surface text-sm leading-snug">{{ item.pergunta }}</span>
+          <span class="material-symbols-outlined text-on-surface-variant flex-shrink-0 transition-transform duration-300"
+                [class.rotate-180]="aberto() === (secao.titulo + j)">
+            expand_more
+          </span>
+        </button>
+
+        <div *ngIf="aberto() === (secao.titulo + j)"
+             class="px-6 pb-5 text-on-surface-variant text-sm leading-relaxed border-t border-outline-variant/10 pt-4">
+          {{ item.resposta }}
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contato -->
+  <section class="mt-14 rounded-3xl bg-primary/5 border border-outline-variant/10 p-8 flex flex-col items-center text-center gap-4">
+    <span class="material-symbols-outlined text-primary text-4xl">mail</span>
+    <h3 class="font-headline text-xl font-bold text-primary">Não encontrou o que procurava?</h3>
+    <p class="text-on-surface-variant text-sm max-w-sm leading-relaxed">
+      Entre em contato com nossa equipe. Respondemos em até 1 dia útil.
+    </p>
+    <a href="mailto:suporte@coliv.com.br"
+       class="mt-2 bg-gradient-to-br from-primary to-primary-container text-white px-8 py-3 rounded-xl font-bold text-sm tracking-widest hover:shadow-lg hover:shadow-primary/10 active:scale-95 transition-all inline-flex items-center gap-2">
+      <span class="material-symbols-outlined text-lg">send</span>
+      suporte@coliv.com.br
+    </a>
+  </section>
+
+</main>

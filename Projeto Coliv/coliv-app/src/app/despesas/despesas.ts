@@ -1,6 +1,7 @@
 import { Component, inject, OnInit, ViewChild, ElementRef, signal, computed } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 
@@ -8,6 +9,8 @@ import { DespesaService } from '../core/services/despesa.service';
 import { DivisaoService } from '../core/services/divisao.service';
 import { ConviteService } from '../core/services/convite.service';
 import { AuthService } from '../core/services/auth.service';
+import { AnfitriaoService } from '../core/services/anfitriao.service';
+import { ColegaService } from '../core/services/colega.service';
 import { ApiError } from '../core/services/api.service';
 import { Despesa, DespesaDTO, DivisaoDTO, DespesaView, TipoDespesa, Divisao } from '../core/models/despesas.model';
 
@@ -16,15 +19,17 @@ import { TopNavbarComponent }    from '../shared/components/top-navbar-component
 
 @Component({
   selector: 'app-despesas',
-  imports: [CommonModule, ReactiveFormsModule, BottomNavbarComponent, TopNavbarComponent],
+  imports: [CommonModule, ReactiveFormsModule, BottomNavbarComponent, TopNavbarComponent, RouterLink],
   templateUrl: './despesas.html',
   styleUrl: './despesas.css',
 })
 export class Despesas implements OnInit {
-  private despesaService = inject(DespesaService);
-  private divisaoService = inject(DivisaoService);
-  private conviteService = inject(ConviteService);
-  private authService    = inject(AuthService);
+  private despesaService   = inject(DespesaService);
+  private divisaoService   = inject(DivisaoService);
+  private conviteService   = inject(ConviteService);
+  private authService      = inject(AuthService);
+  private anfitriaoService = inject(AnfitriaoService);
+  private colegaService    = inject(ColegaService);
 
   form = new FormGroup({
     nome:           new FormControl('', Validators.required),
@@ -47,6 +52,13 @@ export class Despesas implements OnInit {
   usuarioId    = 0;
   isAnfitriao  = false;
   membrosDaCasa: number[] = [];
+  membrosInfo: { id: number; label: string }[] = [];
+  temColegaAceito = signal(false);
+  temConviteAceito = signal(false);
+
+  // Divisão personalizada
+  divisaoPersonalizada = false;
+  valoresCustomizados: Record<number, number> = {};
 
   despesas         = signal<DespesaView[]>([]);
   despesaSelecionada: DespesaView = this.despesaVazia();
@@ -66,7 +78,13 @@ export class Despesas implements OnInit {
     }, 0)
   );
 
-  totalPendente = computed(() => this.soma() - this.totalPago());
+  totalPendente = computed(() =>
+    this.despesas().reduce((acc, d) => {
+      if (d.pago.includes(this.usuarioId)) return acc;
+      const minhaDivisao = d.divisoes.find(dv => dv.usuarioId === this.usuarioId);
+      return acc + (minhaDivisao ? minhaDivisao.valor : 0);
+    }, 0)
+  );
 
   ngOnInit(): void {
     this.usuarioId   = this.authService.getUserId() ?? 0;
@@ -82,22 +100,72 @@ export class Despesas implements OnInit {
   private carregarMembrosDaCasa() {
     if (this.isAnfitriao) {
       return this.conviteService.listarDoAnfitriao(this.usuarioId).pipe(
-        map(convites => {
-          const colegas = convites.filter(c => c.status === 'ACEITO').map(c => c.colegaId);
-          this.membrosDaCasa = [this.usuarioId, ...colegas];
+        switchMap(convites => {
+          const colegaIds = convites.filter(c => c.status === 'ACEITO').map(c => c.colegaId);
+          this.membrosDaCasa = [this.usuarioId, ...colegaIds];
+          this.temColegaAceito.set(colegaIds.length > 0);
+          this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
+
+          if (colegaIds.length === 0) return of(null);
+
+          return forkJoin(
+            colegaIds.map(id =>
+              this.colegaService.buscarPorId(id).pipe(catchError(() => of(null)))
+            )
+          ).pipe(
+            map(resultados => {
+              colegaIds.forEach((id, i) => {
+                const colega = resultados[i];
+                this.membrosInfo.push({ id, label: colega?.nome ?? `Colega ${i + 1}` });
+              });
+              return null;
+            })
+          );
         }),
-        catchError(() => { this.membrosDaCasa = [this.usuarioId]; return of(null); })
+        catchError(() => {
+          this.membrosDaCasa = [this.usuarioId];
+          this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
+          this.temColegaAceito.set(false);
+          return of(null);
+        })
       );
     }
 
     return this.conviteService.listarParaColega(this.usuarioId).pipe(
-      map(convites => {
+      switchMap(convites => {
         const aceito = convites.find(c => c.status === 'ACEITO');
-        this.membrosDaCasa = aceito
-          ? [aceito.anfitriaoId, this.usuarioId]
-          : [this.usuarioId];
+        if (!aceito) {
+          this.membrosDaCasa = [this.usuarioId];
+          this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
+          this.temConviteAceito.set(false);
+          return of(null);
+        }
+        this.membrosDaCasa = [aceito.anfitriaoId, this.usuarioId];
+        this.temConviteAceito.set(true);
+
+        return this.anfitriaoService.buscarPorId(aceito.anfitriaoId).pipe(
+          map(anf => {
+            this.membrosInfo = [
+              { id: aceito.anfitriaoId, label: anf.nome ?? 'Anfitrião' },
+              { id: this.usuarioId, label: 'Você' },
+            ];
+            return null;
+          }),
+          catchError(() => {
+            this.membrosInfo = [
+              { id: aceito.anfitriaoId, label: 'Anfitrião' },
+              { id: this.usuarioId, label: 'Você' },
+            ];
+            return of(null);
+          })
+        );
       }),
-      catchError(() => { this.membrosDaCasa = [this.usuarioId]; return of(null); })
+      catchError(() => {
+        this.membrosDaCasa = [this.usuarioId];
+        this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
+        this.temConviteAceito.set(false);
+        return of(null);
+      })
     );
   }
 
@@ -155,6 +223,8 @@ export class Despesas implements OnInit {
     this.dialog.nativeElement.close();
     this.form.reset({ tipodeDespesa: 'coletiva', dataVencimento: this.hojeISO(), valor: 0 });
     this.modoEdicao = false;
+    this.divisaoPersonalizada = false;
+    this.valoresCustomizados = {};
   }
 
   editarDespesa(despesa: DespesaView): void {
@@ -169,10 +239,13 @@ export class Despesas implements OnInit {
       tipodeDespesa: despesa.tipodeDespesa,
       descricao: '',
     });
+    this.divisaoPersonalizada = false;
+    this.valoresCustomizados = {};
   }
 
   enviarNovaDespesa(): void {
     if (this.form.invalid || this.salvando()) return;
+    if (!this.divisoesValidas()) return;
 
     this.salvando.set(true);
     const { nome, valor, dataVencimento, tipodeDespesa } = this.form.getRawValue();
@@ -202,14 +275,24 @@ export class Despesas implements OnInit {
       ? this.membrosDaCasa
       : [this.usuarioId];
 
-    const valorPorPessoa = Number((valorTotal / moradores.length).toFixed(2));
+    let dtos: DivisaoDTO[];
 
-    const dtos: DivisaoDTO[] = moradores.map(usuarioId => ({
-      despesaId: despesa.id,
-      usuarioId,
-      arquivoId: null,
-      valor:     valorPorPessoa,
-    }));
+    if (tipo === 'coletiva' && this.divisaoPersonalizada) {
+      dtos = moradores.map(usuarioId => ({
+        despesaId: despesa.id,
+        usuarioId,
+        arquivoId: null,
+        valor: this.valoresCustomizados[usuarioId] ?? 0,
+      }));
+    } else {
+      const valorPorPessoa = Number((valorTotal / moradores.length).toFixed(2));
+      dtos = moradores.map(usuarioId => ({
+        despesaId: despesa.id,
+        usuarioId,
+        arquivoId: null,
+        valor:     valorPorPessoa,
+      }));
+    }
 
     this.divisaoService.criarVarias(dtos).subscribe({
       next:  () => this.finalizarSalvamento(),
@@ -228,6 +311,32 @@ export class Despesas implements OnInit {
     this.erro.set(err.message ?? 'Erro ao salvar despesa.');
   }
 
+  // ── Divisão personalizada ─────────────────────────────────────
+
+  ativarDivisaoPersonalizada(): void {
+    this.divisaoPersonalizada = true;
+    const valorTotal = Number(this.form.get('valor')?.value ?? 0);
+    const perPessoa = Number((valorTotal / this.membrosDaCasa.length).toFixed(2));
+    this.membrosInfo.forEach(m => {
+      this.valoresCustomizados[m.id] = perPessoa;
+    });
+  }
+
+  atualizarValorMembro(id: number, event: Event): void {
+    const input = event.target as HTMLInputElement;
+    this.valoresCustomizados[id] = Number(input.value);
+  }
+
+  somaCustomizada(): number {
+    return Object.values(this.valoresCustomizados).reduce((acc, v) => acc + v, 0);
+  }
+
+  divisoesValidas(): boolean {
+    if (!this.divisaoPersonalizada) return true;
+    const valorTotal = Number(this.form.get('valor')?.value ?? 0);
+    return Math.abs(this.somaCustomizada() - valorTotal) < 0.02;
+  }
+
   // ── Painel lateral ────────────────────────────────────────────
 
   openPanel(despesa: DespesaView): void {
@@ -241,6 +350,11 @@ export class Despesas implements OnInit {
 
   euJaPaguei(despesa: DespesaView): boolean {
     return despesa.pago.includes(this.usuarioId);
+  }
+
+  todosJaPagaram(despesa: DespesaView): boolean {
+    if (despesa.divisoes.length === 0) return false;
+    return despesa.divisoes.every(div => despesa.pago.includes(div.usuarioId));
   }
 
   minhaParte(despesa: DespesaView): number {

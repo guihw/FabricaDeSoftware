@@ -46,7 +46,7 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/ws-conectar/**").permitAll()
+                        .requestMatchers("/ws-connect/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/swagger-ui.html").permitAll()
@@ -54,6 +54,7 @@ public class SecurityConfig {
                         // Cadastro e login são públicos
                         .requestMatchers(HttpMethod.POST, "/usuarios/anfitriao/novo", "/usuarios/colega/novo", "/auth/login").permitAll()
                         .requestMatchers("/validacao/cpf/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/pagamentos/webhook").permitAll()
 
                         // Exclusivo de anfitrião
                         .requestMatchers("/formularios/preferencias-anfitriao/**",

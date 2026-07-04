@@ -25,6 +25,8 @@ export interface RecomendacaoColegaDTO {
   email: string;
   score: number;
   resumoCompatibilidade: string;
+  antecedentesVerificados?: boolean;
+  fotoPerfil?: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

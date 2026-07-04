@@ -1,0 +1,64 @@
+<div *ngIf="aberto"
+  class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+
+  <div class="bg-white rounded-3xl max-w-sm w-full p-8 relative shadow-2xl">
+
+    <button (click)="fecharModal()"
+      class="absolute top-4 right-4 w-9 h-9 rounded-full bg-surface-container-low flex items-center justify-center active:scale-90 transition-all">
+      <span class="material-symbols-outlined text-on-surface-variant text-xl">close</span>
+    </button>
+
+    <!-- Estado: carregando -->
+    <div *ngIf="estado() === 'carregando'" class="flex flex-col items-center gap-4 py-10 text-center">
+      <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-on-surface-variant font-medium text-sm">Gerando seu PIX...</p>
+    </div>
+
+    <!-- Estado: aguardando pagamento -->
+    <div *ngIf="estado() === 'aguardando_pagamento' && pix()" class="flex flex-col items-center gap-5">
+      <div class="text-center">
+        <h2 class="font-headline font-bold text-2xl text-on-surface">Plano Plus</h2>
+        <p class="text-on-surface-variant text-sm font-medium mt-1">Escaneie o QR Code com seu app do banco</p>
+      </div>
+
+      <div class="bg-white p-3 rounded-2xl border-2 border-surface-container-high">
+        <img [src]="pix()!.qrCodeBase64" alt="QR Code Pix" class="w-52 h-52" />
+      </div>
+
+      <button (click)="copiarCodigoPix()"
+        class="w-full flex items-center justify-center gap-2 px-5 py-3 bg-surface-container-low rounded-xl font-bold text-sm text-on-surface active:scale-95 transition-all">
+        <span class="material-symbols-outlined text-base">{{ copiado() ? 'check' : 'content_copy' }}</span>
+        {{ copiado() ? 'Código copiado!' : 'Copiar código Pix' }}
+      </button>
+
+      <div class="flex items-center gap-2 text-on-surface-variant text-xs font-medium">
+        <div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+        Aguardando confirmação do pagamento...
+      </div>
+    </div>
+
+    <!-- Estado: pago -->
+    <div *ngIf="estado() === 'pago'" class="flex flex-col items-center gap-4 py-6 text-center">
+      <div class="w-16 h-16 rounded-full bg-secondary-container flex items-center justify-center">
+        <span class="material-symbols-outlined text-secondary text-3xl">check_circle</span>
+      </div>
+      <h2 class="font-headline font-bold text-2xl text-on-surface">Pagamento confirmado!</h2>
+      <p class="text-on-surface-variant text-sm font-medium">Seu Plano Plus já está ativo. Aproveite os benefícios.</p>
+      <button (click)="fecharModal()"
+        class="w-full px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm active:scale-95 transition-all">
+        Continuar
+      </button>
+    </div>
+
+    <!-- Estado: erro -->
+    <div *ngIf="estado() === 'erro'" class="flex flex-col items-center gap-4 py-6 text-center">
+      <span class="material-symbols-outlined text-5xl text-error opacity-60">error_outline</span>
+      <p class="text-on-surface-variant font-medium text-sm max-w-xs">{{ erroMsg() }}</p>
+      <button (click)="tentarNovamente()"
+        class="px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm active:scale-95 transition-all">
+        Tentar novamente
+      </button>
+    </div>
+
+  </div>
+</div>

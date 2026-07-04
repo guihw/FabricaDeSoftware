@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import {
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
@@ -39,7 +39,7 @@ describe('despesasGuard', () => {
 
   afterEach(() => sessionStorage.clear());
 
-  it('deve permitir acesso para anfitrião sem chamar o serviço', fakeAsync(() => {
+  it('deve permitir acesso para anfitrião sem chamar o serviço', () => {
     sessionStorage.setItem('coliv_user_tipo', 'anfitriao');
     sessionStorage.setItem('coliv_user_id', '5');
 
@@ -54,13 +54,12 @@ describe('despesasGuard', () => {
     } else {
       obs.subscribe?.((r: any) => (resultado = r));
     }
-    tick();
 
     expect(conviteServiceSpy.listarParaColega).not.toHaveBeenCalled();
     expect(resultado).toBe(true);
-  }));
+  });
 
-  it('deve permitir acesso a colega com convite ACEITO', fakeAsync(() => {
+  it('deve permitir acesso a colega com convite ACEITO', () => {
     sessionStorage.setItem('coliv_user_tipo', 'colega');
     sessionStorage.setItem('coliv_user_id', '3');
     conviteServiceSpy.listarParaColega.mockReturnValue(of([conviteAceito]));
@@ -68,13 +67,12 @@ describe('despesasGuard', () => {
     let resultado: any;
     (executeGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as any)
       .subscribe((r: any) => (resultado = r));
-    tick();
 
     expect(resultado).toBe(true);
     expect(routerSpy.navigate).not.toHaveBeenCalled();
-  }));
+  });
 
-  it('deve redirecionar colega sem convite aceito para /feedcolega', fakeAsync(() => {
+  it('deve redirecionar colega sem convite aceito para /feedcolega', () => {
     sessionStorage.setItem('coliv_user_tipo', 'colega');
     sessionStorage.setItem('coliv_user_id', '3');
     conviteServiceSpy.listarParaColega.mockReturnValue(of([convitePendente]));
@@ -82,13 +80,12 @@ describe('despesasGuard', () => {
     let resultado: any;
     (executeGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as any)
       .subscribe((r: any) => (resultado = r));
-    tick();
 
     expect(resultado).toBe(false);
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/feedcolega']);
-  }));
+  });
 
-  it('deve redirecionar quando listarParaColega lança erro', fakeAsync(() => {
+  it('deve redirecionar quando listarParaColega lança erro', () => {
     sessionStorage.setItem('coliv_user_tipo', 'colega');
     sessionStorage.setItem('coliv_user_id', '3');
     conviteServiceSpy.listarParaColega.mockReturnValue(throwError(() => new Error('Sem rede')));
@@ -96,9 +93,8 @@ describe('despesasGuard', () => {
     let resultado: any;
     (executeGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot) as any)
       .subscribe((r: any) => (resultado = r));
-    tick();
 
     expect(resultado).toBe(false);
     expect(routerSpy.navigate).toHaveBeenCalledWith(['/feedcolega']);
-  }));
+  });
 });

@@ -74,6 +74,53 @@
         </div>
       </div>
 
+      <!-- Divisão personalizada — visível apenas em despesas coletivas com mais de 1 membro -->
+      <div *ngIf="form.get('tipodeDespesa')?.value === 'coletiva' && membrosDaCasa.length > 1 && !modoEdicao"
+           class="flex flex-col gap-3">
+        <div class="flex items-center justify-between">
+          <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">
+            Como dividir
+          </label>
+          <div class="flex rounded-xl overflow-hidden bg-surface-container-low text-xs">
+            <button type="button" (click)="divisaoPersonalizada = false; valoresCustomizados = {}"
+              [ngClass]="{
+                'bg-secondary text-on-secondary': !divisaoPersonalizada,
+                'text-on-surface-variant': divisaoPersonalizada
+              }"
+              class="px-3 py-1.5 font-bold transition-all">
+              Igualitária
+            </button>
+            <button type="button" (click)="ativarDivisaoPersonalizada()"
+              [ngClass]="{
+                'bg-secondary text-on-secondary': divisaoPersonalizada,
+                'text-on-surface-variant': !divisaoPersonalizada
+              }"
+              class="px-3 py-1.5 font-bold transition-all">
+              Personalizada
+            </button>
+          </div>
+        </div>
+
+        <div *ngIf="divisaoPersonalizada" class="flex flex-col gap-2 bg-surface-container-low rounded-xl p-4">
+          <div *ngFor="let membro of membrosInfo" class="flex items-center gap-3">
+            <span class="text-sm font-medium text-on-surface flex-1 truncate">{{ membro.label }}</span>
+            <div class="flex items-center gap-1">
+              <span class="text-xs text-on-surface-variant">R$</span>
+              <input type="number" step="0.01" min="0"
+                [value]="valoresCustomizados[membro.id] ?? 0"
+                (change)="atualizarValorMembro(membro.id, $event)"
+                class="w-28 bg-surface-container border-none rounded-xl px-3 py-2
+                       focus:ring-2 focus:ring-secondary/20 font-medium text-sm text-right" />
+            </div>
+          </div>
+          <p *ngIf="!divisoesValidas()"
+             class="text-xs text-error font-medium pt-1">
+            Soma das partes (R$ {{ somaCustomizada() | number:'1.2-2' }})
+            deve ser igual ao total (R$ {{ form.get('valor')?.value | number:'1.2-2' }}).
+          </p>
+        </div>
+      </div>
+
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase tracking-widest font-extrabold text-on-surface-variant ml-1">
           Descrição (opcional)
@@ -131,6 +178,46 @@
   </button>
 </app-top-navbar-component>
 
+<!-- Banner: colega sem convite aceito -->
+<div *ngIf="!isAnfitriao && !carregando() && !temConviteAceito()"
+  class="mx-6 mt-6 bg-primary-container text-on-primary-container rounded-2xl p-5
+         flex flex-col gap-3 shadow-sm">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1;">info</span>
+    <h3 class="font-headline font-bold text-base">Nenhum convite aceito ainda</h3>
+  </div>
+  <p class="text-sm leading-relaxed opacity-90">
+    Você ainda não aceitou nenhum convite de moradia. Quando um anfitrião te enviar um convite,
+    você poderá acessar as despesas compartilhadas aqui.
+  </p>
+  <a routerLink="/chats"
+    class="self-start flex items-center gap-2 bg-primary text-white
+           px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider active:scale-95 transition-all">
+    <span class="material-symbols-outlined text-sm">chat</span>
+    Ver Matches
+  </a>
+</div>
+
+<!-- Banner: anfitrião sem colegas aceitos (ao criar despesa coletiva) -->
+<div *ngIf="isAnfitriao && !carregando() && !temColegaAceito()"
+  class="mx-6 mt-6 bg-surface-container-low border border-outline-variant/30 rounded-2xl p-5
+         flex flex-col gap-3">
+  <div class="flex items-center gap-3">
+    <span class="material-symbols-outlined text-2xl text-secondary" style="font-variation-settings: 'FILL' 1;">people</span>
+    <h3 class="font-headline font-bold text-base text-on-surface">Sem colegas confirmados</h3>
+  </div>
+  <p class="text-sm text-on-surface-variant leading-relaxed">
+    Você ainda não tem colegas que aceitaram seu convite. Você pode criar despesas individuais,
+    mas para despesas coletivas precisará de um colega confirmado.
+  </p>
+  <a routerLink="/feedanfitriao"
+    class="self-start flex items-center gap-2 bg-secondary text-on-secondary
+           px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider active:scale-95 transition-all">
+    <span class="material-symbols-outlined text-sm">explore</span>
+    Explorar colegas
+  </a>
+</div>
+
 <main class="px-6 pt-6 pb-36 space-y-8">
 
   <!-- Hero -->
@@ -160,9 +247,10 @@
     </div>
 
     <div class="bg-surface-container-low p-5 rounded-2xl space-y-2">
-      <span class="material-symbols-outlined text-primary">pending</span>
+      <span class="material-symbols-outlined" [class.text-primary]="totalPendente() > 0" [class.text-secondary]="totalPendente() === 0">pending</span>
       <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Pendente</p>
-      <p class="text-xl font-black text-primary">R$ {{ totalPendente() | number:'1.2-2' }}</p>
+      <p *ngIf="totalPendente() > 0" class="text-xl font-black text-primary">R$ {{ totalPendente() | number:'1.2-2' }}</p>
+      <p *ngIf="totalPendente() === 0" class="text-sm font-bold text-secondary">nada pendente</p>
     </div>
   </section>
 
@@ -216,10 +304,16 @@
                 {{ gasto.tipodeDespesa }}
               </span>
               <!-- Indicador de pago -->
-              <span *ngIf="euJaPaguei(gasto)"
+              <span *ngIf="euJaPaguei(gasto) && !todosJaPagaram(gasto)"
                 class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide
                        text-secondary bg-secondary-container/40">
                 ✓ Pago
+              </span>
+              <!-- Badge quitada -->
+              <span *ngIf="todosJaPagaram(gasto)"
+                class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide
+                       text-primary bg-primary-container/60">
+                ✓ Quitada
               </span>
             </div>
           </div>

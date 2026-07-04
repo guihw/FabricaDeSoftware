@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 @Service
@@ -27,13 +28,13 @@ class AnfitriaoService implements IAnfitriao {
 
     public List<UsuarioDTO> listar() {
         return anfitriaoRepository.findAll().stream().
-                map(usuarios -> new UsuarioDTO(usuarios.getId(), usuarios.getNome(), usuarios.getEmail())).
+                map(u -> new UsuarioDTO(u.getId(), u.getNome(), u.getEmail(), u.isPossuiPlano(), u.getFotoPerfilId())).
                 toList();
     }
 
     public UsuarioDTO buscarPorId(Long id) {
         return anfitriaoRepository.findById(id).
-                map(usuario -> new UsuarioDTO(id, usuario.getNome(), usuario.getEmail())).
+                map(u -> new UsuarioDTO(id, u.getNome(), u.getEmail(), u.isPossuiPlano(), u.getFotoPerfilId())).
                 orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
     }
 
@@ -57,6 +58,14 @@ class AnfitriaoService implements IAnfitriao {
 
         return anfitriaoPostDTO;
     }
+    @Override
+    public void ativarPlano(Long id) {
+        Anfitriao anfitriao = anfitriaoRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Anfitrião não encontrado. Id: " + id));
+
+        anfitriao.setPossuiPlano(true);
+        anfitriaoRepository.save(anfitriao);
+    }
 
     public AnfitriaoPutDTO editarAnfitriao(Long id, AnfitriaoPostDTO anfitriao) {
         Anfitriao original = anfitriaoRepository.findById(id).orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
@@ -73,11 +82,14 @@ class AnfitriaoService implements IAnfitriao {
         if (anfitriao.senha() != null && !anfitriao.senha().isBlank()) {
             original.setSenha(passwordEncoder.encode(anfitriao.senha()));
         }
+        if (anfitriao.fotoPerfilId() != null) {
+            original.setFotoPerfilId(anfitriao.fotoPerfilId());
+        }
 
         original = anfitriaoRepository.save(original);
 
         return new AnfitriaoPutDTO(original.getId(), original.getNome(), original.getCpf(),
-                original.getEmail(), original.getSenha());
+                original.getEmail(), original.getSenha(), original.getFotoPerfilId());
     }
 
     public void excluir(Long id) {
@@ -91,7 +103,7 @@ class AnfitriaoService implements IAnfitriao {
     @Override
     public UsuarioDTO obterUsuario(Long id) {
         return anfitriaoRepository.findById(id).
-                map(usuario -> new UsuarioDTO(id , usuario.getNome(), usuario.getEmail())).
+                map(u -> new UsuarioDTO(id, u.getNome(), u.getEmail(), u.isPossuiPlano(), u.getFotoPerfilId())).
                 orElseThrow(() -> new UsuarioIDNaoEncontrado(id));
     }
 
@@ -104,7 +116,7 @@ class AnfitriaoService implements IAnfitriao {
     public List<UsuarioDTO> obterListaDeUsuarios() {
         List<Anfitriao> lista = anfitriaoRepository.findAll();
         return lista.stream().map(usuario ->
-                new UsuarioDTO (usuario.getId(), usuario.getNome(), usuario.getEmail())).toList();
+                new UsuarioDTO(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.isPossuiPlano(), usuario.getFotoPerfilId())).toList();
     }
 
     @Override

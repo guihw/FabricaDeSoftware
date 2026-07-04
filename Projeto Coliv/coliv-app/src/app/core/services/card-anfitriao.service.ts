@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ApiService } from './api.service';
+import { catchError } from 'rxjs/operators';
 
 // Espelha: CardAnfitriaoResponseDTO no java
 export interface CardAnfitriaoResponseDTO {
@@ -37,6 +39,14 @@ export class CardAnfitriaoService extends ApiService {
   }
 
   atualizarArquivos(anfitriaoId: number, arquivoIds: number[]): Observable<void> {
-    return this.put<void>(`${this.PATH}/${anfitriaoId}/arquivos`, arquivoIds);
+    return this.http
+      .put(`${this.baseUrl}${this.PATH}/${anfitriaoId}/arquivos`, arquivoIds, {
+        observe: 'response',
+        responseType: 'text',
+      })
+      .pipe(
+        map(() => void 0),
+        catchError(this.handleError)
+      );
   }
 }
