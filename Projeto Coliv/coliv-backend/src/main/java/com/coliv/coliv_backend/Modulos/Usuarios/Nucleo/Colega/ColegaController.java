@@ -33,6 +33,12 @@ public class ColegaController {
         return colegaService.getColega(id);
     }
 
+    @Operation(summary = "Buscar colegas por lista de IDs", description = "Retorna vários colegas em uma única consulta")
+    @GetMapping("/buscarPorIds")
+    public List<ColegaResponse> buscarPorIds(@RequestParam List<Long> ids) {
+        return colegaService.getColegas(ids);
+    }
+
     @Operation(summary = "Cadastrar colega", description = "Cria um novo colega. Endpoint público — não requer token.")
     @SecurityRequirements
     @PostMapping("/novo")

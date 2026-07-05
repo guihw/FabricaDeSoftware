@@ -6,7 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 
 @Service
 class ArquivoService implements IArquivos {
@@ -16,6 +19,9 @@ class ArquivoService implements IArquivos {
 
     @Autowired
     private StorageService storageService;
+
+    @Autowired
+    private ExecutorService uploadExecutor;
 
     public List<Arquivo> listar() {
         return repository.findAll();
@@ -42,14 +48,22 @@ class ArquivoService implements IArquivos {
             throw new QuantidadeArquivosInvalida();
         }
 
+        for (MultipartFile arquivo : arquivos) {
+            validarArquivo(arquivo);
+        }
+
+        List<CompletableFuture<String>> futuros = Arrays.stream(arquivos)
+                .map(arquivo -> CompletableFuture.supplyAsync(
+                        () -> storageService.upload(arquivo), uploadExecutor))
+                .toList();
+
+        List<String> urls = futuros.stream()
+                .map(CompletableFuture::join)
+                .toList();
+
         List<ArquivoDTO> resultado = new ArrayList<>();
 
-        for (MultipartFile arquivo : arquivos) {
-
-            validarArquivo(arquivo);
-
-            String url =
-                    storageService.upload(arquivo);
+        for (String url : urls) {
 
             Arquivo entidade =
                     new Arquivo(

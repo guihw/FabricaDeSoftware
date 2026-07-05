@@ -9,6 +9,8 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.net.URI;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Configuration
 public class CloudflareR2Config {
@@ -28,7 +30,12 @@ public class CloudflareR2Config {
                 .endpointOverride(URI.create(endpoint))
                 .credentialsProvider(StaticCredentialsProvider.create(
                         AwsBasicCredentials.create(accessKey, secretKey)))
-                .region(Region.US_EAST_1) // O R2 ignora região, mas o SDK exige um valor padrão
+                .region(Region.US_EAST_1)
                 .build();
+    }
+
+    @Bean
+    public ExecutorService uploadExecutor() {
+        return Executors.newFixedThreadPool(8);
     }
 }

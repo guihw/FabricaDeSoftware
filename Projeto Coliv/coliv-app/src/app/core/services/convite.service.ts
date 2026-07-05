@@ -132,6 +132,15 @@ export class ConviteService extends ApiService {
     });
   }
 
+  buscarPorMatches(matchIds: number[]): Observable<ConviteResponse[]> {
+    return new Observable(subscriber => {
+      this.get<any[]>(`/chat/convite/buscarPorMatches?matchIds=${matchIds.join(',')}`).subscribe({
+        next: list => { subscriber.next(list.map(normalizar)); subscriber.complete(); },
+        error: err => subscriber.error(err),
+      });
+    });
+  }
+
   // ── helper PATCH ──────────────────────────────────────────────
   protected override patch<T>(path: string, body?: unknown): Observable<T> {
     return this.http

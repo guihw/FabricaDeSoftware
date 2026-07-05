@@ -49,6 +49,20 @@ public class ConviteService {
                 convite.getAtualizadoEm());
     }
 
+    public List<ConviteResponseDTO> buscarConvitesRecentesPorMatches(List<Long> matchIds) {
+        return conviteRepository.findByMatchIdIn(matchIds).stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        Convite::getMatchId,
+                        convite -> convite,
+                        (a, b) -> a.getId() > b.getId() ? a : b))
+                .values()
+                .stream()
+                .map(convite -> new ConviteResponseDTO(convite.getId(), convite.getConviteStatus(), convite.getTexto(),
+                        convite.getCriadoEm(), convite.getMatchId(), convite.getAnfitriaoId(), convite.getColegaId(),
+                        convite.getAtualizadoEm()))
+                .toList();
+    }
+
     @Transactional
     public ConviteResponseDTO novoConvite(ConviteStatus status, ConviteRequestDTO dto, Long matchId) {
         List<ConviteStatus> statuses = List.of(ConviteStatus.PENDENTE, ConviteStatus.ACEITO);

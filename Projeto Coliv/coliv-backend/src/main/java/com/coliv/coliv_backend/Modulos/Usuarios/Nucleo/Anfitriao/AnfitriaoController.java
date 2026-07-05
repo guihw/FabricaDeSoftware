@@ -32,6 +32,12 @@ class AnfitriaoController {
         return anfitriaoService.buscarPorId(id);
     }
 
+    @Operation(summary = "Buscar anfitriões por lista de IDs", description = "Retorna vários anfitriões em uma única consulta")
+    @GetMapping("/buscarPorIds")
+    public List<UsuarioDTO> buscarPorIds(@RequestParam List<Long> ids) {
+        return anfitriaoService.obterUsuarios(ids);
+    }
+
     @Operation(summary = "Cadastrar anfitrião", description = "Cria um novo anfitrião. Endpoint público — não requer token.")
     @SecurityRequirements
     @PostMapping("/novo")
