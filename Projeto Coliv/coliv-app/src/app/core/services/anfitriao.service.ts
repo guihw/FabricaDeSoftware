@@ -17,6 +17,10 @@ export class AnfitriaoService extends ApiService {
     return this.get<Anfitriao>(`${this.PATH}/buscar/${id}`);
   }
 
+  buscarPorIds(ids: number[]): Observable<Anfitriao[]> {
+    return this.get<Anfitriao[]>(`${this.PATH}/buscarPorIds?ids=${ids.join(',')}`);
+  }
+
   // POST /usuarios/anfitriao/novo
   criar(dto: AnfitriaoDTO): Observable<Anfitriao> {
     return this.post<Anfitriao>(`${this.PATH}/novo`, dto);

@@ -108,6 +108,13 @@ class AnfitriaoService implements IAnfitriao {
     }
 
     @Override
+    public List<UsuarioDTO> obterUsuarios(List<Long> ids) {
+        return anfitriaoRepository.findAllById(ids).stream().
+                map(u -> new UsuarioDTO(u.getId(), u.getNome(), u.getEmail(), u.isPossuiPlano(), u.getFotoPerfilId())).
+                toList();
+    }
+
+    @Override
     public boolean verificarExistencia(Long id) {
         return anfitriaoRepository.existsById(id);
     }

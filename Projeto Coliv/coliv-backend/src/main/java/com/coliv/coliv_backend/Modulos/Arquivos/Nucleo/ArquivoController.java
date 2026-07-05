@@ -30,6 +30,12 @@ class ArquivoController {
         return service.getArquivo(id);
     }
 
+    @Operation(summary = "Buscar arquivos por lista de IDs", description = "Retorna metadados de vários arquivos em uma única consulta")
+    @GetMapping("/buscarPorIds")
+    public List<ArquivoDTO> buscarPorIds(@RequestParam List<Long> ids) {
+        return service.getArquivos(ids);
+    }
+
     @Operation(summary = "Criar registro de arquivo manualmente")
     @PostMapping
     public ArquivoDTO criar(@RequestBody ArquivoRequestDTO dto) {

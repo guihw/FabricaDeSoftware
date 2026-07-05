@@ -16,5 +16,7 @@ public interface ConviteRepository extends JpaRepository<Convite, Long> {
 
     Optional<Convite> findTopByMatchIdOrderByIdDesc(Long matchId);
 
+    List<Convite> findByMatchIdIn(List<Long> matchIds);
+
     boolean existsByMatchIdAndConviteStatusIn(Long matchId, List<ConviteStatus> statuses);
 }

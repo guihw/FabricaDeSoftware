@@ -19,4 +19,8 @@ export class ArquivoService extends ApiService {
   buscarPorId(id: number): Observable<ArquivoDTO> {
     return this.get<ArquivoDTO>(`/arquivos/${id}`);
   }
+
+  buscarPorIds(ids: number[]): Observable<ArquivoDTO[]> {
+    return this.get<ArquivoDTO[]>(`/arquivos/buscarPorIds?ids=${ids.join(',')}`);
+  }
 }

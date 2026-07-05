@@ -36,6 +36,13 @@ public class ConviteController {
         return conviteService.buscarConviteRecente(matchId);
     }
 
+    @Operation(summary = "Buscar convites mais recentes por lista de matches", description = "Retorna o convite mais recente de cada match em uma única consulta")
+    @SecurityRequirements
+    @GetMapping("/buscarPorMatches")
+    public List<ConviteResponseDTO> buscarPorMatches(@RequestParam List<Long> matchIds) {
+        return conviteService.buscarConvitesRecentesPorMatches(matchIds);
+    }
+
     @Operation(summary = "Enviar convite de chat", description = "Cria um convite com status PENDENTE para o match informado")
     @SecurityRequirements
     @PostMapping("/enviar/{matchId}")

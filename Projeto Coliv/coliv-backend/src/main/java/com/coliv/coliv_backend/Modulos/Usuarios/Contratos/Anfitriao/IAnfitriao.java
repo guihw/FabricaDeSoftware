@@ -9,6 +9,8 @@ public interface IAnfitriao {
 
     public UsuarioDTO obterUsuario(Long id);
 
+    public List<UsuarioDTO> obterUsuarios(List<Long> ids);
+
     public boolean verificarExistencia(Long id);
     
     public List<UsuarioDTO> obterListaDeUsuarios();

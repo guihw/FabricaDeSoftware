@@ -17,6 +17,10 @@ export class ColegaService extends ApiService {
     return this.get<Colega>(`${this.PATH}/buscar/${id}`);
   }
 
+  buscarPorIds(ids: number[]): Observable<Colega[]> {
+    return this.get<Colega[]>(`${this.PATH}/buscarPorIds?ids=${ids.join(',')}`);
+  }
+
   // POST /usuarios/colega/novo
   criar(request: CreateColegaRequest): Observable<ColegaResponse> {
     return this.post<ColegaResponse>(`${this.PATH}/novo`, request);

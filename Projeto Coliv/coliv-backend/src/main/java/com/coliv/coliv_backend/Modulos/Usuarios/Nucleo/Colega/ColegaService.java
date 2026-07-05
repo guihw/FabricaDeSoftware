@@ -67,6 +67,23 @@ public class ColegaService implements IColega {
     }
 
     @Override
+    public List<ColegaResponse> getColegas(List<Long> ids) {
+
+        return colegaRepository.findAllById(ids)
+                .stream()
+                .map(colega -> new ColegaResponse(
+                        colega.getId(),
+                        colega.getNome(),
+                        colega.getEmail(),
+                        colega.getDescricao(),
+                        colega.getClassificacao(),
+                        colega.preferenciaColegaId,
+                        colega.getFotoPerfilId()
+                ))
+                .toList();
+    }
+
+    @Override
     public boolean verificarExistencia(Long id) {
         return colegaRepository.existsById(id);
     }

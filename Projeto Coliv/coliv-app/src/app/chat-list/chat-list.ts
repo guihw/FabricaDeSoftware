@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { forkJoin, of, Observable } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
 import { AuthService } from '../core/services/auth.service';
@@ -9,7 +9,7 @@ import { MatchService, MatchResponse } from '../core/services/match.service';
 import { ConviteService, ConviteResponse } from '../core/services/convite.service';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
-import { ArquivoService } from '../core/services/arquivo.service';
+import { ArquivoService, ArquivoDTO } from '../core/services/arquivo.service';
 import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
 
@@ -20,6 +20,12 @@ interface ItemChat {
   outroId: number;
   statusMatch: string;
   convite: ConviteResponse | null;
+}
+
+interface PessoaResumo {
+  id: number;
+  nome: string;
+  fotoId: number | null;
 }
 
 @Component({
@@ -62,39 +68,61 @@ export class ChatList implements OnInit {
 
     matches$.pipe(
       switchMap((matches: MatchResponse[]) => {
-        if (matches.length === 0) return of([] as ItemChat[]);
-
         const aceitos = matches.filter(m => m.status === 'ACEITO');
         if (aceitos.length === 0) return of([] as ItemChat[]);
 
-        const tasks = aceitos.map(m => {
-          const outroId = this.isAnfitriao ? m.colegaId : m.anfitriaoId;
-          const dados$ = this.isAnfitriao
-            ? this.colegaService.buscarPorId(outroId).pipe(
-                switchMap(c => this.resolverFoto(c.nome, c.fotoPerfilId ?? null)),
-                catchError(() => of({ nome: 'Colega', fotoUrl: null as string | null }))
-              )
-            : this.anfitriaoService.buscarPorId(outroId).pipe(
-                switchMap(a => this.resolverFoto(a.nome, a.fotoPerfil)),
-                catchError(() => of({ nome: 'Anfitrião', fotoUrl: null as string | null }))
-              );
+        const matchIds = aceitos.map(m => m.id);
+        const outroIds = [...new Set(aceitos.map(m => this.isAnfitriao ? m.colegaId : m.anfitriaoId))];
 
-          return forkJoin({
-            convite: this.conviteService.buscarPorMatch(m.id).pipe(catchError(() => of(null))),
-            dados: dados$,
-          }).pipe(
-            map(({ convite, dados }): ItemChat => ({
-              matchId: m.id,
-              nomeOutro: dados.nome,
-              fotoOutro: dados.fotoUrl,
-              outroId,
-              statusMatch: m.status,
-              convite,
-            }))
-          );
-        });
+        const convites$ = this.conviteService.buscarPorMatches(matchIds).pipe(
+          catchError(() => of([] as ConviteResponse[]))
+        );
 
-        return forkJoin(tasks);
+        const pessoas$ = (this.isAnfitriao
+          ? this.colegaService.buscarPorIds(outroIds).pipe(
+              map((lista): PessoaResumo[] => lista.map(c => ({ id: c.id, nome: c.nome, fotoId: c.fotoPerfilId ?? null })))
+            )
+          : this.anfitriaoService.buscarPorIds(outroIds).pipe(
+              map((lista): PessoaResumo[] => lista.map(a => ({ id: a.id, nome: a.nome, fotoId: a.fotoPerfil ?? null })))
+            )
+        ).pipe(catchError(() => of([] as PessoaResumo[])));
+
+        return forkJoin({ convites: convites$, pessoas: pessoas$ }).pipe(
+          switchMap(({ convites, pessoas }) => {
+            const fotoIds = [...new Set(
+              pessoas
+                .map(p => p.fotoId)
+                .filter((id): id is number => !!id)
+            )];
+
+            const fotos$ = fotoIds.length
+              ? this.arquivoService.buscarPorIds(fotoIds).pipe(catchError(() => of([] as ArquivoDTO[])))
+              : of([] as ArquivoDTO[]);
+
+            return fotos$.pipe(
+              map((fotos): ItemChat[] => {
+                const conviteMap = new Map(convites.map(c => [c.matchId, c]));
+                const pessoaMap = new Map(pessoas.map(p => [p.id, p]));
+                const fotoMap = new Map(fotos.map(f => [f.id, f.url]));
+
+                return aceitos.map((m): ItemChat => {
+                  const outroId = this.isAnfitriao ? m.colegaId : m.anfitriaoId;
+                  const pessoa = pessoaMap.get(outroId);
+                  const fotoId = pessoa?.fotoId ?? null;
+
+                  return {
+                    matchId: m.id,
+                    nomeOutro: pessoa?.nome ?? (this.isAnfitriao ? 'Colega' : 'Anfitrião'),
+                    fotoOutro: fotoId ? (fotoMap.get(fotoId) ?? null) : null,
+                    outroId,
+                    statusMatch: m.status,
+                    convite: conviteMap.get(m.id) ?? null,
+                  };
+                });
+              })
+            );
+          })
+        );
       }),
       catchError(() => of([] as ItemChat[]))
     ).subscribe({
@@ -107,14 +135,6 @@ export class ChatList implements OnInit {
         this.carregando.set(false);
       }
     });
-  }
-
-  private resolverFoto(nome: string, fotoId: number | null): Observable<{ nome: string; fotoUrl: string | null }> {
-    if (!fotoId) return of({ nome, fotoUrl: null });
-    return this.arquivoService.buscarPorId(fotoId).pipe(
-      map(a => ({ nome, fotoUrl: a.url })),
-      catchError(() => of({ nome, fotoUrl: null }))
-    );
   }
 
   abrirChat(item: ItemChat): void {
