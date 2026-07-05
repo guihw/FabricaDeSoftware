@@ -1,13 +1,19 @@
 package com.coliv.coliv_backend.Modulos.Financeiro.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Chat.Contratos.IChatMembros;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DespesaDTO;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DespesaIdNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.NovaDespesa;
+import com.coliv.coliv_backend.Modulos.Security.Nucleo.UsuarioAutenticado;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,10 +34,17 @@ class DespesaServiceTest {
     @Mock
     private ApplicationEventPublisher publisher;
 
+    @Mock
+    private IChatMembros chatMembros;
+
     @InjectMocks
     private DespesaService service;
 
     private Despesa despesa;
+
+    private static final Long ANFITRIAO_ID = 99L;
+
+    private MockedStatic<SecurityContextHolder> securityContextHolderMock;
 
     @BeforeEach
     void setup() {
@@ -42,6 +55,27 @@ class DespesaServiceTest {
         despesa.setValor(100.0);
         despesa.setDescricao("Internet");
         despesa.setDataVencimento(LocalDateTime.now());
+        despesa.setAnfitriaoId(ANFITRIAO_ID);
+
+        UsuarioAutenticado usuario =
+                new UsuarioAutenticado(1L, "usuario@teste.com", "hash", "ANFITRIAO");
+
+        Authentication authentication = mock(Authentication.class);
+        lenient().when(authentication.getPrincipal()).thenReturn(usuario);
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+
+        securityContextHolderMock = mockStatic(SecurityContextHolder.class);
+        securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+        lenient().when(chatMembros.usuarioPertenceAoAnfitriao(anyLong(), anyLong()))
+                .thenReturn(true);
+    }
+
+    @AfterEach
+    void tearDown() {
+        securityContextHolderMock.close();
     }
 
     @Test
@@ -51,7 +85,8 @@ class DespesaServiceTest {
                 new DespesaDTO(
                         100.0,
                         LocalDateTime.now(),
-                        "Internet"
+                        "Internet",
+                        ANFITRIAO_ID
                 );
 
         when(repository.save(any(Despesa.class)))
@@ -68,13 +103,13 @@ class DespesaServiceTest {
     }
 
     @Test
-    void deveListarDespesas() {
+    void deveListarDespesasPorAnfitriao() {
 
-        when(repository.findAll())
+        when(repository.findAllByAnfitriaoId(ANFITRIAO_ID))
                 .thenReturn(List.of(despesa));
 
         List<Despesa> lista =
-                service.listar();
+                service.listarPorAnfitriao(ANFITRIAO_ID);
 
         assertEquals(1, lista.size());
     }
@@ -110,7 +145,8 @@ class DespesaServiceTest {
                 new DespesaDTO(
                         250.0,
                         LocalDateTime.now(),
-                        "Energia"
+                        "Energia",
+                        ANFITRIAO_ID
                 );
 
         when(repository.findById(1L))
