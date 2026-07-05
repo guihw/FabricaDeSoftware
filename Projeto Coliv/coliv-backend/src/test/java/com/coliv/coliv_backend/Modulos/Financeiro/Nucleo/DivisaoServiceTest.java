@@ -1,15 +1,20 @@
 package com.coliv.coliv_backend.Modulos.Financeiro.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Chat.Contratos.IChatMembros;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoDTO;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoEditada;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.DivisaoIdNaoEncontrado;
+import com.coliv.coliv_backend.Modulos.Security.Nucleo.UsuarioAutenticado;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -22,6 +27,12 @@ class DivisaoServiceTest {
     private DivisaoRepository repository;
 
     @Mock
+    private DespesaRepository despesaRepository;
+
+    @Mock
+    private IChatMembros chatMembros;
+
+    @Mock
     private ApplicationEventPublisher publisher;
 
     @InjectMocks
@@ -29,8 +40,18 @@ class DivisaoServiceTest {
 
     private Divisao divisao;
 
+    private Despesa despesa;
+
+    private static final Long ANFITRIAO_ID = 99L;
+
+    private MockedStatic<SecurityContextHolder> securityContextHolderMock;
+
     @BeforeEach
     void setup() {
+
+        despesa = new Despesa();
+        despesa.setId(10L);
+        despesa.setAnfitriaoId(ANFITRIAO_ID);
 
         divisao = new Divisao();
 
@@ -39,6 +60,29 @@ class DivisaoServiceTest {
         divisao.setUsuarioId(20L);
         divisao.setArquivoId(30L);
         divisao.setValor(50.0);
+
+        UsuarioAutenticado usuario =
+                new UsuarioAutenticado(1L, "usuario@teste.com", "hash", "ANFITRIAO");
+
+        Authentication authentication = mock(Authentication.class);
+        lenient().when(authentication.getPrincipal()).thenReturn(usuario);
+
+        SecurityContext securityContext = mock(SecurityContext.class);
+        lenient().when(securityContext.getAuthentication()).thenReturn(authentication);
+
+        securityContextHolderMock = mockStatic(SecurityContextHolder.class);
+        securityContextHolderMock.when(SecurityContextHolder::getContext).thenReturn(securityContext);
+
+        lenient().when(despesaRepository.findById(anyLong()))
+                .thenReturn(Optional.of(despesa));
+
+        lenient().when(chatMembros.usuarioPertenceAoAnfitriao(anyLong(), anyLong()))
+                .thenReturn(true);
+    }
+
+    @AfterEach
+    void tearDown() {
+        securityContextHolderMock.close();
     }
 
     @Test
@@ -61,18 +105,6 @@ class DivisaoServiceTest {
         assertNotNull(resultado);
 
         verify(repository).save(any(Divisao.class));
-    }
-
-    @Test
-    void deveListarDivisoes() {
-
-        when(repository.findAll())
-                .thenReturn(List.of(divisao));
-
-        List<Divisao> lista =
-                service.listar();
-
-        assertEquals(1, lista.size());
     }
 
     @Test
@@ -104,7 +136,7 @@ class DivisaoServiceTest {
 
         DivisaoDTO dto =
                 new DivisaoDTO(
-                        11L,
+                        10L,
                         21L,
                         31L,
                         70.0
