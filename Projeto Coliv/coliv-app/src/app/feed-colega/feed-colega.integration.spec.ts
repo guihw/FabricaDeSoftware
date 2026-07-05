@@ -163,7 +163,7 @@ describe('FeedColega (integração)', () => {
     expect(component.erro()).toBe('Não foi possível conectar ao servidor. Verifique sua conexão.');
   });
 
-  it('deve criar match via POST e navegar para /chat com matchId correto', () => {
+  it('deve criar match via POST e marcar o card como curtido, sem navegar', () => {
     const card = makeCard(10);
     const navigateSpy = vi.spyOn(router, 'navigate').mockResolvedValue(true);
 
@@ -182,20 +182,8 @@ describe('FeedColega (integração)', () => {
     const matchResponse: MatchResponse = { id: 99, colegaId: 3, anfitriaoId: 10, status: 'PENDENTE' };
     matchReq.flush(matchResponse);
 
-    expect(navigateSpy).toHaveBeenCalledWith(['/chat', 99]);
-  });
-
-  it('deve salvar dados do chat no sessionStorage ao criar match', () => {
-    const card = makeCard(10);
-    vi.spyOn(router, 'navigate').mockResolvedValue(true);
-
-    httpMock.expectOne(FEED_URL_P0).flush(makeFeed([card]));
-
-    component.onLike(card);
-    httpMock.expectOne(`${BASE}/matches/novo`).flush({ id: 99, colegaId: 3, anfitriaoId: 10, status: 'PENDENTE' });
-
-    expect(sessionStorage.getItem('coliv_chat_outro_id')).toBe('10');
-    expect(sessionStorage.getItem('coliv_chat_outro_nome')).toBe(card.card.nome);
+    expect(component.curtidos().has(10)).toBe(true);
+    expect(navigateSpy).not.toHaveBeenCalled();
   });
 
   it('deve exibir erro e remover loading de like quando POST /matches/novo falha', () => {

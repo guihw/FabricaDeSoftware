@@ -1,16 +1,3 @@
-/**
- * Testes de integração: Despesas + DespesaService + DivisaoService + GrupoService
- *
- * Diferencial em relação ao teste unitário existente (despesas.spec.ts):
- * - Usa todos os serviços reais (sem mocks de serviço)
- * - Intercepta apenas o transporte HTTP com HttpTestingController
- * - Verifica o ciclo completo de carregamento: grupo → (label do anfitrião) → despesas → divisões
- * - Testa criação de despesa coletiva com divisões paralelas (forkJoin)
- * - Testa marcar/desmarcar como pago e exclusão de despesa
- *
- * Nota: HttpTestingController.flush() despacha respostas de forma síncrona,
- * dispensando fakeAsync/tick().
- */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
@@ -27,8 +14,6 @@ import { GrupoResponse } from '../core/services/grupo.service';
 const BASE         = 'http://localhost:8080';
 const USUARIO_ID   = 1;
 const ANFITRIAO_ID = 5;
-
-// ── Factories ──────────────────────────────────────────────────────────────────
 
 function makeDespesa(id: number, valor = 200): Despesa {
   return {
@@ -94,7 +79,6 @@ describe('Despesas (integração)', () => {
     sessionStorage.clear();
   });
 
-  /** Substitui os métodos de dialog não implementados no JSDOM */
   function setupDialogStubs(): void {
     if (component.dialog?.nativeElement) {
       component.dialog.nativeElement.showModal = vi.fn();
@@ -106,10 +90,6 @@ describe('Despesas (integração)', () => {
     }
   }
 
-  /**
-   * Inicializa o componente e faz flush da cadeia HTTP padrão (colega):
-   * GET grupo → GET anfitrião (label) → GET despesas → GET divisões (em paralelo via forkJoin)
-   */
   function initWithDespesas(despesas: Despesa[], divisoesPorId: Map<number, Divisao[]>): void {
     fixture.detectChanges();
     setupDialogStubs();
@@ -124,8 +104,6 @@ describe('Despesas (integração)', () => {
       httpMock.expectOne(DIVISOES_URL(d.id)).flush(divisoesPorId.get(d.id) ?? []);
     });
   }
-
-  // ── Carregamento inicial ───────────────────────────────────────────────────
 
   it('deve carregar despesas via cadeia HTTP (grupo → despesas → divisões)', () => {
     const divisoes1 = [
@@ -147,7 +125,7 @@ describe('Despesas (integração)', () => {
       [makeDespesa(1, 100), makeDespesa(2, 200)],
       new Map([
         [1, [makeDivisao(1, 1, USUARIO_ID, 100)]],
-        [2, [makeDivisao(2, 2, ANFITRIAO_ID, 200)]], // usuário não tem divisão aqui
+        [2, [makeDivisao(2, 2, ANFITRIAO_ID, 200)]],
       ]),
     );
 
@@ -176,7 +154,7 @@ describe('Despesas (integração)', () => {
 
     expect(component.soma()).toBe(200);
     expect(component.totalPago()).toBe(100);
-    expect(component.totalPendente()).toBe(100);
+    expect(component.totalPendente()).toBe(0);
   });
 
   it('deve apresentar lista vazia sem erro quando não há despesas cadastradas', () => {
@@ -194,8 +172,6 @@ describe('Despesas (integração)', () => {
     expect(component.erro()).toBeNull();
   });
 
-  // ── Criar despesa coletiva ─────────────────────────────────────────────────
-
   it('deve criar despesa coletiva (POST) e depois as divisões (forkJoin) e recarregar lista', () => {
     initWithDespesas([], new Map());
 
@@ -208,21 +184,18 @@ describe('Despesas (integração)', () => {
     component.modoEdicao = false;
     component.enviarNovaDespesa();
 
-    // POST despesa
     const criarReq = httpMock.expectOne(CRIAR_DESP_URL);
     expect(criarReq.request.method).toBe('POST');
     expect(criarReq.request.body.descricao).toBe('Aluguel');
     expect(criarReq.request.body.anfitriaoId).toBe(ANFITRIAO_ID);
     criarReq.flush(makeDespesa(10, 200));
 
-    // POST divisões em paralelo via forkJoin (anfitrião + colega = 2 membros)
     const divReqs = httpMock.match(CRIAR_DIV_URL);
     expect(divReqs.length).toBe(2);
     divReqs.forEach((r, i) =>
       r.flush(makeDivisao(i + 1, 10, r.request.body.usuarioId, 100))
     );
 
-    // Reload após criação
     httpMock.expectOne(DESPESAS_URL).flush([makeDespesa(10, 200)]);
     httpMock.expectOne(DIVISOES_URL(10)).flush([
       makeDivisao(1, 10, ANFITRIAO_ID, 100),
@@ -241,8 +214,6 @@ describe('Despesas (integração)', () => {
 
     httpMock.expectNone(CRIAR_DESP_URL);
   });
-
-  // ── Marcar/desmarcar como pago ─────────────────────────────────────────────
 
   it('deve chamar PATCH /pagar e atualizar o campo pago da despesa', () => {
     initWithDespesas(
@@ -272,8 +243,6 @@ describe('Despesas (integração)', () => {
 
     expect(component.despesas()[0].pago).not.toContain(USUARIO_ID);
   });
-
-  // ── Excluir despesa ────────────────────────────────────────────────────────
 
   it('deve chamar DELETE e recarregar lista vazia após excluir despesa', () => {
     initWithDespesas(

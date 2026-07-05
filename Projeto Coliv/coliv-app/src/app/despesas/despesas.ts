@@ -2,7 +2,7 @@ import { Component, inject, OnInit, ViewChild, ElementRef, signal, computed } fr
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, Observable } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 
 import { DespesaService } from '../core/services/despesa.service';
@@ -131,13 +131,17 @@ export class Despesas implements OnInit {
     );
   }
 
-  private resolverLabelMembro(membro: MembroInfo) {
+  private resolverLabelMembro(membro: MembroInfo): Observable<{ id: number; label: string }> {
     const rotuloPadrao = membro.tipoUsuario === 'ANFITRIAO' ? 'Anfitrião' : 'Colega';
-    const busca = membro.tipoUsuario === 'ANFITRIAO'
-      ? this.anfitriaoService.buscarPorId(membro.usuarioId)
-      : this.colegaService.buscarPorId(membro.usuarioId);
 
-    return busca.pipe(
+    if (membro.tipoUsuario === 'ANFITRIAO') {
+      return this.anfitriaoService.buscarPorId(membro.usuarioId).pipe(
+        map(usuario => ({ id: membro.usuarioId, label: usuario?.nome ?? rotuloPadrao })),
+        catchError(() => of({ id: membro.usuarioId, label: rotuloPadrao }))
+      );
+    }
+
+    return this.colegaService.buscarPorId(membro.usuarioId).pipe(
       map(usuario => ({ id: membro.usuarioId, label: usuario?.nome ?? rotuloPadrao })),
       catchError(() => of({ id: membro.usuarioId, label: rotuloPadrao }))
     );
