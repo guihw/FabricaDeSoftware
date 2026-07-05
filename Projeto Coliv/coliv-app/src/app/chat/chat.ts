@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
 import { CommonModule } from '@angular/common';
@@ -44,6 +44,7 @@ export class Chat implements OnInit, OnDestroy {
     private location: Location,
     private chatApi: ChatApiService,
     private wsChat: WsChatService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
@@ -100,7 +101,8 @@ export class Chat implements OnInit, OnDestroy {
   private conectarWs(): void {
     this.wsChat.conectar(this.chatId);
     this.wsSub = this.wsChat.mensagens$.subscribe((evento) => {
-      this.mensagens.push(evento.mensagemDTO);
+      this.mensagens = [...this.mensagens, evento.mensagemDTO];
+      this.cdr.detectChanges();
       this.scrollParaBaixo();
     });
   }
