@@ -23,10 +23,10 @@ class DespesaController {
         return service.criar(dto);
     }
 
-    @Operation(summary = "Listar despesas")
-    @GetMapping("/listar")
-    public List<Despesa> listar() {
-        return service.listar();
+    @Operation(summary = "Listar despesas de um anfitrião")
+    @GetMapping("/anfitriao/{anfitriaoId}")
+    public List<Despesa> listarPorAnfitriao(@PathVariable Long anfitriaoId) {
+        return service.listarPorAnfitriao(anfitriaoId);
     }
 
     @Operation(summary = "Buscar despesa por ID")

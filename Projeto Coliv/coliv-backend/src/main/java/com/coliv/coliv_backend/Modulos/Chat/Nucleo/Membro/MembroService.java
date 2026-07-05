@@ -1,5 +1,6 @@
 package com.coliv.coliv_backend.Modulos.Chat.Nucleo.Membro;
 
+import com.coliv.coliv_backend.Modulos.Chat.Contratos.Membro.MembroNaoEncontrado;
 import com.coliv.coliv_backend.Modulos.Chat.Contratos.Membro.NovoMembroDTO;
 import com.coliv.coliv_backend.Modulos.Chat.Nucleo.Grupo.Grupo;
 import com.coliv.coliv_backend.Modulos.Usuarios.Contratos.Anfitriao.IAnfitriao;
@@ -40,5 +41,13 @@ public class MembroService {
                 build();
 
         return membroRepository.save(membro);
+    }
+
+    @Transactional
+    public void removerPorGrupoEUsuario(Long grupoId, Long usuarioId) {
+        Membro membro = membroRepository.findByGrupoIdAndUsuarioId(grupoId, usuarioId)
+                .orElseThrow(() -> new MembroNaoEncontrado(grupoId, usuarioId));
+
+        membroRepository.delete(membro);
     }
 }

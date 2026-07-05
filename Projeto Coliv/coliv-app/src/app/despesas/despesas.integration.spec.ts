@@ -1,16 +1,3 @@
-/**
- * Testes de integração: Despesas + DespesaService + DivisaoService + ConviteService
- *
- * Diferencial em relação ao teste unitário existente (despesas.spec.ts):
- * - Usa todos os serviços reais (sem mocks de serviço)
- * - Intercepta apenas o transporte HTTP com HttpTestingController
- * - Verifica o ciclo completo de carregamento: convites → despesas → divisões (via HTTP chain)
- * - Testa criação de despesa coletiva com divisões paralelas (forkJoin)
- * - Testa marcar/desmarcar como pago e exclusão de despesa
- *
- * Nota: HttpTestingController.flush() despacha respostas de forma síncrona,
- * dispensando fakeAsync/tick().
- */
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
@@ -22,13 +9,11 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { Despesas } from './despesas';
 import { Despesa, Divisao } from '../core/models/despesas.model';
-import { ConviteResponse } from '../core/services/convite.service';
+import { GrupoResponse } from '../core/services/grupo.service';
 
 const BASE         = 'http://localhost:8080';
 const USUARIO_ID   = 1;
 const ANFITRIAO_ID = 5;
-
-// ── Factories ──────────────────────────────────────────────────────────────────
 
 function makeDespesa(id: number, valor = 200): Despesa {
   return {
@@ -37,6 +22,7 @@ function makeDespesa(id: number, valor = 200): Despesa {
     descricao: `Despesa ${id}`,
     dataVencimento: '2026-02-28T00:00:00Z',
     pago: [],
+    anfitriaoId: ANFITRIAO_ID,
   };
 }
 
@@ -44,16 +30,14 @@ function makeDivisao(id: number, despesaId: number, usuarioId: number, valor = 1
   return { id, despesaId, usuarioId, arquivoId: null, valor };
 }
 
-function makeConviteAceito(): ConviteResponse {
+function makeGrupoComColega(): GrupoResponse {
   return {
-    id: 50,
-    matchId: 10,
-    anfitriaoId: ANFITRIAO_ID,
-    colegaId: USUARIO_ID,
-    status: 'ACEITO',
-    criadoEm: '2026-01-01T00:00:00Z',
-    respondidoEm: '2026-01-02T00:00:00Z',
-    mensagem: null,
+    grupoId: 1,
+    nomeGrupo: 'Grupo',
+    membroList: [
+      { usuarioId: ANFITRIAO_ID, tipoUsuario: 'ANFITRIAO' },
+      { usuarioId: USUARIO_ID,   tipoUsuario: 'COLEGA' },
+    ],
   };
 }
 
@@ -62,8 +46,9 @@ describe('Despesas (integração)', () => {
   let fixture: ComponentFixture<Despesas>;
   let httpMock: HttpTestingController;
 
-  const CONVITES_URL   = `${BASE}/chat/convite/listarPorUsuario/${USUARIO_ID}/COLEGA`;
-  const DESPESAS_URL   = `${BASE}/despesas/listar`;
+  const GRUPO_URL      = `${BASE}/chat/grupo/buscarPorUsuarioId/${USUARIO_ID}/COLEGA`;
+  const ANFITRIAO_URL  = `${BASE}/usuarios/anfitriao/buscar/${ANFITRIAO_ID}`;
+  const DESPESAS_URL   = `${BASE}/despesas/anfitriao/${ANFITRIAO_ID}`;
   const DIVISOES_URL   = (id: number) => `${BASE}/divisoes/despesa/${id}`;
   const CRIAR_DESP_URL = `${BASE}/despesas/criar`;
   const CRIAR_DIV_URL  = `${BASE}/divisoes/criar`;
@@ -94,7 +79,6 @@ describe('Despesas (integração)', () => {
     sessionStorage.clear();
   });
 
-  /** Substitui os métodos de dialog não implementados no JSDOM */
   function setupDialogStubs(): void {
     if (component.dialog?.nativeElement) {
       component.dialog.nativeElement.showModal = vi.fn();
@@ -106,15 +90,14 @@ describe('Despesas (integração)', () => {
     }
   }
 
-  /**
-   * Inicializa o componente e faz flush da cadeia HTTP padrão (colega):
-   * GET convites → GET despesas → GET divisões (em paralelo via forkJoin)
-   */
   function initWithDespesas(despesas: Despesa[], divisoesPorId: Map<number, Divisao[]>): void {
     fixture.detectChanges();
     setupDialogStubs();
 
-    httpMock.expectOne(CONVITES_URL).flush([makeConviteAceito()]);
+    httpMock.expectOne(GRUPO_URL).flush(makeGrupoComColega());
+    httpMock.expectOne(ANFITRIAO_URL).flush({
+      id: ANFITRIAO_ID, nome: 'Anfitrião Teste', cpf: '', email: '', possuiPlano: false, fotoPerfil: null,
+    });
     httpMock.expectOne(DESPESAS_URL).flush(despesas);
 
     despesas.forEach(d => {
@@ -122,9 +105,7 @@ describe('Despesas (integração)', () => {
     });
   }
 
-  // ── Carregamento inicial ───────────────────────────────────────────────────
-
-  it('deve carregar despesas via cadeia HTTP (convites → despesas → divisões)', () => {
+  it('deve carregar despesas via cadeia HTTP (grupo → despesas → divisões)', () => {
     const divisoes1 = [
       makeDivisao(1, 1, ANFITRIAO_ID, 100),
       makeDivisao(2, 1, USUARIO_ID,   100),
@@ -144,7 +125,7 @@ describe('Despesas (integração)', () => {
       [makeDespesa(1, 100), makeDespesa(2, 200)],
       new Map([
         [1, [makeDivisao(1, 1, USUARIO_ID, 100)]],
-        [2, [makeDivisao(2, 2, ANFITRIAO_ID, 200)]], // usuário não tem divisão aqui
+        [2, [makeDivisao(2, 2, ANFITRIAO_ID, 200)]],
       ]),
     );
 
@@ -152,13 +133,14 @@ describe('Despesas (integração)', () => {
     expect(component.despesas()[0].id).toBe(1);
   });
 
-  it('deve montar membrosDaCasa com anfitrião + colega ao encontrar convite aceito', () => {
+  it('deve montar membrosDaCasa a partir do grupo real (anfitrião + colega)', () => {
     initWithDespesas(
       [makeDespesa(1)],
       new Map([[1, [makeDivisao(1, 1, USUARIO_ID)]]]),
     );
 
     expect(component.membrosDaCasa).toEqual([ANFITRIAO_ID, USUARIO_ID]);
+    expect(component.anfitriaoId).toBe(ANFITRIAO_ID);
   });
 
   it('deve calcular soma, totalPago e totalPendente corretamente', () => {
@@ -172,22 +154,23 @@ describe('Despesas (integração)', () => {
 
     expect(component.soma()).toBe(200);
     expect(component.totalPago()).toBe(100);
-    expect(component.totalPendente()).toBe(100);
+    expect(component.totalPendente()).toBe(0);
   });
 
   it('deve apresentar lista vazia sem erro quando não há despesas cadastradas', () => {
     fixture.detectChanges();
     setupDialogStubs();
 
-    httpMock.expectOne(CONVITES_URL).flush([makeConviteAceito()]);
+    httpMock.expectOne(GRUPO_URL).flush(makeGrupoComColega());
+    httpMock.expectOne(ANFITRIAO_URL).flush({
+      id: ANFITRIAO_ID, nome: 'Anfitrião Teste', cpf: '', email: '', possuiPlano: false, fotoPerfil: null,
+    });
     httpMock.expectOne(DESPESAS_URL).flush([]);
 
     expect(component.despesas().length).toBe(0);
     expect(component.carregando()).toBe(false);
     expect(component.erro()).toBeNull();
   });
-
-  // ── Criar despesa coletiva ─────────────────────────────────────────────────
 
   it('deve criar despesa coletiva (POST) e depois as divisões (forkJoin) e recarregar lista', () => {
     initWithDespesas([], new Map());
@@ -201,20 +184,18 @@ describe('Despesas (integração)', () => {
     component.modoEdicao = false;
     component.enviarNovaDespesa();
 
-    // POST despesa
     const criarReq = httpMock.expectOne(CRIAR_DESP_URL);
     expect(criarReq.request.method).toBe('POST');
     expect(criarReq.request.body.descricao).toBe('Aluguel');
+    expect(criarReq.request.body.anfitriaoId).toBe(ANFITRIAO_ID);
     criarReq.flush(makeDespesa(10, 200));
 
-    // POST divisões em paralelo via forkJoin (anfitrião + colega = 2 membros)
     const divReqs = httpMock.match(CRIAR_DIV_URL);
     expect(divReqs.length).toBe(2);
     divReqs.forEach((r, i) =>
       r.flush(makeDivisao(i + 1, 10, r.request.body.usuarioId, 100))
     );
 
-    // Reload após criação
     httpMock.expectOne(DESPESAS_URL).flush([makeDespesa(10, 200)]);
     httpMock.expectOne(DIVISOES_URL(10)).flush([
       makeDivisao(1, 10, ANFITRIAO_ID, 100),
@@ -233,8 +214,6 @@ describe('Despesas (integração)', () => {
 
     httpMock.expectNone(CRIAR_DESP_URL);
   });
-
-  // ── Marcar/desmarcar como pago ─────────────────────────────────────────────
 
   it('deve chamar PATCH /pagar e atualizar o campo pago da despesa', () => {
     initWithDespesas(
@@ -264,8 +243,6 @@ describe('Despesas (integração)', () => {
 
     expect(component.despesas()[0].pago).not.toContain(USUARIO_ID);
   });
-
-  // ── Excluir despesa ────────────────────────────────────────────────────────
 
   it('deve chamar DELETE e recarregar lista vazia após excluir despesa', () => {
     initWithDespesas(

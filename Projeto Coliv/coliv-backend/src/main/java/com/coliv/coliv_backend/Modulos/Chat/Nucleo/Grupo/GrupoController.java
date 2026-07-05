@@ -43,4 +43,10 @@ public class GrupoController {
     public GrupoResponseDTO editarNome(@PathVariable Long id, @RequestBody Map<String, String> data) {
         return grupoService.editarNome(id, data.get("nome"));
     }
+
+    @Operation(summary = "Remover morador do grupo", description = "Anfitrião expulsa um colega, ou o próprio colega sai da casa")
+    @DeleteMapping("/{grupoId}/membro/{colegaId}")
+    public void removerMembro(@PathVariable Long grupoId, @PathVariable Long colegaId) {
+        grupoService.removerMembro(grupoId, colegaId);
+    }
 }

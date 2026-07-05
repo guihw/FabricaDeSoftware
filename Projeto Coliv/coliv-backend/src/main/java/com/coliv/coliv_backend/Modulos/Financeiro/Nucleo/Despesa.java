@@ -20,6 +20,9 @@ public class Despesa {
 
     private String descricao;
 
+    @Column(name = "anfitriao_id", nullable = false)
+    private Long anfitriaoId;
+
     @ElementCollection
     @CollectionTable(
             name = "despesa_pago",
@@ -51,6 +54,10 @@ public class Despesa {
         return pago;
     }
 
+    public Long getAnfitriaoId() {
+        return anfitriaoId;
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
@@ -69,5 +76,9 @@ public class Despesa {
 
     public void setPago(List<Long> pago) {
         this.pago = pago;
+    }
+
+    public void setAnfitriaoId(Long anfitriaoId) {
+        this.anfitriaoId = anfitriaoId;
     }
 }

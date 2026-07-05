@@ -11,8 +11,8 @@ export class DespesaService extends ApiService {
     return this.post<Despesa>(`${this.PATH}/criar`, dto);
   }
 
-  listar(): Observable<Despesa[]> {
-    return this.get<Despesa[]>(`${this.PATH}/listar`);
+  listarPorAnfitriao(anfitriaoId: number): Observable<Despesa[]> {
+    return this.get<Despesa[]>(`${this.PATH}/anfitriao/${anfitriaoId}`);
   }
 
   buscarPorId(id: number): Observable<Despesa> {

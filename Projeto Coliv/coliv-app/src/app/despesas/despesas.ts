@@ -2,12 +2,12 @@ import { Component, inject, OnInit, ViewChild, ElementRef, signal, computed } fr
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, of, Observable } from 'rxjs';
 import { switchMap, catchError, map } from 'rxjs/operators';
 
 import { DespesaService } from '../core/services/despesa.service';
 import { DivisaoService } from '../core/services/divisao.service';
-import { ConviteService } from '../core/services/convite.service';
+import { GrupoService, MembroInfo, TipoUsuarioGrupo } from '../core/services/grupo.service';
 import { AuthService } from '../core/services/auth.service';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
@@ -26,7 +26,7 @@ import { TopNavbarComponent }    from '../shared/components/top-navbar-component
 export class Despesas implements OnInit {
   private despesaService   = inject(DespesaService);
   private divisaoService   = inject(DivisaoService);
-  private conviteService   = inject(ConviteService);
+  private grupoService     = inject(GrupoService);
   private authService      = inject(AuthService);
   private anfitriaoService = inject(AnfitriaoService);
   private colegaService    = inject(ColegaService);
@@ -50,6 +50,8 @@ export class Despesas implements OnInit {
   salvando    = signal(false);
 
   usuarioId    = 0;
+  anfitriaoId  = 0;
+  grupoId      = 0;
   isAnfitriao  = false;
   membrosDaCasa: number[] = [];
   membrosInfo: { id: number; label: string }[] = [];
@@ -98,82 +100,86 @@ export class Despesas implements OnInit {
   // ── Carregamento ──────────────────────────────────────────────
 
   private carregarMembrosDaCasa() {
-    if (this.isAnfitriao) {
-      return this.conviteService.listarDoAnfitriao(this.usuarioId).pipe(
-        switchMap(convites => {
-          const colegaIds = convites.filter(c => c.status === 'ACEITO').map(c => c.colegaId);
-          this.membrosDaCasa = [this.usuarioId, ...colegaIds];
-          this.temColegaAceito.set(colegaIds.length > 0);
-          this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
+    const tipoUsuario: TipoUsuarioGrupo = this.isAnfitriao ? 'ANFITRIAO' : 'COLEGA';
 
-          if (colegaIds.length === 0) return of(null);
-
-          return forkJoin(
-            colegaIds.map(id =>
-              this.colegaService.buscarPorId(id).pipe(catchError(() => of(null)))
-            )
-          ).pipe(
-            map(resultados => {
-              colegaIds.forEach((id, i) => {
-                const colega = resultados[i];
-                this.membrosInfo.push({ id, label: colega?.nome ?? `Colega ${i + 1}` });
-              });
-              return null;
-            })
-          );
-        }),
-        catchError(() => {
-          this.membrosDaCasa = [this.usuarioId];
-          this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
-          this.temColegaAceito.set(false);
-          return of(null);
-        })
-      );
-    }
-
-    return this.conviteService.listarParaColega(this.usuarioId).pipe(
-      switchMap(convites => {
-        const aceito = convites.find(c => c.status === 'ACEITO');
-        if (!aceito) {
-          this.membrosDaCasa = [this.usuarioId];
-          this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
-          this.temConviteAceito.set(false);
-          return of(null);
-        }
-        this.membrosDaCasa = [aceito.anfitriaoId, this.usuarioId];
+    return this.grupoService.buscarPorUsuarioId(this.usuarioId, tipoUsuario).pipe(
+      switchMap(grupo => {
+        const anfitriaoMembro = grupo.membroList.find(m => m.tipoUsuario === 'ANFITRIAO');
+        this.anfitriaoId = anfitriaoMembro?.usuarioId ?? this.usuarioId;
+        this.grupoId = grupo.grupoId;
+        this.membrosDaCasa = grupo.membroList.map(m => m.usuarioId);
+        this.temColegaAceito.set(grupo.membroList.some(m => m.tipoUsuario === 'COLEGA'));
         this.temConviteAceito.set(true);
 
-        return this.anfitriaoService.buscarPorId(aceito.anfitriaoId).pipe(
-          map(anf => {
-            this.membrosInfo = [
-              { id: aceito.anfitriaoId, label: anf.nome ?? 'Anfitrião' },
-              { id: this.usuarioId, label: 'Você' },
-            ];
-            return null;
-          }),
-          catchError(() => {
-            this.membrosInfo = [
-              { id: aceito.anfitriaoId, label: 'Anfitrião' },
-              { id: this.usuarioId, label: 'Você' },
-            ];
-            return of(null);
-          })
-        );
+        return forkJoin(
+          grupo.membroList.map(membro =>
+            membro.usuarioId === this.usuarioId
+              ? of({ id: membro.usuarioId, label: 'Você' })
+              : this.resolverLabelMembro(membro)
+          )
+        ).pipe(map(membrosInfo => { this.membrosInfo = membrosInfo; return null; }));
       }),
       catchError(() => {
+        this.anfitriaoId = this.isAnfitriao ? this.usuarioId : 0;
+        this.grupoId = 0;
         this.membrosDaCasa = [this.usuarioId];
         this.membrosInfo = [{ id: this.usuarioId, label: 'Você' }];
+        this.temColegaAceito.set(false);
         this.temConviteAceito.set(false);
         return of(null);
       })
     );
   }
 
+  private resolverLabelMembro(membro: MembroInfo): Observable<{ id: number; label: string }> {
+    const rotuloPadrao = membro.tipoUsuario === 'ANFITRIAO' ? 'Anfitrião' : 'Colega';
+
+    if (membro.tipoUsuario === 'ANFITRIAO') {
+      return this.anfitriaoService.buscarPorId(membro.usuarioId).pipe(
+        map(usuario => ({ id: membro.usuarioId, label: usuario?.nome ?? rotuloPadrao })),
+        catchError(() => of({ id: membro.usuarioId, label: rotuloPadrao }))
+      );
+    }
+
+    return this.colegaService.buscarPorId(membro.usuarioId).pipe(
+      map(usuario => ({ id: membro.usuarioId, label: usuario?.nome ?? rotuloPadrao })),
+      catchError(() => of({ id: membro.usuarioId, label: rotuloPadrao }))
+    );
+  }
+
+  podeRemoverMembro(membro: { id: number; label: string }): boolean {
+    if (membro.id === this.anfitriaoId) return false;
+    return this.isAnfitriao || membro.id === this.usuarioId;
+  }
+
+  removerMembro(membro: { id: number; label: string }): void {
+    const mensagem = membro.id === this.usuarioId
+      ? 'Tem certeza que deseja sair desta casa?'
+      : `Tem certeza que deseja remover ${membro.label} da casa?`;
+
+    if (!confirm(mensagem)) return;
+
+    this.grupoService.removerMembro(this.grupoId, membro.id).subscribe({
+      next: () => {
+        this.carregarMembrosDaCasa()
+          .pipe(switchMap(() => this.carregarDespesas()))
+          .subscribe();
+      },
+      error: (err: ApiError) => this.erro.set(err.message ?? 'Erro ao remover morador.'),
+    });
+  }
+
   private carregarDespesas() {
     this.carregando.set(true);
     this.erro.set(null);
 
-    return this.despesaService.listar().pipe(
+    if (!this.anfitriaoId) {
+      this.despesas.set([]);
+      this.carregando.set(false);
+      return of([] as DespesaView[]);
+    }
+
+    return this.despesaService.listarPorAnfitriao(this.anfitriaoId).pipe(
       switchMap(despesas => {
         if (despesas.length === 0) return of([] as DespesaView[]);
 
@@ -254,6 +260,7 @@ export class Despesas implements OnInit {
       descricao: nome ?? '',
       valor: Number(valor),
       dataVencimento: new Date(dataVencimento ?? this.hojeISO()).toISOString(),
+      anfitriaoId: this.anfitriaoId,
     };
 
     if (this.modoEdicao) {
@@ -360,6 +367,14 @@ export class Despesas implements OnInit {
   minhaParte(despesa: DespesaView): number {
     const divisao = despesa.divisoes.find(d => d.usuarioId === this.usuarioId);
     return divisao ? divisao.valor : despesa.valor;
+  }
+
+  statusPagamentoPorMembro(despesa: DespesaView): { usuarioId: number; label: string; pago: boolean }[] {
+    return despesa.divisoes.map(divisao => ({
+      usuarioId: divisao.usuarioId,
+      label: this.membrosInfo.find(m => m.id === divisao.usuarioId)?.label ?? `Usuário ${divisao.usuarioId}`,
+      pago: despesa.pago.includes(divisao.usuarioId),
+    }));
   }
 
   togglePago(despesa: DespesaView): void {

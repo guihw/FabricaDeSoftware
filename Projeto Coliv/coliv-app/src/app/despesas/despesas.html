@@ -229,6 +229,18 @@
     <p class="text-on-surface-variant text-sm font-medium">Casa Exemplo • {{ membrosDaCasa.length }} moradores</p>
   </section>
 
+  <section *ngIf="membrosInfo.length > 1" class="flex flex-wrap gap-2">
+    <div *ngFor="let membro of membrosInfo"
+      class="flex items-center gap-2 bg-surface-container-low rounded-full pl-3 pr-2 py-1.5">
+      <span class="text-xs font-bold text-primary">{{ membro.label }}</span>
+      <button *ngIf="podeRemoverMembro(membro)" (click)="removerMembro(membro)"
+        class="w-5 h-5 rounded-full flex items-center justify-center text-on-surface-variant
+               hover:bg-error-container hover:text-on-error-container transition-colors">
+        <span class="material-symbols-outlined text-sm">close</span>
+      </button>
+    </div>
+  </section>
+
   <!-- Cards de resumo -->
   <section class="grid grid-cols-2 gap-4">
     <div class="col-span-2 bg-surface-container-lowest p-6 rounded-2xl
@@ -368,6 +380,21 @@
           }"
             class="text-[10px] font-bold rounded-md px-2 py-1 uppercase tracking-wide">
             {{ despesaSelecionada.tipodeDespesa }}
+          </span>
+        </div>
+      </div>
+
+      <div *ngIf="statusPagamentoPorMembro(despesaSelecionada).length > 1" class="space-y-2">
+        <p class="text-[10px] uppercase tracking-widest font-bold text-on-surface-variant">Pagamentos</p>
+        <div *ngFor="let membro of statusPagamentoPorMembro(despesaSelecionada)"
+          class="flex justify-between items-center py-2 border-b border-outline-variant/20 last:border-0">
+          <p class="text-sm font-medium text-primary">{{ membro.label }}</p>
+          <span [ngClass]="{
+            'text-secondary bg-secondary-container/40': membro.pago,
+            'text-on-surface-variant bg-surface-container': !membro.pago
+          }"
+            class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide">
+            {{ membro.pago ? '✓ Pago' : 'Pendente' }}
           </span>
         </div>
       </div>

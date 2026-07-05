@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record DespesaDTO(
         Double valor,
         LocalDateTime dataVencimento,
-        String descricao
+        String descricao,
+        Long anfitriaoId
 ) {
 }
