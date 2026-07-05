@@ -6,12 +6,12 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { of } from 'rxjs';
-import { catchError, defaultIfEmpty, switchMap } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { catchError, switchMap } from 'rxjs/operators';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { DadosImovelDTO } from '../core/models/formulario.model';
 import { ApiError } from '../core/services/api.service';
-import { ArquivoService } from '../core/services/arquivo.service';
+import { ArquivoDTO, ArquivoService } from '../core/services/arquivo.service';
 import { CardAnfitriaoService } from '../core/services/card-anfitriao.service';
 import { Router } from '@angular/router';
 
@@ -158,33 +158,24 @@ export class CriarAnuncio implements OnInit {
 
     const arquivos = this.fotos.filter(f => f.arquivo !== null).map(f => f.arquivo!);
 
-    if (this.modoEdicao) {
-      this.dadosImovelService.editar(anfitriaoId, dto).pipe(
-        switchMap(() => arquivos.length > 0
-          ? this.arquivoService.upload(arquivos).pipe(
-              switchMap(arquivoDTOs =>
-                this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
-              ),
-              defaultIfEmpty(null)
-            )
+    const salvarDados$ = this.modoEdicao
+      ? this.dadosImovelService.editar(anfitriaoId, dto)
+      : this.dadosImovelService.criar(anfitriaoId, dto);
+
+    const arquivos$ = arquivos.length > 0
+      ? this.arquivoService.upload(arquivos)
+      : of<ArquivoDTO[]>([]);
+
+    forkJoin([salvarDados$, arquivos$]).pipe(
+      switchMap(([, arquivoDTOs]) =>
+        arquivoDTOs.length > 0
+          ? this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
           : of(null)
-        )
-      ).subscribe({
-        next: () => { this.publicando = false; this.publicado = true; },
-        error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
-      });
-    } else {
-      this.dadosImovelService.criar(anfitriaoId, dto).pipe(
-        switchMap(() => this.arquivoService.upload(arquivos)),
-        switchMap(arquivoDTOs =>
-          this.cardAnfitriaoService.atualizarArquivos(anfitriaoId, arquivoDTOs.map(a => a.id))
-        ),
-        defaultIfEmpty(null)
-      ).subscribe({
-        next: () => { this.publicando = false; this.publicado = true; },
-        error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
-      });
-    }
+      )
+    ).subscribe({
+      next: () => { this.publicando = false; this.publicado = true; },
+      error: (err: ApiError) => { this.publicando = false; this.erroPublicacao = err.message; },
+    });
   }
 
   voltarParaEdicao(): void { this.publicado = false; }
