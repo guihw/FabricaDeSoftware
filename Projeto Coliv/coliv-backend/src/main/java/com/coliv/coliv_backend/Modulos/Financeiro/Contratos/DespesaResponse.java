@@ -8,6 +8,7 @@ public record DespesaResponse(
         Double valor,
         LocalDateTime dataVencimento,
         String descricao,
-        List<Long> pago
+        List<Long> pago,
+        Long anfitriaoId
 ) {
 }

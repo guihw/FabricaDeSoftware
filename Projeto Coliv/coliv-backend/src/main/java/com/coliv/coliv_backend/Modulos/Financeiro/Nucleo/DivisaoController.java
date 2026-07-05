@@ -28,12 +28,6 @@ class DivisaoController {
         return service.criar(dto);
     }
 
-    @Operation(summary = "Listar divisões")
-    @GetMapping("/listar")
-    public List<Divisao> listar() {
-        return service.listar();
-    }
-
     @Operation(summary = "Buscar divisão por ID")
     @GetMapping("/buscar/{id}")
     public Divisao buscarPorId(@PathVariable Long id) {

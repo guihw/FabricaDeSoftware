@@ -1,8 +1,11 @@
 package com.coliv.coliv_backend.Modulos.Financeiro.Nucleo;
 
+import com.coliv.coliv_backend.Modulos.Chat.Contratos.IChatMembros;
 import com.coliv.coliv_backend.Modulos.Financeiro.Contratos.*;
+import com.coliv.coliv_backend.Modulos.Security.Nucleo.UsuarioAutenticado;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,13 +22,19 @@ class DespesaService implements IFinanceiro {
     @Autowired
     private ApplicationEventPublisher publisher;
 
+    @Autowired
+    private IChatMembros chatMembros;
+
     public Despesa criar(DespesaDTO dto) {
+
+        verificarAcesso(dto.anfitriaoId());
 
         Despesa despesa = new Despesa();
 
         despesa.setValor(dto.valor());
         despesa.setDescricao(dto.descricao());
         despesa.setDataVencimento(dto.dataVencimento());
+        despesa.setAnfitriaoId(dto.anfitriaoId());
 
         Despesa salva = repository.save(despesa);
 
@@ -40,15 +49,20 @@ class DespesaService implements IFinanceiro {
         return salva;
     }
 
-    public List<Despesa> listar() {
-        return repository.findAll();
+    public List<Despesa> listarPorAnfitriao(Long anfitriaoId) {
+        verificarAcesso(anfitriaoId);
+        return repository.findAllByAnfitriaoId(anfitriaoId);
     }
 
     public Despesa buscarPorId(Long id) {
 
-        return repository.findById(id)
+        Despesa despesa = repository.findById(id)
                 .orElseThrow(() ->
                         new DespesaIdNaoEncontrado(id));
+
+        verificarAcesso(despesa.getAnfitriaoId());
+
+        return despesa;
     }
 
     public Despesa editar(Long id, DespesaDTO dto) {
@@ -69,6 +83,16 @@ class DespesaService implements IFinanceiro {
         repository.deleteById(id);
     }
 
+    private void verificarAcesso(Long anfitriaoId) {
+        UsuarioAutenticado usuario = (UsuarioAutenticado) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (!chatMembros.usuarioPertenceAoAnfitriao(usuario.getId(), anfitriaoId)) {
+            throw new AcessoNegadoDespesa();
+        }
+    }
+
     @Override
     public DespesaResponse getDespesa(Long id) {
 
@@ -79,7 +103,8 @@ class DespesaService implements IFinanceiro {
                 despesa.getValor(),
                 despesa.getDataVencimento(),
                 despesa.getDescricao(),
-                despesa.getPago()
+                despesa.getPago(),
+                despesa.getAnfitriaoId()
         );
     }
 
@@ -89,6 +114,8 @@ class DespesaService implements IFinanceiro {
         Divisao divisao = divisaoRepository.findById(id)
                 .orElseThrow(() ->
                         new DivisaoIdNaoEncontrado(id));
+
+        buscarPorId(divisao.getDespesaId());
 
         return new DivisaoResponse(
                 divisao.getId(),
@@ -101,6 +128,8 @@ class DespesaService implements IFinanceiro {
 
     @Override
     public List<DivisaoResponse> getDivisoes(Long despesaId) {
+
+        buscarPorId(despesaId);
 
         return divisaoRepository.findByDespesaId(despesaId)
                 .stream()

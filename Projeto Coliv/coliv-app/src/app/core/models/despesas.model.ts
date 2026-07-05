@@ -7,6 +7,7 @@ export interface DespesaDTO {
   valor: number;
   dataVencimento: string;
   descricao: string;
+  anfitriaoId: number;
 }
 
 // Espelha: DespesaResponse.java (entidade Despesa)
@@ -16,6 +17,7 @@ export interface Despesa {
   dataVencimento: string;
   descricao: string;
   pago: number[]; // lista de usuarioId que já pagaram
+  anfitriaoId: number;
 }
 
 // Espelha: DivisaoDTO.java
