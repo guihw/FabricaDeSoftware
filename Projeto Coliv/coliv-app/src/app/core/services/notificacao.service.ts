@@ -14,6 +14,7 @@ export class NotificacaoService extends ApiService implements OnDestroy {
 
   private _toastMatch = signal<Notificacao | null>(null);
   readonly toastMatch = this._toastMatch.asReadonly();
+  private filaToastMatch: Notificacao[] = [];
   private toastTimeout?: ReturnType<typeof setTimeout>;
 
   private client: Client | null = null;
@@ -80,14 +81,23 @@ export class NotificacaoService extends ApiService implements OnDestroy {
   }
 
   private mostrarToastMatch(notificacao: Notificacao): void {
+    this.filaToastMatch.push(notificacao);
+    if (this._toastMatch() === null) {
+      this.exibirProximoToastMatch();
+    }
+  }
+
+  private exibirProximoToastMatch(): void {
     clearTimeout(this.toastTimeout);
-    this._toastMatch.set(notificacao);
-    this.toastTimeout = setTimeout(() => this._toastMatch.set(null), 8000);
+    const proximo = this.filaToastMatch.shift() ?? null;
+    this._toastMatch.set(proximo);
+    if (proximo) {
+      this.toastTimeout = setTimeout(() => this.exibirProximoToastMatch(), 8000);
+    }
   }
 
   fecharToastMatch(): void {
-    clearTimeout(this.toastTimeout);
-    this._toastMatch.set(null);
+    this.exibirProximoToastMatch();
   }
 
   desconectar(): void {
@@ -96,6 +106,7 @@ export class NotificacaoService extends ApiService implements OnDestroy {
     this.client?.deactivate();
     this.client = null;
     this.notificacoes.set([]);
+    this.filaToastMatch = [];
     this.fecharToastMatch();
   }
 

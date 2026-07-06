@@ -6,6 +6,4 @@ import java.util.List;
 interface NotificacaoRepository extends JpaRepository<Notificacao, Long> {
 
     List<Notificacao> findByUsuarioIdAndLidaFalseOrderByCriadoEmDesc(Long usuarioId);
-
-    boolean existsByChaveIdempotencia(String chaveIdempotencia);
 }
