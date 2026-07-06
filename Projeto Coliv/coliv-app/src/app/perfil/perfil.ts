@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -7,6 +7,7 @@ import { NotificacaoService } from '../core/services/notificacao.service';
 import { AnfitriaoService } from '../core/services/anfitriao.service';
 import { ColegaService } from '../core/services/colega.service';
 import { ArquivoService } from '../core/services/arquivo.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
 import { Anfitriao, Colega } from '../core/models/usuario.model';
 import { ApiError } from '../core/services/api.service';
 import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
@@ -30,7 +31,8 @@ export class Perfil implements OnInit {
 
   isAnfitriao = signal(false);
   usuario = signal<Anfitriao | Colega | null>(null);
-  fotoPerfilUrl = signal<string | null>(null);
+  private fotoPerfilService = inject(FotoPerfilService);
+  fotoPerfilUrl = this.fotoPerfilService.fotoPerfilUrl;
 
   form!: FormGroup;
 
@@ -49,10 +51,6 @@ export class Perfil implements OnInit {
     const id = this.auth.getUserId();
     this.isAnfitriao.set(tipo === 'anfitriao');
 
-    // Restaura foto do sessionStorage (exibição imediata)
-    const fotoSalva = sessionStorage.getItem('coliv_foto_perfil');
-    if (fotoSalva) this.fotoPerfilUrl.set(fotoSalva);
-
     if (!id) {
       this.router.navigate(['/login']);
       return;
@@ -68,10 +66,7 @@ export class Perfil implements OnInit {
         next: (user) => {
           this.usuario.set(user);
           this.form.patchValue({ nome: user.nome, email: user.email });
-          if (!user.fotoPerfil) {
-            sessionStorage.removeItem('coliv_foto_perfil');
-            this.fotoPerfilUrl.set(null);
-          }
+          this.fotoPerfilService.hidratarComId(user.fotoPerfil);
           this.carregando.set(false);
         },
         error: () => {
@@ -84,10 +79,7 @@ export class Perfil implements OnInit {
         next: (user) => {
           this.usuario.set(user);
           this.form.patchValue({ nome: user.nome, email: user.email });
-          if (!user.fotoPerfilId) {
-            sessionStorage.removeItem('coliv_foto_perfil');
-            this.fotoPerfilUrl.set(null);
-          }
+          this.fotoPerfilService.hidratarComId(user.fotoPerfilId);
           this.carregando.set(false);
         },
         error: () => {
@@ -113,12 +105,8 @@ export class Perfil implements OnInit {
       next: (arquivos) => {
         if (!arquivos || arquivos.length === 0) return;
         const arquivo = arquivos[0];
+        this.fotoPerfilService.cachear(arquivo.url);
 
-        // Persiste URL localmente
-        sessionStorage.setItem('coliv_foto_perfil', arquivo.url);
-        this.fotoPerfilUrl.set(arquivo.url);
-
-        // Salva ID no backend
         const dados: any = { fotoPerfilId: arquivo.id };
         const onDone = () => this.uploadandoFoto.set(false);
         if (this.isAnfitriao()) {

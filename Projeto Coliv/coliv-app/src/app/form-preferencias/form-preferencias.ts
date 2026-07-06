@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -16,6 +16,8 @@ import {
 
 import { ArquivoService } from '../core/services/arquivo.service';
 import { ColegaService } from '../core/services/colega.service';
+import { AnfitriaoService } from '../core/services/anfitriao.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
 import { ApiError } from '../core/services/api.service';
 
 // ── Tipos locais para as seleções visuais ─────────────────────
@@ -57,7 +59,8 @@ export class FormPreferencias implements OnInit {
   erro          = signal<string | null>(null);
   sucesso       = signal(false);
   uploadandoFoto = signal(false);
-  fotoPerfilUrl  = signal<string | null>(null);
+  private fotoPerfilService = inject(FotoPerfilService);
+  fotoPerfilUrl  = this.fotoPerfilService.fotoPerfilUrl;
 
   // ── Seleções visuais (estado real ligado ao envio) ─────────
   ritmoSono     = signal<RitmoSono>('EQUILIBRADO');
@@ -98,6 +101,7 @@ export class FormPreferencias implements OnInit {
     private preferenciasColegaService: PreferenciasColegaService,
     private arquivoService: ArquivoService,
     private colegaService: ColegaService,
+    private anfitriaoService: AnfitriaoService,
   ) {}
 
   ngOnInit(): void {
@@ -106,9 +110,6 @@ export class FormPreferencias implements OnInit {
 
     this.isAnfitriao.set(tipo === 'anfitriao');
     this.userId.set(id ? Number(id) : null);
-
-    const fotoSalva = sessionStorage.getItem('coliv_foto_perfil');
-    if (fotoSalva) this.fotoPerfilUrl.set(fotoSalva);
 
     this.form = this.fb.group({
       localizacao:   ['', Validators.required],
@@ -136,11 +137,9 @@ export class FormPreferencias implements OnInit {
     this.aceitaPets.update(v => !v);
   }
 
-  // ── Upload de foto (colega) ────────────────────────────────
+  // ── Upload de foto ─────────────────────────────────────────
 
   onFotoSelecionada(event: Event): void {
-    if (this.isAnfitriao()) return;
-
     const input = event.target as HTMLInputElement;
     if (!input.files || input.files.length === 0) return;
 
@@ -154,12 +153,15 @@ export class FormPreferencias implements OnInit {
       next: (arquivos) => {
         if (!arquivos || arquivos.length === 0) return;
         const arquivo = arquivos[0];
-        sessionStorage.setItem('coliv_foto_perfil', arquivo.url);
-        this.fotoPerfilUrl.set(arquivo.url);
-        this.colegaService.editar(id, { fotoPerfilId: arquivo.id }).subscribe({
-          next: () => this.uploadandoFoto.set(false),
-          error: () => this.uploadandoFoto.set(false),
-        });
+        this.fotoPerfilService.cachear(arquivo.url);
+
+        const dados: any = { fotoPerfilId: arquivo.id };
+        const onDone = () => this.uploadandoFoto.set(false);
+        if (this.isAnfitriao()) {
+          this.anfitriaoService.editar(id, dados).subscribe({ next: onDone, error: onDone });
+        } else {
+          this.colegaService.editar(id, dados).subscribe({ next: onDone, error: onDone });
+        }
       },
       error: (err: ApiError) => {
         this.uploadandoFoto.set(false);

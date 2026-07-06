@@ -5,11 +5,21 @@ import {
 } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { signal } from '@angular/core';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { Despesas } from './despesas';
 import { Despesa, Divisao } from '../core/models/despesas.model';
 import { GrupoResponse } from '../core/services/grupo.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
+
+const fotoPerfilServiceStub = {
+  fotoPerfilUrl: signal<string | null>(null),
+  hidratar: () => {},
+  hidratarComId: () => {},
+  cachear: () => {},
+  limpar: () => {},
+};
 
 const BASE         = 'http://localhost:8080';
 const USUARIO_ID   = 1;
@@ -66,6 +76,7 @@ describe('Despesas (integração)', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideRouter([]),
+        { provide: FotoPerfilService, useValue: fotoPerfilServiceStub },
       ],
     }).compileComponents();
 

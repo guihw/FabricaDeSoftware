@@ -48,6 +48,8 @@ export class Chat implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    document.body.style.minHeight = '100dvh';
+
     this.matchId = Number(this.route.snapshot.paramMap.get('matchId'));
 
     const tipo = sessionStorage.getItem('coliv_user_tipo');
@@ -85,6 +87,7 @@ export class Chat implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.wsSub?.unsubscribe();
     this.wsChat.desconectar();
+    document.body.style.minHeight = '';
   }
 
   private carregarMensagens(): void {

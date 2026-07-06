@@ -1,10 +1,10 @@
-import { Component, Input, OnInit, signal } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { FotoPerfilService } from '../../../core/services/foto-perfil.service';
 import { inject } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 export type NavTab = 'inicio' | 'chat' | 'gestao' | 'perfil';
 
@@ -20,20 +20,20 @@ export class BottomNavbarComponent implements OnInit {
 
   private auth   = inject(AuthService);
   private router = inject(Router);
+  private fotoPerfilService = inject(FotoPerfilService);
 
-  fotoPerfilUrl = signal<string | null>(null);
+  fotoPerfilUrl = this.fotoPerfilService.fotoPerfilUrl;
 
   ngOnInit(): void {
-    this.fotoPerfilUrl.set(sessionStorage.getItem('coliv_foto_perfil'));
-
-    // Atualiza a foto após cada navegação (caso o usuário acabou de fazer upload)
-    this.router.events.pipe(filter(e => e instanceof NavigationEnd)).subscribe(() => {
-      this.fotoPerfilUrl.set(sessionStorage.getItem('coliv_foto_perfil'));
-    });
+    this.fotoPerfilService.hidratar();
   }
 
   get feedLink(): string {
     return this.auth.getUserType() === 'anfitriao' ? '/feedanfitriao' : '/feedcolega';
+  }
+
+  get isAnfitriao(): boolean {
+    return this.auth.getUserType() === 'anfitriao';
   }
 
   irParaPerfil(): void {

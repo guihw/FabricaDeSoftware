@@ -17,6 +17,7 @@ import {
 } from '@angular/common/http/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { Router, provideRouter } from '@angular/router';
+import { signal } from '@angular/core';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { FeedColega } from './feed-colega';
@@ -26,8 +27,17 @@ import {
   FeedPageDTO,
 } from '../core/services/recomendacao.service';
 import { MatchService, MatchResponse } from '../core/services/match.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
 
 const BASE = 'http://localhost:8080';
+
+const fotoPerfilServiceStub = {
+  fotoPerfilUrl: signal<string | null>(null),
+  hidratar: () => {},
+  hidratarComId: () => {},
+  cachear: () => {},
+  limpar: () => {},
+};
 
 function makeCard(id = 1): RecomendacaoCardAnfitriaoDTO {
   return {
@@ -78,6 +88,7 @@ describe('FeedColega (integração)', () => {
         provideRouter([]),
         RecomendacaoService,
         MatchService,
+        { provide: FotoPerfilService, useValue: fotoPerfilServiceStub },
       ],
     }).compileComponents();
 

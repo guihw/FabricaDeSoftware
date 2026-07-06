@@ -4,14 +4,24 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { Location } from '@angular/common';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
+import { signal } from '@angular/core';
 import { Chat } from './chat';
 import { ConviteService, ConviteResponse } from '../core/services/convite.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
 
 describe('Chat', () => {
   let component: Chat;
   let fixture: ComponentFixture<Chat>;
   let conviteServiceSpy: { buscarPorMatch: ReturnType<typeof vi.fn> };
   let locationSpy: { back: ReturnType<typeof vi.fn> };
+
+  const fotoPerfilServiceStub = {
+    fotoPerfilUrl: signal<string | null>(null),
+    hidratar: () => {},
+    hidratarComId: () => {},
+    cachear: () => {},
+    limpar: () => {},
+  };
 
   const activatedRouteMock = {
     snapshot: { paramMap: { get: (key: string) => (key === 'matchId' ? '10' : null) } },
@@ -34,6 +44,7 @@ describe('Chat', () => {
         { provide: ActivatedRoute, useValue: activatedRouteMock },
         { provide: ConviteService, useValue: conviteServiceSpy  },
         { provide: Location,       useValue: locationSpy        },
+        { provide: FotoPerfilService, useValue: fotoPerfilServiceStub },
       ],
     }).compileComponents();
 

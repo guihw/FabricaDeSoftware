@@ -30,15 +30,15 @@ class NotificacaoEventListener {
         service.criar(
                 event.anfitriaoId(),
                 TipoNotificacao.NOVO_MATCH,
-                "Novo match!",
-                "Você tem um novo match disponível",
+                "Novo colega compatível!",
+                "Você tem uma nova compatibilidade disponível",
                 event.matchId()
         );
         service.criar(
                 event.colegaId(),
                 TipoNotificacao.NOVO_MATCH,
-                "Novo match!",
-                "Você tem um novo match disponível",
+                "Novo colega compatível!",
+                "Você tem uma nova compatibilidade disponível",
                 event.matchId()
         );
     }

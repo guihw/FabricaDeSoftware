@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
+import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
 import { CardAnfitriaoService, CardAnfitriaoResponseDTO } from '../core/services/card-anfitriao.service';
 import { DadosImovelService } from '../core/services/dados-imovel.service';
 import { ApiError } from '../core/services/api.service';
@@ -9,7 +10,7 @@ import { ApiError } from '../core/services/api.service';
 @Component({
   selector: 'app-gerenciar-anuncios',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterOutlet, TopNavbarComponent],
+  imports: [CommonModule, RouterLink, RouterOutlet, TopNavbarComponent, BottomNavbarComponent],
   templateUrl: './gerenciar-anuncios.html',
   styleUrl: './gerenciar-anuncios.css',
 })

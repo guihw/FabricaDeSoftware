@@ -9,12 +9,12 @@
 
   <section class="mb-8">
     <h1 class="font-headline font-bold text-3xl text-on-surface tracking-tight">
-      {{ isAnfitriao ? 'Suas Conversas' : 'Matches' }}
+      {{ isAnfitriao ? 'Suas Conversas' : 'Conversas' }}
     </h1>
     <p class="text-on-surface-variant text-sm mt-1">
       {{ isAnfitriao
         ? 'Acompanhe o status dos convites enviados'
-        : 'Veja seus matches e convites recebidos' }}
+        : 'Veja suas conversas e convites recebidos' }}
     </p>
   </section>
 
@@ -38,9 +38,9 @@
     <div class="w-20 h-20 bg-surface-container-low rounded-full flex items-center justify-center">
       <span class="material-symbols-outlined text-4xl text-outline opacity-50">waving_hand</span>
     </div>
-    <h2 class="font-headline font-bold text-xl text-on-surface">Nenhum match ainda</h2>
+    <h2 class="font-headline font-bold text-xl text-on-surface">Nenhuma conversa ainda</h2>
     <p class="text-on-surface-variant text-sm max-w-xs leading-relaxed">
-      Você ainda não deu match com nenhum anfitrião. Explore o feed e demonstre interesse em imóveis!
+      Você ainda não é compatível com nenhum anfitrião. Explore o feed e demonstre interesse em imóveis!
     </p>
     <a routerLink="/feedcolega"
       class="mt-2 px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm active:scale-95 transition-all">
@@ -64,7 +64,7 @@
     </a>
   </div>
 
-  <!-- Lista de matches -->
+  <!-- Lista de conversas -->
   <div *ngIf="!carregando() && !erro() && itens().length > 0" class="space-y-3">
     <button *ngFor="let item of itens()"
       (click)="abrirChat(item)"
