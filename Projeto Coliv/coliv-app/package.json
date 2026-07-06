@@ -23,7 +23,6 @@
   "private": true,
   "packageManager": "npm@10.9.2",
   "dependencies": {
-    "@stomp/stompjs": "^7.0.0",
     "@angular/cdk": "^21.2.4",
     "@angular/common": "^21.1.0",
     "@angular/compiler": "^21.1.0",
@@ -34,6 +33,7 @@
     "@capacitor/android": "^8.4.0",
     "@capacitor/cli": "^8.4.0",
     "@capacitor/core": "^8.4.0",
+    "@stomp/stompjs": "^7.3.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "^0.16.2"
