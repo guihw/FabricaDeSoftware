@@ -4,10 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(
-    name = "notificacao",
-    uniqueConstraints = @UniqueConstraint(columnNames = "chave_idempotencia")
-)
+@Table(name = "notificacao")
 public class Notificacao {
 
     @Id
@@ -36,9 +33,6 @@ public class Notificacao {
     @Column(name = "criado_em", nullable = false)
     private LocalDateTime criadoEm = LocalDateTime.now();
 
-    @Column(name = "chave_idempotencia", nullable = false, unique = true, length = 100)
-    private String chaveIdempotencia;
-
     protected Notificacao() {}
 
     public Notificacao(Long usuarioId, TipoNotificacao tipo, String titulo, String mensagem, Long referenciaId) {
@@ -47,7 +41,6 @@ public class Notificacao {
         this.titulo = titulo;
         this.mensagem = mensagem;
         this.referenciaId = referenciaId;
-        this.chaveIdempotencia = tipo.name() + "_" + referenciaId + "_" + usuarioId;
     }
 
     public Long getId() { return id; }
@@ -58,7 +51,6 @@ public class Notificacao {
     public Long getReferenciaId() { return referenciaId; }
     public boolean isLida() { return lida; }
     public LocalDateTime getCriadoEm() { return criadoEm; }
-    public String getChaveIdempotencia() { return chaveIdempotencia; }
 
     public void marcarComoLida() { this.lida = true; }
 }
