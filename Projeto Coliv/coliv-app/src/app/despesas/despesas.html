@@ -172,11 +172,7 @@
 </dialog>
 
 <!-- Navbar superior -->
-<app-top-navbar-component>
-  <button class="active:scale-95 transition-all duration-200">
-    <span class="material-symbols-outlined text-primary">notifications</span>
-  </button>
-</app-top-navbar-component>
+<app-top-navbar-component></app-top-navbar-component>
 
 <!-- Banner: colega sem convite aceito -->
 <div *ngIf="!isAnfitriao && !carregando() && !temConviteAceito()"
@@ -194,7 +190,7 @@
     class="self-start flex items-center gap-2 bg-primary text-white
            px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider active:scale-95 transition-all">
     <span class="material-symbols-outlined text-sm">chat</span>
-    Ver Matches
+    Ver Conversas
   </a>
 </div>
 

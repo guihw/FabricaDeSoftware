@@ -3,8 +3,18 @@ import { CommonModule } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { signal } from '@angular/core';
 import { GerenciarAnuncios } from './gerenciar-anuncios';
 import { CardAnfitriaoService, CardAnfitriaoResponseDTO } from '../core/services/card-anfitriao.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
+
+const fotoPerfilServiceStub = {
+  fotoPerfilUrl: signal<string | null>(null),
+  hidratar: () => {},
+  hidratarComId: () => {},
+  cachear: () => {},
+  limpar: () => {},
+};
 
 describe('GerenciarAnuncios', () => {
   let component: GerenciarAnuncios;
@@ -42,6 +52,7 @@ describe('GerenciarAnuncios', () => {
       providers: [
         provideRouter([]),
         { provide: CardAnfitriaoService, useValue: cardServiceSpy },
+        { provide: FotoPerfilService, useValue: fotoPerfilServiceStub },
       ],
     }).compileComponents();
 

@@ -25,7 +25,7 @@
     <div class="absolute top-4 right-4 px-3 py-1 rounded-full flex items-center gap-1 shadow-md"
       [ngClass]="corScore">
       <span class="font-black text-sm">{{ score }}%</span>
-      <span class="text-[8px] font-bold uppercase tracking-tighter">Match</span>
+      <span class="text-[8px] font-bold uppercase tracking-tighter">Compatível</span>
     </div>
 
     <!-- Badge de verificação de antecedentes -->
@@ -56,9 +56,6 @@
 
     <div>
       <h3 class="text-xl font-bold text-primary line-clamp-1">{{ recomendacao.nome }}</h3>
-      <p class="text-on-surface-variant text-sm font-medium line-clamp-1 mt-0.5">
-        {{ recomendacao.email }}
-      </p>
     </div>
 
     <!-- Resumo de compatibilidade -->
@@ -100,7 +97,7 @@
         <ng-container *ngIf="!carregandoInteresse && !interesse">
           Tenho Interesse
           <span class="material-symbols-outlined text-[16px]"
-            style="font-variation-settings: 'FILL' 1">favorite</span>
+            style="font-variation-settings: 'FILL' 1">handshake</span>
         </ng-container>
         <ng-container *ngIf="!carregandoInteresse && interesse">
           <span class="material-symbols-outlined text-[16px]"

@@ -13,6 +13,17 @@
     <span class="text-[10px] font-bold uppercase tracking-widest">Início</span>
   </a>
 
+  <!-- Anúncio (somente anfitrião) -->
+  <a *ngIf="isAnfitriao" routerLink="/gerenciaranuncios"
+     routerLinkActive="nav-tab--active"
+     [routerLinkActiveOptions]="{ exact: false }"
+     class="nav-tab flex flex-col items-center gap-1 px-5 py-2
+            text-on-surface-variant hover:text-primary
+            transition-all active:scale-90 duration-300 rounded-2xl">
+    <span class="material-symbols-outlined">home_work</span>
+    <span class="text-[10px] font-bold uppercase tracking-widest">Anúncio</span>
+  </a>
+
   <!-- Chat -->
   <a routerLink="/chats"
      routerLinkActive="nav-tab--active"

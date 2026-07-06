@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
+import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
 import {
   RecomendacaoService,
   RecomendacaoColegaDTO,
@@ -12,6 +13,7 @@ import { ColegaDetailModalComponent } from './components/colega-detail-modal/col
 import { ApiError } from '../core/services/api.service';
 import { MatchService } from '../core/services/match.service';
 import { CardAnfitriaoService, CardAnfitriaoResponseDTO } from '../core/services/card-anfitriao.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
 import { catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -23,8 +25,9 @@ import { of } from 'rxjs';
     RouterLink,
     RouterOutlet,
     TopNavbarComponent,
+    BottomNavbarComponent,
     ColegasCardComponent,
-    ColegaDetailModalComponent, 
+    ColegaDetailModalComponent,
   ],
   templateUrl: './feed-anfitriao.html',
   styleUrl: './feed-anfitriao.css',
@@ -40,7 +43,8 @@ export class FeedAnfitriao implements OnInit {
   acaoEmAndamento  = signal<Set<number>>(new Set());
   /** Colegas para quem o anfitrião demonstrou interesse mas ainda sem match confirmado */
   interessados = signal<Set<number>>(new Set());
-  fotoPerfilUrl = signal<string | null>(null);
+  private fotoPerfilService = inject(FotoPerfilService);
+  fotoPerfilUrl = this.fotoPerfilService.fotoPerfilUrl;
 
   // ── Estado do modal ───────────────────────────────────────────
   modalAberto              = false;
@@ -58,7 +62,7 @@ export class FeedAnfitriao implements OnInit {
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
     this.anfitriaoId = id ? Number(id) : null;
-    this.fotoPerfilUrl.set(sessionStorage.getItem('coliv_foto_perfil'));
+    this.fotoPerfilService.hidratar();
 
     if (!this.anfitriaoId) {
       this.erro.set('Sessão expirada. Faça login novamente.');

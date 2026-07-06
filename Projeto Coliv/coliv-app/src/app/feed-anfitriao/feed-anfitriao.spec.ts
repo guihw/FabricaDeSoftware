@@ -3,12 +3,22 @@ import { CommonModule } from '@angular/common';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { vi } from 'vitest';
+import { signal } from '@angular/core';
 import { FeedAnfitriao } from './feed-anfitriao';
 import {
   RecomendacaoService,
   RecomendacaoColegaDTO,
   FeedPageDTO,
 } from '../core/services/recomendacao.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
+
+const fotoPerfilServiceStub = {
+  fotoPerfilUrl: signal<string | null>(null),
+  hidratar: () => {},
+  hidratarComId: () => {},
+  cachear: () => {},
+  limpar: () => {},
+};
 
 
 function makeFeedColega(itens: RecomendacaoColegaDTO[]): FeedPageDTO<RecomendacaoColegaDTO> {
@@ -42,6 +52,7 @@ describe('FeedAnfitriao', () => {
       providers: [
         provideRouter([]),
         { provide: RecomendacaoService, useValue: recomendacaoSpy },
+        { provide: FotoPerfilService, useValue: fotoPerfilServiceStub },
       ],
     }).compileComponents();
 

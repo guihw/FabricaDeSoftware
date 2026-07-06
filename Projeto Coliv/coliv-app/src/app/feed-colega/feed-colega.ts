@@ -1,7 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { TopNavbarComponent } from '../shared/components/top-navbar-component/top-navbar-component';
+import { BottomNavbarComponent } from '../shared/components/bottom-navbar-component/bottom-navbar-component';
 import {
   RecomendacaoService,
   RecomendacaoCardAnfitriaoDTO,
@@ -12,6 +13,7 @@ import { MoradiaDetailModalComponent } from './components/moradia-detail-modal/m
 import { PlanoPlusModalComponent } from './components/plano-plus-modal/plano-plus-modal';
 import { ApiError } from '../core/services/api.service';
 import { MatchService } from '../core/services/match.service';
+import { FotoPerfilService } from '../core/services/foto-perfil.service';
 
 @Component({
   selector: 'app-feed-colega',
@@ -20,6 +22,7 @@ import { MatchService } from '../core/services/match.service';
     RouterOutlet,
     RouterLink,
     TopNavbarComponent,
+    BottomNavbarComponent,
     CommonModule,
     MoradiaCardComponent,
     MoradiaDetailModalComponent,
@@ -45,7 +48,8 @@ export class FeedColega implements OnInit {
 
   private colegaId: number | null = null;
   likeEmAndamento = signal<Set<number>>(new Set());
-  fotoPerfilUrl = signal<string | null>(null);
+  private fotoPerfilService = inject(FotoPerfilService);
+  fotoPerfilUrl = this.fotoPerfilService.fotoPerfilUrl;
 
   constructor(
     private recomendacaoService: RecomendacaoService,
@@ -55,7 +59,7 @@ export class FeedColega implements OnInit {
   ngOnInit(): void {
     const id = sessionStorage.getItem('coliv_user_id');
     this.colegaId = id ? Number(id) : null;
-    this.fotoPerfilUrl.set(sessionStorage.getItem('coliv_foto_perfil'));
+    this.fotoPerfilService.hidratar();
 
     if (!this.colegaId) {
       this.erro.set('Sessão expirada. Faça login novamente.');

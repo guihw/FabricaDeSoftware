@@ -19,7 +19,7 @@
   <section class="mb-12">
     <h1 class="font-headline text-5xl md:text-7xl font-extrabold text-primary tracking-tight leading-[0.9] mb-4">
       Encontre seu <br/>
-      <span class="text-secondary-container [text-shadow:_2px_2px_0_#031636]">match ideal.</span>
+      <span class="text-secondary-container [text-shadow:_2px_2px_0_#031636]">colega ideal.</span>
     </h1>
     <p class="text-on-surface-variant text-lg max-w-md">
       {{ isAnfitriao()
@@ -28,8 +28,8 @@
     </p>
   </section>
 
-  <!-- Foto de perfil (apenas colega) -->
-  <div *ngIf="!isAnfitriao()" class="mb-10 flex items-center gap-6">
+  <!-- Foto de perfil -->
+  <div class="mb-10 flex items-center gap-6">
     <!-- Preview / avatar -->
     <div class="w-20 h-20 rounded-full bg-surface-container-high overflow-hidden flex-shrink-0
                 flex items-center justify-center ring-2 ring-primary/20">
@@ -41,7 +41,9 @@
     <div class="flex flex-col gap-1">
       <p class="text-sm font-bold text-on-surface">Foto de Perfil</p>
       <p class="text-xs text-on-surface-variant mb-2">
-        Adicione uma foto para aparecer no card que os anfitriões verão.
+        {{ isAnfitriao()
+          ? 'Adicione uma foto para aparecer no seu perfil de anfitrião.'
+          : 'Adicione uma foto para aparecer no card que os anfitriões verão.' }}
       </p>
       <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-widest transition-all active:scale-95"
              [class.bg-primary]="!uploadandoFoto()"
