@@ -1,6 +1,8 @@
 @if (notificacao) {
   <div
     (click)="abrirConversa()"
+    (keydown.enter)="abrirConversa()"
+    (keydown.space)="$event.preventDefault(); abrirConversa()"
     class="fixed top-20 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm
            bg-surface-container-lowest rounded-2xl shadow-xl
            border border-outline-variant/20

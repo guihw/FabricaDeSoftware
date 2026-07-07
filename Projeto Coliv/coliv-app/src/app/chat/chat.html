@@ -1,5 +1,4 @@
 <div class="h-dvh flex flex-col overflow-hidden">
-<!-- TopAppBar -->
 <header class="w-full z-50 bg-slate-50/70 dark:bg-slate-950/70 backdrop-blur-xl">
   <div class="flex items-center justify-between px-6 py-4 w-full">
     <div class="flex items-center gap-4">
@@ -28,10 +27,8 @@
   </div>
 </header>
 
-<!-- Main Canvas -->
 <main class="flex-1 min-h-0 w-full max-w-4xl mx-auto px-4 md:px-0 flex flex-col">
 
-  <!-- Bloco de convite -->
   <div class="mt-4 mb-6 px-4 md:px-0 max-w-4xl mx-auto">
     <app-convite-action
       [matchId]="matchId"
@@ -42,7 +39,6 @@
     </app-convite-action>
   </div>
 
-  <!-- Notificação inline quando status do convite muda -->
   <div *ngIf="notificacaoConvite" class="flex justify-center my-4">
     <div class="bg-secondary-container/20 border border-secondary-container/30 px-6 py-3
                 rounded-2xl flex items-center gap-3 max-w-sm">
@@ -53,11 +49,9 @@
     </div>
   </div>
 
-  <!-- Área de mensagens -->
   <div #mensagensContainer
        class="flex-1 min-h-0 overflow-y-auto space-y-3 pb-40 px-2">
 
-    <!-- Loading -->
     <div *ngIf="carregando" class="flex justify-center py-12">
       <span class="material-symbols-outlined text-primary"
             style="animation: spin 1s linear infinite;">progress_activity</span>
@@ -65,7 +59,6 @@
 
     <ng-container *ngIf="!carregando">
 
-      <!-- Divider de tempo -->
       <div class="flex justify-center my-4">
         <span class="bg-surface-container-high px-4 py-1 rounded-full
                      text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
@@ -73,7 +66,6 @@
         </span>
       </div>
 
-      <!-- Estado vazio -->
       <div *ngIf="mensagens.length === 0"
            class="flex flex-col items-center text-center max-w-md mx-auto space-y-3 py-8">
         <div class="w-12 h-12 bg-surface-container-low rounded-full flex items-center justify-center">
@@ -85,7 +77,6 @@
         </p>
       </div>
 
-      <!-- Mensagens -->
       <div *ngFor="let msg of mensagens"
            [class.justify-end]="ehMinhaMensagem(msg)"
            [class.justify-start]="!ehMinhaMensagem(msg)"
@@ -105,7 +96,6 @@
 </main>
 </div>
 
-<!-- Campo de mensagem fixo -->
 <div class="fixed bottom-24 left-0 w-full px-6 md:px-0 flex justify-center z-40 pointer-events-none">
   <div class="w-full max-w-3xl bg-white/90 backdrop-blur-xl p-3 rounded-[2rem]
               shadow-2xl shadow-primary/10 flex items-center gap-3
@@ -114,8 +104,10 @@
                    text-on-surface-variant hover:text-primary transition-colors">
       <span class="material-symbols-outlined">add_circle</span>
     </button>
+    <label for="mensagem-texto" class="sr-only">Mensagem</label>
     <input [(ngModel)]="textoMensagem"
            (keyup.enter)="enviarMensagem()"
+           id="mensagem-texto"
            class="flex-grow bg-surface-container-low border-none rounded-full px-6 py-3 text-sm
                   focus:ring-2 focus:ring-secondary/20 placeholder:text-on-surface-variant/40"
            placeholder="Escreva sua mensagem..."

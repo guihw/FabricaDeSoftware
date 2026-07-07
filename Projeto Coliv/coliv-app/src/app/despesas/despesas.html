@@ -1,4 +1,3 @@
-<!-- Modal: Nova Despesa / Editar -->
 <dialog #dialogRef class="w-full max-w-full m-0 mt-auto rounded-t-[2.5rem] p-0
   backdrop:bg-primary/40 backdrop:backdrop-blur-sm
   max-h-[90vh] overflow-y-auto">
@@ -74,7 +73,6 @@
         </div>
       </div>
 
-      <!-- Divisão personalizada — visível apenas em despesas coletivas com mais de 1 membro -->
       <div *ngIf="form.get('tipodeDespesa')?.value === 'coletiva' && membrosDaCasa.length > 1 && !modoEdicao"
            class="flex flex-col gap-3">
         <div class="flex items-center justify-between">
@@ -106,7 +104,9 @@
             <span class="text-sm font-medium text-on-surface flex-1 truncate">{{ membro.label }}</span>
             <div class="flex items-center gap-1">
               <span class="text-xs text-on-surface-variant">R$</span>
+              <label [for]="'valor-membro-' + membro.id" class="sr-only">Valor de {{ membro.label }}</label>
               <input type="number" step="0.01" min="0"
+                [id]="'valor-membro-' + membro.id"
                 [value]="valoresCustomizados[membro.id] ?? 0"
                 (change)="atualizarValorMembro(membro.id, $event)"
                 class="w-28 bg-surface-container border-none rounded-xl px-3 py-2
@@ -147,7 +147,6 @@
   </div>
 </dialog>
 
-<!-- Modal de confirmação de exclusão -->
 <dialog #confirmDialog class="w-full max-w-full m-0 mt-auto rounded-t-[2.5rem] p-0
   backdrop:bg-primary/40 backdrop:backdrop-blur-sm">
   <div class="p-8 flex flex-col gap-6">
@@ -171,10 +170,8 @@
   </div>
 </dialog>
 
-<!-- Navbar superior -->
 <app-top-navbar-component></app-top-navbar-component>
 
-<!-- Banner: colega sem convite aceito -->
 <div *ngIf="!isAnfitriao && !carregando() && !temConviteAceito()"
   class="mx-6 mt-6 bg-primary-container text-on-primary-container rounded-2xl p-5
          flex flex-col gap-3 shadow-sm">
@@ -194,7 +191,6 @@
   </a>
 </div>
 
-<!-- Banner: anfitrião sem colegas aceitos (ao criar despesa coletiva) -->
 <div *ngIf="isAnfitriao && !carregando() && !temColegaAceito()"
   class="mx-6 mt-6 bg-surface-container-low border border-outline-variant/30 rounded-2xl p-5
          flex flex-col gap-3">
@@ -216,7 +212,6 @@
 
 <main class="px-6 pt-6 pb-36 space-y-8">
 
-  <!-- Hero -->
   <section class="flex flex-col gap-2">
     <span class="text-secondary font-bold tracking-[0.2em] text-[10px] uppercase">Seu Santuário</span>
     <h2 class="text-3xl font-extrabold tracking-tight text-primary leading-tight">
@@ -237,7 +232,6 @@
     </div>
   </section>
 
-  <!-- Cards de resumo -->
   <section class="grid grid-cols-2 gap-4">
     <div class="col-span-2 bg-surface-container-lowest p-6 rounded-2xl
                 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex justify-between items-center">
@@ -262,7 +256,6 @@
     </div>
   </section>
 
-  <!-- Lista de despesas -->
   <section class="space-y-4">
     <div class="flex justify-between items-center">
       <h3 class="text-xl font-bold text-primary">Despesas</h3>
@@ -311,13 +304,11 @@
                 class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide">
                 {{ gasto.tipodeDespesa }}
               </span>
-              <!-- Indicador de pago -->
               <span *ngIf="euJaPaguei(gasto) && !todosJaPagaram(gasto)"
                 class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide
                        text-secondary bg-secondary-container/40">
                 ✓ Pago
               </span>
-              <!-- Badge quitada -->
               <span *ngIf="todosJaPagaram(gasto)"
                 class="text-[10px] font-bold rounded-md px-2 py-0.5 uppercase tracking-wide
                        text-primary bg-primary-container/60">
@@ -332,7 +323,6 @@
   </section>
 </main>
 
-<!-- Painel lateral de detalhe -->
 <div class="fixed inset-0 z-40 pointer-events-none">
   <div (click)="closePanel()"
     [class.opacity-100]="isOpen" [class.opacity-0]="!isOpen" [class.pointer-events-auto]="isOpen"
@@ -395,7 +385,6 @@
         </div>
       </div>
 
-      <!-- Botão marcar como pago -->
       <button (click)="togglePago(despesaSelecionada)"
         class="w-full py-3 rounded-2xl font-bold text-sm transition-transform active:scale-[0.98]"
         [class.bg-secondary-container]="euJaPaguei(despesaSelecionada)"
