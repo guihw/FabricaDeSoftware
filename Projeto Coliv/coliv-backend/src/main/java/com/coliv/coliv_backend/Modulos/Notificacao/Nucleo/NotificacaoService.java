@@ -7,7 +7,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -44,9 +44,9 @@ public class NotificacaoService {
 
         Object[] linha = linhas.get(0);
         Long id = ((Number) linha[0]).longValue();
-        Timestamp criadoEm = (Timestamp) linha[1];
+        LocalDateTime criadoEm = (LocalDateTime) linha[1];
 
-        NotificacaoDTO dto = new NotificacaoDTO(id, usuarioId, tipo, titulo, mensagem, referenciaId, false, criadoEm.toLocalDateTime());
+        NotificacaoDTO dto = new NotificacaoDTO(id, usuarioId, tipo, titulo, mensagem, referenciaId, false, criadoEm);
         messagingTemplate.convertAndSend("/topic/notificacoes." + usuarioId, dto);
     }
 
